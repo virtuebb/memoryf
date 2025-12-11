@@ -17,4 +17,17 @@ public interface MemberService {
 	
 	// 회원 탈퇴용 서비스
 	int deleteMember(String memberId);
+	
+	// 회원 비밀번호 변경 서비스
+	int updatePwd(Member m);
+	
+	// 내 댓글 조회 서비스
+	
+	
+	// 내 좋아요 조회 서비스
+	
+	
+	// 팔로워 팔로우 조회 서비스
+	
+	
 }

@@ -26,4 +26,9 @@ public class MemberServiceImpl implements MemberService {
 		return 0;
 	}
 
+	@Override
+	public int updatePwd(Member m) {
+		return 0;
+	}
+
 }
