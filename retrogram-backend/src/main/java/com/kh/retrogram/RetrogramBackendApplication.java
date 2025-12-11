@@ -11,7 +11,7 @@ public class RetrogramBackendApplication   {
 	public static void main(String[] args) {
 		SpringApplication.run(RetrogramBackendApplication.class, args);
 	
-		// System.out.println("잘되나?");
+		System.out.println("잘되나?");
 	}
 
 	// war로 배포하겠다고 코드 작성

@@ -2,8 +2,11 @@ package com.kh.retrogram.member.model.service;
 
 import java.util.ArrayList;
 
+import org.springframework.stereotype.Service;
+
 import com.kh.retrogram.member.model.vo.Member;
 
+@Service
 public class MemberServiceImpl implements MemberService {
 
 	@Override
