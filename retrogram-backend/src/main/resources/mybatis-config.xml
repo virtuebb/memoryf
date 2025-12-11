@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "mybatis-3-config.dtd" >
+<configuration>
+	
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL" />
+	</settings>
+	
+	<typeAliases>
+		<package name="com.kh.retrogram" />
+		<!-- 
+			- 기존에는 typeAlias 라는 단수 태그 안에 일일이 어느 클래스를 어느 별칭으로 부를건지 
+			  1 : 1 로 매칭 정보를 다 적어줬었음!!
+			- 예전부터 많이 써오던 방식이긴 하지만 일일이 적기에는 너무 귀찮음!!
+			- typeAlias 라는 태그 대신 package 태그를 이용하면 1 : 1 로 매칭 정보를 적던 걸 생략할 수 있다!!
+			- package 태그 내에 name 속성값에 베이스 패키지명 (처음 프로젝트 생성 시 셋팅한 3단계의 패키지 구조) 을 적게 되면
+			  내부적으로 com.kh.backend 패키지 (베이스 패키지) 안에 있는 모든 클래스들을 자동으로 Type Alias 로 등록하겠다.
+			  라고 설정이 잡히게 됨!! (단, @Alias 어노테이션이 붙은 클래스에 한해서)
+		 -->
+	</typeAliases>
+	
+</configuration>
