@@ -6,10 +6,10 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-public class RetrogramBackendApplication   {
+public class MemoryfBackendApplication   {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RetrogramBackendApplication.class, args);
+		SpringApplication.run(MemoryfBackendApplication.class, args);
 	
 		System.out.println("잘되나?");
 	}

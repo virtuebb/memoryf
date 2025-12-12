@@ -7,7 +7,7 @@
 	</settings>
 	
 	<typeAliases>
-		<package name="com.kh.retrogram" />
+		<package name="com.kh.memoryf" />
 		<!-- 
 			- 기존에는 typeAlias 라는 단수 태그 안에 일일이 어느 클래스를 어느 별칭으로 부를건지 
 			  1 : 1 로 매칭 정보를 다 적어줬었음!!
