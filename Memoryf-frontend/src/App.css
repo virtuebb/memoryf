@@ -12,6 +12,9 @@ html,body,#root{height:100%;margin:0}
 
 .section-label{font-size:12px;color:#b85a6b;font-weight:600;letter-spacing:0.06em;margin-bottom:10px}
 .section-content{flex:1;width:100%;display:flex;align-items:center;justify-content:center}
+.sidebar{display:flex;flex-direction:column;gap:10px;width:100%}
+.sidebar-link{display:block;padding:10px 12px;border-radius:10px;color:#3a2a2a;text-decoration:none;font-weight:600;border:1px solid rgba(0,0,0,0.06);background:#fff;transition:all .2s ease}
+.sidebar-link:hover{background:#ffe5de;color:#b85a6b;border-color:rgba(184,90,107,0.24)}
 
 .main-content{flex:1;padding:28px;background:linear-gradient(180deg,#fff,#fff7f6);border-left:3px solid rgba(0,0,0,0.05)}
 

@@ -1,16 +1,20 @@
-// src/components/Sidebar.jsx
-
 import { Link } from 'react-router-dom';
+import { NAVIGATION_ITEMS } from '../constants/navigation';
 
 function Sidebar() {
   return (
-    <nav className="sidebar">
-      {/* 메뉴 목록: Home을 /로, Diary를 /diary로 연결 */}
-      <Link to="/">Home</Link>
-      <Link to="/diary">Diary</Link>
-      <Link to="/feed">Feed</Link>
-      {/* ... */}
-    </nav>
+    <div className="left-section sidebar-wrap">
+      <div className="section-content">
+        <nav className="sidebar">
+          {NAVIGATION_ITEMS.map((item) => (
+            <Link key={item.path} to={item.path} className="sidebar-link">
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </div>
   );
 }
+
 export default Sidebar;
