@@ -14,6 +14,4 @@ public class MemoryfBackendApplication   {
 		System.out.println("잘되나?");
 	}
 
-	// war로 배포하겠다고 코드 작성
-	// 추후 삽입
 }

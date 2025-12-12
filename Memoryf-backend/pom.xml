@@ -9,12 +9,11 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.kh</groupId>
-	<artifactId>retrogram</artifactId>
+	<artifactId>memoryf</artifactId>
 	
-	<!-- war 파일형태로 배포 -->
-	<packaging>war</packaging>
+
 	<version>0.0.1-SNAPSHOT</version>
-	<name>retrogram-backend</name>
+	<name>Memoryf-backend</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
