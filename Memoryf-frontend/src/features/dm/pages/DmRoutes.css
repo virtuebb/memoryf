@@ -1,0 +1,57 @@
+/* DmRoutes 전용 스타일 */
+
+/* 외부 컨테이너 - 핑크 배경 */
+.dm-container {
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.dm-container.light {
+  background-color: #fce7f3; /* pink-100 */
+}
+
+.dm-container.dark {
+  background-color: #111827; /* gray-900 */
+}
+
+/* 카드 형태의 DM 컨테이너 */
+.dm-card {
+  width: 100%;
+  max-width: 28rem; /* max-w-md */
+  height: 700px;
+  border-radius: 1.5rem; /* rounded-3xl */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); /* shadow-xl */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dm-card.light {
+  background-color: #ffffff;
+}
+
+.dm-card.dark {
+  background-color: #1f2937; /* gray-800 */
+}
+
+/* DmRoomListPage 컨테이너 */
+.dm-room-list-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 채팅 없음 메시지 */
+.dm-not-found {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280; /* gray-500 */
+}
+

@@ -31,3 +31,10 @@ html,body,#root{height:100%;margin:0}
 /* Header/Footer */
 .app-root > header,.app-root > footer,.app-root > .header-skeleton{height:60px}
 
+
+/* App 레벨 스타일 (Tailwind 보완용) */
+.app-shell {
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  

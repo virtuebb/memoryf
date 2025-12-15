@@ -1,0 +1,5 @@
+/* ChatRoom 전용 보조 스타일 */
+.chat-room {
+  backdrop-filter: blur(0px);
+}
+

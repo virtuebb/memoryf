@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>WebSocket Chat</title>
+<!-- 이 웹페이지는 채팅을 할 수 있는 페이지야. -->
+<!-- SockJS와 STOMP 라이브러리를 사용해서 서버와 연결해. -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+
+<h2>채팅</h2>
+<!-- 여기에 내 ID, 받는 사람 ID, 메시지를 입력해. -->
+<input id="myId" placeholder="내 ID (user1 / user2)">
+<input id="targetId" placeholder="받는 사람 ID">
+<input id="msg" placeholder="메시지">
+
+<!-- 버튼들로 연결하고, 메시지를 보내. -->
+<button id="connectBtn" onclick="connect()">연결</button>
+<button id="disconnectBtn" onclick="disconnect()" disabled>연결 해제</button>
+<button onclick="sendPrivate()">1:1 보내기</button>
+
+<!-- 채팅 메시지가 여기 나타나. -->
+<ul id="chat"></ul>
+
+<script>
+    let stompClient = null; // 서버와 연결하는 도구
+    let myId = ""; // 내 ID 저장
+    let isConnected = false; // 연결되었는지 확인
+
+    // 이 함수는 서버에 연결하는 함수야.
+    function connect() {
+
+        // ✅ 이미 연결돼 있으면 무시
+        if (isConnected) {
+            alert("이미 연결되어 있습니다.");
+            return;
+        }
+
+        myId = document.getElementById("myId").value;
+
+        if (!myId) {
+            alert("내 ID를 입력하세요.");
+            return;
+        }
+
+        // SockJS로 서버에 연결해.
+        const socket = new SockJS("/ws");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function () {
+
+            isConnected = true; // 🔥 연결 완료
+            document.getElementById("connectBtn").disabled = true;
+            document.getElementById("disconnectBtn").disabled = false;
+
+            addMessage("[" + myId + "] 연결 성공");
+
+            // 내게 오는 메시지를 듣는 곳
+            stompClient.subscribe("/sub/private/" + myId, function (msg) {
+                const data = JSON.parse(msg.body);
+                addMessage(data.sender + " → 나 : " + data.content);
+            });
+        });
+    }
+
+    // 이 함수는 연결을 끊는 함수야.
+    function disconnect() {
+        if (stompClient && isConnected) {
+            stompClient.disconnect();
+            isConnected = false;
+            document.getElementById("connectBtn").disabled = false;
+            document.getElementById("disconnectBtn").disabled = true;
+            addMessage("연결 해제됨");
+        }
+    }
+
+    // 이 함수는 1:1 메시지를 보내는 함수야.
+    function sendPrivate() {
+        stompClient.send("/pub/chat/private", {}, JSON.stringify({
+            roomId: document.getElementById("targetId").value, // 받는 사람
+            sender: myId,
+            content: document.getElementById("msg").value
+        }));
+    }
+
+    // 이 함수는 채팅 목록에 메시지를 추가하는 함수야.
+    function addMessage(text) {
+        const li = document.createElement("li");
+        li.innerText = text;
+        document.getElementById("chat").appendChild(li);
+    }
+</script>
+
+
+</body>
+</html>
