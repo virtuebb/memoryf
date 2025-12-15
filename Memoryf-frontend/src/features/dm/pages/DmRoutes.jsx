@@ -5,6 +5,7 @@ import ChatRoom from '../components/ChatRoom.jsx';
 import UserSearchModal from '../components/UserSearchModal.jsx';
 import ThemeSelector from '../components/ThemeSelector.jsx';
 import { chatRoomsSeed, pendingChatsSeed } from '../data/chats.js';
+import './DmRoutes.css';
 
 export default function DmRoutes() {
   const navigate = useNavigate();
@@ -79,9 +80,9 @@ export default function DmRoutes() {
   };
 
   return (
-    <div className={`min-h-full w-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-pink-100'} flex items-center justify-center p-6`}>
+    <div className={`dm-container ${theme}`}>
       {/* 카드 형태의 DM 컨테이너 */}
-      <div className={`w-full max-w-md h-[700px] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-3xl shadow-xl overflow-hidden flex flex-col`}>
+      <div className={`dm-card ${theme}`}>
         <Routes>
           <Route
             index
@@ -122,7 +123,7 @@ export default function DmRoutes() {
 
 function DmRoomListPage({ allChats, theme, setTheme, openSearch, navigateToChat }) {
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="dm-room-list-page">
       <ChatList
         chats={allChats}
         onSelectChat={navigateToChat}
@@ -140,7 +141,7 @@ function DmChatPage({ allChats, onBack, onSendMessage, theme }) {
 
   if (!selectedChat) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500">
+      <div className="dm-not-found">
         채팅을 찾을 수 없습니다.
       </div>
     );
@@ -148,4 +149,3 @@ function DmChatPage({ allChats, onBack, onSendMessage, theme }) {
 
   return <ChatRoom chat={selectedChat} onBack={onBack} onSendMessage={onSendMessage} theme={theme} />;
 }
-
