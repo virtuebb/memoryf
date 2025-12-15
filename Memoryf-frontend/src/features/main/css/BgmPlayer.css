@@ -1,0 +1,97 @@
+/* ===== BGM PLAYER ===== */
+.bgm-player {
+  width: 100%;
+  min-height: 320px;              /* 🔥 세로 길이 2배 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* LP 외곽 (레이아웃 고정용) */
+.lp {
+  width: 160px;
+  height: 160px;
+  position: relative;
+}
+
+/* 펄스 전용 레이어 */
+.lp-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 실제 회전 디스크 */
+.lp-disc {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #ff9bb7 0 12%, #111 14%);
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+
+/* 가운데 구멍 */
+.lp-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ▶ 재생 중 */
+.lp.playing .lp-disc {
+  animation: spin 4s linear infinite;
+}
+
+.lp.playing .lp-pulse {
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+/* 회전 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 펄스 */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 155, 183, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 26px rgba(255, 155, 183, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 155, 183, 0);
+  }
+}
+
+/* 상태 텍스트 */
+.bgm-info {
+  text-align: center;
+}
+
+.status {
+  font-size: 11px;
+  color: #999;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+}
