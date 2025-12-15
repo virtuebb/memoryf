@@ -1,0 +1,209 @@
+/* ChatList 전용 스타일 */
+
+/* 채팅 목록 컨테이너 */
+.chat-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+
+.chat-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+}
+
+/* 헤더 */
+.chat-list-header {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid;
+}
+
+.chat-list-header.light {
+  border-color: #e5e7eb; /* gray-200 */
+}
+
+.chat-list-header.dark {
+  border-color: #374151; /* gray-700 */
+}
+
+/* 제목 */
+.chat-list-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.chat-list-title.light {
+  color: #111827; /* gray-900 */
+}
+
+.chat-list-title.dark {
+  color: #ffffff;
+}
+
+/* 추가 버튼 */
+.chat-list-add-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.chat-list-add-btn.light {
+  background-color: #f3f4f6; /* gray-100 */
+  color: #374151; /* gray-700 */
+}
+
+.chat-list-add-btn.light:hover {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+.chat-list-add-btn.dark {
+  background-color: #374151; /* gray-700 */
+  color: #ffffff;
+}
+
+.chat-list-add-btn.dark:hover {
+  background-color: #4b5563; /* gray-600 */
+}
+
+/* 채팅 목록 스크롤 영역 */
+.chat-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 채팅 아이템 */
+.chat-item {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid;
+}
+
+.chat-item.light {
+  border-color: #f3f4f6; /* gray-100 */
+}
+
+.chat-item.light:hover {
+  background-color: #f9fafb; /* gray-50 */
+}
+
+.chat-item.dark {
+  border-color: #374151; /* gray-700 */
+}
+
+.chat-item.dark:hover {
+  background-color: #374151; /* gray-700 */
+}
+
+/* 아바타 */
+.chat-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background-color: #60a5fa; /* blue-400 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+/* 채팅 정보 */
+.chat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+/* 유저 이름 */
+.chat-username {
+  font-weight: 500;
+}
+
+.chat-username.light {
+  color: #111827; /* gray-900 */
+}
+
+.chat-username.dark {
+  color: #ffffff;
+}
+
+/* 시간 */
+.chat-time {
+  font-size: 0.875rem;
+}
+
+.chat-time.light {
+  color: #6b7280; /* gray-500 */
+}
+
+.chat-time.dark {
+  color: #9ca3af; /* gray-400 */
+}
+
+/* 메시지 미리보기 행 */
+.chat-preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 마지막 메시지 */
+.chat-last-message {
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-last-message.light {
+  color: #4b5563; /* gray-600 */
+}
+
+.chat-last-message.dark {
+  color: #9ca3af; /* gray-400 */
+}
+
+.chat-last-message.pending {
+  font-style: italic;
+}
+
+/* 읽지 않은 메시지 뱃지 */
+.chat-unread-badge {
+  margin-left: 0.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background-color: #ef4444; /* red-500 */
+  color: #ffffff;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

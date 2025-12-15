@@ -1,6 +1,6 @@
 import './App.css'
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Header from './shared/components/Header';
 import Sidebar from './shared/components/Sidebar';
 import Footer from './shared/components/Footer';
@@ -9,8 +9,6 @@ import SearchPage from './features/search/pages/SearchPage';
 import FeedListPage from './features/feed/pages/FeedListPage';
 import FeedUploadPage from './features/feed/pages/FeedUploadPage';
 import GuestbookPage from './features/cyworld/pages/GuestbookPage';
-import DmRoomListPage from './features/dm/pages/DmRoomListPage';
-import DmChatPage from './features/dm/pages/DmChatPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
 
 import AdminLayout from './features/admin/components/AdminLayout';
@@ -28,9 +26,15 @@ import LoginPage from './features/member/pages/LoginPage';
 import DiaryPage from './features/cyworld/pages/DiaryPage';
 import SignupPage from './features/member/pages/SignupPage';
 
+import DmRoutes from './features/dm/pages/DmRoutes';
+
 function App() {
 
-  const isLoggedIn = false;
+  const isLoggedIn = true;
+  const isAdmin = true;
+  const location = useLocation();
+  // 현재 경로가 관리자 경로인지 확인 (/admin으로 시작하면 관리자 레이아웃 사용)
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   if (!isLoggedIn) {
     return (
@@ -44,6 +48,24 @@ function App() {
     );
   }
 
+  // 관리자 경로일 때는 사용자용 사이드바/헤더를 숨기고 관리자 레이아웃만 렌더
+  if (isAdminRoute && isAdmin) {
+    return (
+      <Routes>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="users" element={<UserManagementPage />} />
+          <Route path="reports" element={<ReportManagementPage />} />
+          <Route path="payments" element={<PaymentManagementPage />} />
+          <Route path="bgm" element={<BgmManagementPage />} />
+        </Route>
+        {/* 잘못된 관리자 경로 접근 시 관리자 홈으로 이동 */}
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    );
+  }
+
+  // 일반 사용자 레이아웃
   return (
     <div className="app-root">
       <div className="main-layout">
@@ -61,22 +83,14 @@ function App() {
             <Route path="/feeds" element={<FeedListPage />} />
             <Route path="/feeds/new" element={<FeedUploadPage />} />
             <Route path="/guestbook" element={<GuestbookPage />} />
-            <Route path="/messages" element={<DmRoomListPage />} />
-            <Route path="/messages/:chatId" element={<DmChatPage />} />
+            <Route path="/messages/*" element={<DmRoutes />} />
             <Route path="/settings" element={<SettingsPage />} />
 
             {/* 이정민 */}
             <Route path="/diaries" element={<DiaryPage />} />
 
-            {/* 관리자 페이지 라우팅 */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="users" element={<UserManagementPage />} />
-              <Route path="reports" element={<ReportManagementPage />} />
-              <Route path="payments" element={<PaymentManagementPage />} />
-              <Route path="bgm" element={<BgmManagementPage />} />
-            </Route>
-
+            {/* 기본 경로 리다이렉트 */}
+            <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </main>
       </div>

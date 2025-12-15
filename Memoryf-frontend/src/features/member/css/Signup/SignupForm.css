@@ -1,0 +1,208 @@
+/* SignupForm.css */
+
+.signup-form{
+  width: min(420px, 92vw);
+  margin: 40px auto;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* 인풋 공통 */
+.signup-form input{
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  outline: none;
+  font-size: 14px;
+  background: #fff;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .05s ease;
+}
+
+.signup-form input::placeholder{
+  color: #a7a7a7;
+}
+
+.signup-form input:focus{
+  border-color: #F5D2D2;
+  box-shadow: 0 0 0 4px rgba(91,141,239,0.18);
+}
+
+.signup-form input:active{
+  transform: translateY(0.5px);
+}
+
+/* 생년월일 라벨 */
+.birth-label{
+  margin-top: 4px;
+  font-size: 13px;
+  color: #555;
+  font-weight: 600;
+}
+
+/* 성별 */
+.gender-group{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  background: #fafafa;
+  font-size: 14px;
+}
+
+.gender-group label{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.gender-group input[type="radio"]{
+  width: 16px;
+  height: 16px;
+  accent-color: #5b8def; /* 라디오 색 */
+}
+
+/* 버튼 영역 */
+.signup-buttons{
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.signup-buttons button{
+  flex: 1;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.signup-buttons button:active{
+  transform: translateY(1px);
+}
+
+/* 가입하기 */
+.signup-buttons button[type="submit"]{
+  background: #F5D2D2;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(91,141,239,0.25);
+}
+
+.signup-buttons button[type="submit"]:hover{
+  background: #EFB5B5;
+}
+
+/* 뒤로가기 */
+.signup-buttons button[type="button"]{
+  background: #f3f4f6;
+  color: #333;
+  border-color: #e5e7eb;
+}
+
+.signup-buttons button[type="button"]:hover{
+  background: #e9ebef;
+}
+
+.email-row{
+  display: flex;
+  gap: 10px;
+}
+
+.email-row input{
+  flex: 1;
+}
+
+.email-btn{
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.email-btn:hover{
+  background: #f3f4f6;
+}
+
+/* 인증번호 입력칸 영역 */
+.code-row{
+  margin-top: 8px;
+}
+
+/* 버튼 비활성화(인증번호 발송 누른 뒤) */
+.email-btn:disabled{
+  background: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* 인증번호 입력칸 블러 → 선명 등장 */
+.blur-in{
+  animation: blurIn .25s ease forwards;
+}
+
+@keyframes blurIn{
+  from{
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(-4px);
+  }
+  to{
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+/* 인증번호 영역 */
+.code-row{
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 인증번호 확인 버튼 */
+.code-check-btn{
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #dcdcdc;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.code-check-btn:hover{
+  background: #f3f4f6;
+}
+
+/* 안내 멘트 */
+.code-ment{
+  font-size: 12px;
+  color: #888;
+  margin-left: 2px;
+}
+
+
+
+
