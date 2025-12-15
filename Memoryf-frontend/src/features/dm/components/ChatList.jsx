@@ -1,66 +1,80 @@
+/**
+ * ChatList.jsx - 채팅방 목록 컴포넌트
+ * 
+ * 이 컴포넌트는 모든 채팅방 목록을 보여주는 큰 상자예요!
+ * 
+ * 핵심 기능:
+ * 1. 내가 대화 중인 모든 채팅방 목록을 보여줘요
+ * 2. + 버튼을 누르면 친구를 검색해서 새 채팅방을 만들 수 있어요
+ * 3. 친구 이름이나 메시지 내용으로 검색할 수 있어요
+ * 4. 채팅방을 클릭하면 그 채팅방으로 이동해요
+ * 5. 아래쪽에 테마 색상을 바꿀 수 있는 버튼들이 있어요
+ */
 import React from 'react';
 import { themes } from '../themes';
 import { getChatListStyles } from '../styles/chatListStyles';
+import ChatListItem from './ChatListItem';
 
+// 예시 채팅방 데이터 (나중에 서버에서 가져올 거예요)
 const DUMMY_CHATS = [
-  { id: 1, name: 'Jenny Kim', message: '다음주에 콜라보 관련해서 이야기해요!', time: '오후 4:33', unread: 2, profileUrl: '/src/assets/images/profiles/bono.jpg' },
-  { id: 2, name: '@cool_guy.99', message: '생일 축하해!🥳', time: '어제', unread: 0, profileUrl: '/src/assets/images/profiles/bono.jpg' },
-  { id: 3, name: 'minji_luv', message: '카페는 다음주에 가요!', time: '1일 전', unread: 1, profileUrl: '/src/assets/images/profiles/bono.jpg' },
-  { id: 4, name: 'travel.ha', message: '이탈리아 사진 너무 예뻐요.', time: '3일 전', unread: 0, profileUrl: '/src/assets/images/profiles/bono.jpg' },
+  { id: 1, name: 'Jenny Kim', message: '다음주에 콜라보 관련해서 이야기해요!', time: '오후 4:33', unread: 2, profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: true },
+  { id: 2, name: '@cool_guy.99', message: '생일 축하해!🥳', time: '어제', unread: 0, profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: true },
+  { id: 3, name: 'minji_luv', message: '카페는 다음주에 가요!', time: '1일 전', unread: 1, profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: true },
+  { id: 4, name: 'travel.ha', message: '이탈리아 사진 너무 예뻐요.', time: '3일 전', unread: 0, profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: true },
 ];
 
-const ChatListItem = ({ name, message, time, unreadCount, onClick, profileUrl, theme }) => {
-  const [isHovered, setIsHovered] = React.useState(false);
-  const styles = getChatListStyles(theme);
-
-  return (
-    <div 
-      style={{ 
-        ...styles.listItem, 
-        ...(isHovered ? styles.listItemHover : {}) 
-      }}
-      onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <img src={DUMMY_CHATS[0].profileUrl} alt={name} style={styles.profileImage} />
-      <div style={styles.content}>
-        <div style={styles.name}>{name}</div>
-        <div style={styles.preview}>{message}</div>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
-        <div style={{ fontSize: '12px', color: '#AAAAAA' }}>{time}</div>
-        {unreadCount > 0 && (
-          <div style={styles.badge}>{unreadCount}</div>
-        )}
-      </div>
-    </div>
-  );
-};
+// 채팅방이 없는 친구 목록 (새로운 채팅방을 만들 수 있는 사람들)
+// 이 친구들과는 아직 대화를 시작하지 않았어요
+const DUMMY_FRIENDS = [
+  { id: 5, name: 'new_friend_01', profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: false },
+  { id: 6, name: 'sunny_day', profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: false },
+  { id: 7, name: 'coffee_lover', profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: false },
+];
 
 const ChatList = ({ onSelectChat, currentTheme, onThemeChange, onStartNewChat }) => {
   const styles = getChatListStyles(currentTheme);
+  // 지금 새 채팅방을 만들려고 검색 중인지 확인하는 변수
   const [isComposing, setIsComposing] = React.useState(false);
+  // 검색창에 입력한 텍스트를 저장하는 변수
   const [query, setQuery] = React.useState('');
   const inputRef = React.useRef(null);
 
+  // 검색 모드가 켜지면 자동으로 검색창에 포커스를 줘요
   React.useEffect(() => {
     if (isComposing && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isComposing]);
 
-  const filteredFriends = DUMMY_CHATS.filter((chat) =>
-    [chat.name, chat.message].some((field) => field.toLowerCase().includes(query.toLowerCase()))
-  );
+  // 검색할 때 기존 채팅방과 친구 목록을 모두 검색해요
+  const allContacts = [...DUMMY_CHATS, ...DUMMY_FRIENDS];
+  const filteredFriends = allContacts.filter((contact) => {
+    const searchFields = [contact.name];
+    if (contact.message) {
+      searchFields.push(contact.message);
+    }
+    return searchFields.some((field) => field.toLowerCase().includes(query.toLowerCase()));
+  });
 
+  // 채팅방을 선택했을 때 실행되는 함수
   const handleSelect = (chat) => {
-    if (isComposing && onStartNewChat) {
-      onStartNewChat(chat);
+    if (isComposing) {
+      // 검색 모드일 때는 항상 새로운 채팅방을 만들어요
+      if (onStartNewChat) {
+        onStartNewChat(chat);
+      }
       setIsComposing(false);
-      setQuery('');
+      setQuery(''); // 검색창 비우기
     } else {
-      onSelectChat(chat.id, chat.name);
+      // 일반 모드일 때는 기존 채팅방을 열어요
+      if (chat.hasChatRoom) {
+        onSelectChat(chat.id, chat.name);
+      } else {
+        // 채팅방이 없는 친구를 클릭해도 새 채팅방을 만들어요
+        if (onStartNewChat) {
+          onStartNewChat(chat);
+        }
+      }
     }
   };
 
@@ -105,8 +119,9 @@ const ChatList = ({ onSelectChat, currentTheme, onThemeChange, onStartNewChat })
             message={chat.message}
             time={chat.time}
             unreadCount={chat.unread}
-            profileUrl={chat.profile}
+            profileUrl={chat.profileUrl}
             theme={currentTheme}
+            hasChatRoom={chat.hasChatRoom}
             onClick={() => handleSelect(chat)}
           />
         ))}
