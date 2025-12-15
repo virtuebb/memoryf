@@ -25,6 +25,9 @@ import HomeVisitorList from './features/cyworld/components/HomeVisitorList';
 import LoginPage from './features/member/pages/LoginPage';
 import DiaryPage from './features/cyworld/pages/DiaryPage';
 import SignupPage from './features/member/pages/SignupPage';
+import FindIdPage from './features/member/pages/FindIdPage';
+import FindPasswordPage from './features/member/pages/FindPasswordPage';
+import ResetPasswordForm from './features/member/components/ResetPasswordForm';
 
 import DmRoutes from './features/dm/pages/DmRoutes';
 import { ThemeProvider } from "./features/main/components/ThemeContext";
@@ -33,7 +36,7 @@ import Home from "./features/main/components/Home";
 
 function App() {
 
-  const isLoggedIn = true;
+  const isLoggedIn = false;
   const isAdmin = true;
   const location = useLocation();
   // 현재 경로가 관리자 경로인지 확인 (/admin으로 시작하면 관리자 레이아웃 사용)
@@ -46,6 +49,11 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          
+          {/* 아이디, 비밀번호 찾기 */}
+          <Route path="/member/find-id" element={<FindIdPage />} />
+          <Route path="/member/find-pw" element={<FindPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordForm />} />
         </Routes>
       </div>
     );
