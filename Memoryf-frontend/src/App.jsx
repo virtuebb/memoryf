@@ -12,6 +12,14 @@ import GuestbookPage from './features/cyworld/pages/GuestbookPage';
 import DmRoomListPage from './features/dm/pages/DmRoomListPage';
 import DmChatPage from './features/dm/pages/DmChatPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
+
+import AdminLayout from './features/admin/components/AdminLayout';
+import DashboardPage from './features/admin/pages/DashboardPage';
+import UserManagementPage from './features/admin/pages/UserManagementPage';
+import ReportManagementPage from './features/admin/pages/ReportManagementPage';
+import PaymentManagementPage from './features/admin/pages/PaymentManagementPage';
+import BgmManagementPage from './features/admin/pages/BgmManagementPage';
+
 import BgmPlayer from './features/cyworld/components/BgmPlayer';
 import HomeVisitorList from './features/cyworld/components/HomeVisitorList';
 
@@ -22,36 +30,30 @@ import SignupPage from './features/member/pages/SignupPage';
 
 function App() {
 
-  // 인증 미구현 상태라 우선 임시로 true로 고정
   const isLoggedIn = false;
 
-  // 로그인 전 화면: LoginForm만 렌더
-if (!isLoggedIn) {
-  return (
-    <div className="login-wrapper">
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-      </Routes>
-    </div>
-  );
-}
+  if (!isLoggedIn) {
+    return (
+      <div className="login-wrapper">
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+        </Routes>
+      </div>
+    );
+  }
 
-  // 로그인 후 화면
   return (
     <div className="app-root">
       <div className="main-layout">
-
         <aside className="left-column">
           <Header />
           <BgmPlayer />
           <Sidebar />
           <HomeVisitorList />
         </aside>
-        
 
-        {/* 오른쪽 메인 콘텐츠: 라우트로 동적 렌더 */}
         <main className="main-content">
           <Routes>
             <Route path="/home" element={<HomePage />} />
@@ -66,6 +68,15 @@ if (!isLoggedIn) {
             {/* 이정민 */}
             <Route path="/diaries" element={<DiaryPage />} />
 
+            {/* 관리자 페이지 라우팅 */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="users" element={<UserManagementPage />} />
+              <Route path="reports" element={<ReportManagementPage />} />
+              <Route path="payments" element={<PaymentManagementPage />} />
+              <Route path="bgm" element={<BgmManagementPage />} />
+            </Route>
+
           </Routes>
         </main>
       </div>
@@ -73,7 +84,6 @@ if (!isLoggedIn) {
       <Footer />
     </div>
   );
-
 }
 
-export default App
+export default App;

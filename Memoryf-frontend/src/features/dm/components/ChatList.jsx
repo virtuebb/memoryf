@@ -15,14 +15,6 @@ import { themes } from '../themes';
 import { getChatListStyles } from '../styles/chatListStyles';
 import ChatListItem from './ChatListItem';
 
-// 예시 채팅방 데이터 (나중에 서버에서 가져올 거예요)
-const DUMMY_CHATS = [
-  { id: 1, name: 'Jenny Kim', message: '다음주에 콜라보 관련해서 이야기해요!', time: '오후 4:33', unread: 2, profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: true },
-  { id: 2, name: '@cool_guy.99', message: '생일 축하해!🥳', time: '어제', unread: 0, profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: true },
-  { id: 3, name: 'minji_luv', message: '카페는 다음주에 가요!', time: '1일 전', unread: 1, profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: true },
-  { id: 4, name: 'travel.ha', message: '이탈리아 사진 너무 예뻐요.', time: '3일 전', unread: 0, profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: true },
-];
-
 // 채팅방이 없는 친구 목록 (새로운 채팅방을 만들 수 있는 사람들)
 // 이 친구들과는 아직 대화를 시작하지 않았어요
 const DUMMY_FRIENDS = [
@@ -31,7 +23,16 @@ const DUMMY_FRIENDS = [
   { id: 7, name: 'coffee_lover', profileUrl: '/src/assets/images/profiles/bono.jpg', hasChatRoom: false },
 ];
 
-const ChatList = ({ onSelectChat, currentTheme, onThemeChange, onStartNewChat }) => {
+/**
+ * ChatList 컴포넌트
+ * 
+ * @param {Array} chats - 채팅방 목록 (페이지에서 전달받아요)
+ * @param {Function} onSelectChat - 채팅방 선택 시 호출되는 함수
+ * @param {Object} currentTheme - 현재 테마
+ * @param {Function} onThemeChange - 테마 변경 시 호출되는 함수
+ * @param {Function} onStartNewChat - 새 채팅방 시작 시 호출되는 함수
+ */
+const ChatList = ({ chats = [], onSelectChat, currentTheme, onThemeChange, onStartNewChat }) => {
   const styles = getChatListStyles(currentTheme);
   // 지금 새 채팅방을 만들려고 검색 중인지 확인하는 변수
   const [isComposing, setIsComposing] = React.useState(false);
@@ -47,7 +48,8 @@ const ChatList = ({ onSelectChat, currentTheme, onThemeChange, onStartNewChat })
   }, [isComposing]);
 
   // 검색할 때 기존 채팅방과 친구 목록을 모두 검색해요
-  const allContacts = [...DUMMY_CHATS, ...DUMMY_FRIENDS];
+  // chats는 페이지에서 전달받은 채팅방 목록이에요 (새로 만든 채팅방도 포함!)
+  const allContacts = [...chats, ...DUMMY_FRIENDS];
   const filteredFriends = allContacts.filter((contact) => {
     const searchFields = [contact.name];
     if (contact.message) {
@@ -111,8 +113,9 @@ const ChatList = ({ onSelectChat, currentTheme, onThemeChange, onStartNewChat })
       )}
 
       {/* 채팅 목록 */}
+      {/* 검색 모드일 때는 검색 결과를, 일반 모드일 때는 채팅방 목록을 보여줘요 */}
       <div style={styles.list}>
-        {(isComposing ? filteredFriends : DUMMY_CHATS).map(chat => (
+        {(isComposing ? filteredFriends : chats).map(chat => (
           <ChatListItem 
             key={chat.id}
             name={chat.name}
