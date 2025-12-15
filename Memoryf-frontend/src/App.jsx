@@ -12,6 +12,12 @@ import GuestbookPage from './features/cyworld/pages/GuestbookPage';
 import DmRoomListPage from './features/dm/pages/DmRoomListPage';
 import DmChatPage from './features/dm/pages/DmChatPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
+import AdminLayout from './features/admin/components/AdminLayout';
+import DashboardPage from './features/admin/pages/DashboardPage';
+import UserManagementPage from './features/admin/pages/UserManagementPage';
+import ReportManagementPage from './features/admin/pages/ReportManagementPage';
+import PaymentManagementPage from './features/admin/pages/PaymentManagementPage';
+import BgmManagementPage from './features/admin/pages/BgmManagementPage';
 import BgmPlayer from './features/cyworld/components/BgmPlayer';
 import HomeVisitorList from './features/cyworld/components/HomeVisitorList';
 
@@ -57,6 +63,15 @@ function App() {
             <Route path="/messages" element={<DmRoomListPage />} />
             <Route path="/messages/:chatId" element={<DmChatPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            
+            {/* 관리자 페이지 라우팅 */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="users" element={<UserManagementPage />} />
+              <Route path="reports" element={<ReportManagementPage />} />
+              <Route path="payments" element={<PaymentManagementPage />} />
+              <Route path="bgm" element={<BgmManagementPage />} />
+            </Route>
           </Routes>
         </main>
       </div>
