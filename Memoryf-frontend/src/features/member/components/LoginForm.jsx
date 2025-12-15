@@ -1,8 +1,21 @@
 import "../css/Login/LoginForm.css";
+import { useNavigate, Link } from "react-router-dom";
 
 const LoginForm = () => {
+
+    const navigate = useNavigate();
+
+    const login = (e) => {
+
+        e.preventDefault();
+
+        navigate("/home")
+    }
+    
+
+
   return (
-    <form className="login-form">
+    <div className="login-form">
         <div className="login-logo-wrap">
             <img
             className="login-logo"
@@ -10,32 +23,34 @@ const LoginForm = () => {
             alt="Memorif logo"
             />
         </div>
+        <form onSubmit={login}>
+            <input type="text" placeholder="id" />
+            <input type="password" placeholder="password" />
 
-        <input type="text" placeholder="id" />
-        <input type="password" placeholder="password" />
+            <button type="submit">로그인</button>
+        </form>
 
-        <button type="submit">로그인</button>
-
-        {/* 아이디 저장 */}
-        <div className="login-remember">
-        <label className="remember-id">
-            <input type="checkbox" />
-            <span>아이디 저장</span>
-        </label>
+            {/* 아이디 저장 */}
+            <div className="login-remember">
+                <label className="remember-id">
+                    <input type="checkbox" />
+                    <span>아이디 저장</span>
+                </label>
+            <div className="login-find">
+                <Link to="/member/find-id">id 찾기</Link>
+                <span className="divider">|</span>
+                <Link to="/member/find-pw">password 찾기</Link>
+            </div>
+        </ div>
 
         {/* id/pw 찾기 */}
-        <div className="login-find">
-            <a href="/member/find-id">id 찾기</a>
-            <span className="divider">|</span>
-            <a href="/member/find-pw">password 찾기</a>
-        </div>
-        </div>
+
 
         {/* 회원가입 */}
         <div className="login-links">
-            <a href="/member/signup">회원가입</a>
+            <Link to="/signup">회원가입</Link>
         </div>
-    </form>
+    </div>
 
   );
 };
