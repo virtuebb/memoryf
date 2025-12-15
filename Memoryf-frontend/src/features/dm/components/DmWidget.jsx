@@ -11,7 +11,7 @@
  * 5. DM 버튼을 누르면 작은 창(PiP)으로 채팅을 할 수 있어요
  * 6. 작은 창은 드래그해서 옮기고 크기도 조절할 수 있어요
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ChatList from './ChatList';
 import ChatWindow from './ChatWindow';
 import ModalOverlay from './ModalOverlay';
@@ -27,6 +27,11 @@ const DmWidget = () => {
   const [currentTheme, setCurrentTheme] = useState(themes.pink);
   // 작은 창(PiP)이 열려있는지 확인하는 변수
   const [pipOpen, setPipOpen] = useState(false);
+  // 메인 위젯 사이즈 (사용자가 자유롭게 조절할 수 있게)
+  const [size, setSize] = useState({ width: 420, height: 720 });
+  const [resizing, setResizing] = useState(false);
+  const resizeStart = useRef({ x: 0, y: 0, width: 420, height: 720 });
+  const minSize = { width: 360, height: 560 }; // 최소 크기 제한
 
   // 새 채팅방을 시작할 때 실행되는 함수
   const handleStartNewChat = (chat) => {
@@ -49,6 +54,33 @@ const DmWidget = () => {
   const handleThemeChange = (theme) => {
     setCurrentTheme(theme);
   };
+
+  // 메인 위젯 리사이즈 시작
+  const handleResizeMouseDown = (e) => {
+    e.preventDefault();
+    resizeStart.current = { x: e.clientX, y: e.clientY, width: size.width, height: size.height };
+    setResizing(true);
+  };
+
+  // 마우스 드래그로 사이즈 조절
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      if (!resizing) return;
+      const deltaX = e.clientX - resizeStart.current.x;
+      const deltaY = e.clientY - resizeStart.current.y;
+      const nextWidth = Math.max(minSize.width, resizeStart.current.width + deltaX);
+      const nextHeight = Math.max(minSize.height, resizeStart.current.height + deltaY);
+      setSize({ width: nextWidth, height: nextHeight });
+    };
+    const onMouseUp = () => setResizing(false);
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [resizing, size]);
 
   // 현재 화면에 맞는 컴포넌트를 보여주는 함수
   const renderScreen = () => {
@@ -76,8 +108,38 @@ const DmWidget = () => {
 
   return (
     <div style={getAppStyles(currentTheme)}>
-      <div style={getMobileFrameStyle()}>
+      {/* 메인 DM 창을 사용자가 직접 리사이즈할 수 있어요 */}
+      <div
+        style={{
+          ...getMobileFrameStyle(),
+          position: 'relative',
+          width: size.width,
+          height: size.height,
+          overflow: 'hidden',
+          userSelect: resizing ? 'none' : 'auto',
+        }}
+      >
         {renderScreen()}
+        {/* 오른쪽 아래 리사이즈 핸들 */}
+        <div
+          onMouseDown={handleResizeMouseDown}
+          style={{
+            position: 'absolute',
+            width: '24px',
+            height: '24px',
+            right: '2px',
+            bottom: '2px',
+            cursor: 'nwse-resize',
+            background:
+              'conic-gradient(from 135deg, transparent 0deg 90deg, rgba(0,0,0,0.3) 90deg 180deg, transparent 180deg 270deg, rgba(0,0,0,0.3) 270deg 360deg)',
+            borderRadius: '6px',
+            border: '1px solid rgba(0,0,0,0.15)',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
+            zIndex: 8,
+            pointerEvents: 'auto',
+          }}
+          title="크기 조절"
+        />
       </div>
       {/* 화면 오른쪽 아래에 떠있는 DM 버튼 (작은 창을 열고 닫을 수 있어요) */}
       <button

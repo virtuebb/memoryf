@@ -1,6 +1,6 @@
 import './App.css'
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Header from './shared/components/Header';
 import Sidebar from './shared/components/Sidebar';
 import Footer from './shared/components/Footer';
@@ -30,7 +30,11 @@ import SignupPage from './features/member/pages/SignupPage';
 
 function App() {
 
-  const isLoggedIn = false;
+  const isLoggedIn = true;
+  const isAdmin = true;
+  const location = useLocation();
+  // 현재 경로가 관리자 경로인지 확인 (/admin으로 시작하면 관리자 레이아웃 사용)
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   if (!isLoggedIn) {
     return (
@@ -44,6 +48,24 @@ function App() {
     );
   }
 
+  // 관리자 경로일 때는 사용자용 사이드바/헤더를 숨기고 관리자 레이아웃만 렌더
+  if (isAdminRoute && isAdmin) {
+    return (
+      <Routes>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="users" element={<UserManagementPage />} />
+          <Route path="reports" element={<ReportManagementPage />} />
+          <Route path="payments" element={<PaymentManagementPage />} />
+          <Route path="bgm" element={<BgmManagementPage />} />
+        </Route>
+        {/* 잘못된 관리자 경로 접근 시 관리자 홈으로 이동 */}
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    );
+  }
+
+  // 일반 사용자 레이아웃
   return (
     <div className="app-root">
       <div className="main-layout">
@@ -68,15 +90,8 @@ function App() {
             {/* 이정민 */}
             <Route path="/diaries" element={<DiaryPage />} />
 
-            {/* 관리자 페이지 라우팅 */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="users" element={<UserManagementPage />} />
-              <Route path="reports" element={<ReportManagementPage />} />
-              <Route path="payments" element={<PaymentManagementPage />} />
-              <Route path="bgm" element={<BgmManagementPage />} />
-            </Route>
-
+            {/* 기본 경로 리다이렉트 */}
+            <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </main>
       </div>
