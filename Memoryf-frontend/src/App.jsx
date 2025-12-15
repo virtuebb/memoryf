@@ -27,6 +27,9 @@ import DiaryPage from './features/cyworld/pages/DiaryPage';
 import SignupPage from './features/member/pages/SignupPage';
 
 import DmRoutes from './features/dm/pages/DmRoutes';
+import { ThemeProvider } from "./features/main/components/ThemeContext";
+import Home from "./features/main/components/Home";
+
 
 function App() {
 
@@ -66,37 +69,39 @@ function App() {
   }
 
   // 일반 사용자 레이아웃
-  return (
-    <div className="app-root">
-      <div className="main-layout">
-        <aside className="left-column">
-          <Header />
-          <BgmPlayer />
-          <Sidebar />
-          <HomeVisitorList />
-        </aside>
+return (
+    <ThemeProvider>
+      <div className="app-root">
+        <div className="main-layout">
+          <aside className="left-column">
+            <Header />
+            <BgmPlayer />
+            <Sidebar />
+            <HomeVisitorList />
+          </aside>
 
-        <main className="main-content">
-          <Routes>
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/feeds" element={<FeedListPage />} />
-            <Route path="/feeds/new" element={<FeedUploadPage />} />
-            <Route path="/guestbook" element={<GuestbookPage />} />
-            <Route path="/messages/*" element={<DmRoutes />} />
-            <Route path="/settings" element={<SettingsPage />} />
+          <main className="main-content">
+            <Routes>
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/feeds" element={<FeedListPage />} />
+              <Route path="/feeds/new" element={<FeedUploadPage />} />
+              <Route path="/guestbook" element={<GuestbookPage />} />
+              <Route path="/messages/*" element={<DmRoutes />} />
+              <Route path="/settings" element={<SettingsPage />} />
 
-            {/* 이정민 */}
-            <Route path="/diaries" element={<DiaryPage />} />
+              {/* 이정민 */}
+              <Route path="/diaries" element={<DiaryPage />} />
 
-            {/* 기본 경로 리다이렉트 */}
-            <Route path="*" element={<Navigate to="/home" replace />} />
-          </Routes>
-        </main>
+              {/* 기본 경로 리다이렉트 */}
+              <Route path="*" element={<Navigate to="/home" replace />} />
+            </Routes>
+          </main>
+        </div>
+
+        <Footer />
       </div>
-
-      <Footer />
-    </div>
+    </ThemeProvider>
   );
 }
 

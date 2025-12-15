@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./FeedTabs.css";
+import "../css/FeedTabs.css";
 
 // 14개 더미 데이터
 const FEEDS = Array.from({ length: 14 }, (_, i) => ({

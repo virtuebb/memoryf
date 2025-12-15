@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./BgmPlayer.css";
+import "../css/BgmPlayer.css";
 
 function BgmPlayer() {
   const [playing, setPlaying] = useState(false);

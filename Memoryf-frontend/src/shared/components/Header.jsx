@@ -1,16 +1,22 @@
-import "./Header.css";
-import BgmPlayer from "./BgmPlayer";
-import Menu from "./Menu";
-import Visitors from "./Visitors";
-import SkinButton from "./SkinButton";
+// shared css
+import "../css/Header.css";
+
+// assets
+import logo from "../../assets/images/logo/Memorif-logo-main.png";
+
+// features/main/components
+import BgmPlayer from "../../features/main/components/BgmPlayer";
+import Menu from "../../features/main/components/Menu";
+import Visitors from "../../features/main/components/Visitors";
+import SkinButton from "../../features/main/components/SkinButton";
+
 
 function Header() {
   return (
     <aside className="sidebar">
-
-      {/* 🔥 로고 (카드 아님) */}
+      {/* 로고 */}
       <div className="logo-section">
-        <img src="/Memorif-logo-main.png" alt="MEMORYF" />
+        <img src={logo} alt="MEMORYF" />
       </div>
 
       {/* BGM */}
@@ -33,7 +39,6 @@ function Header() {
           <SkinButton />
         </div>
       </div>
-
     </aside>
   );
 }

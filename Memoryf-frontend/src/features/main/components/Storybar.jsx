@@ -1,4 +1,4 @@
-import "./StoryBar.css";
+import "../css/StoryBar.css";
 
 function StoryBar() {
   return (

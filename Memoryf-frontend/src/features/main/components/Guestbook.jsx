@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./Guestbook.css";
+import "../css/Guestbook.css";
 
 function Guestbook() {
   const [message, setMessage] = useState("");

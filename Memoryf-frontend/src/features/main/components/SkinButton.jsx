@@ -1,5 +1,5 @@
 import { useTheme, themes } from "../components/ThemeContext";
-import "./SkinButton.css";
+import "../css/SkinButton.css";
 
 function SkinButton() {
   const { themeIndex, setThemeIndex } = useTheme();

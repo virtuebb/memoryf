@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 
-const ThemeContext = createContext();
+const ThemeContext = createContext(null);
 
 export const themes = [
   {
@@ -28,17 +28,27 @@ export const themes = [
 export function ThemeProvider({ children }) {
   const [themeIndex, setThemeIndex] = useState(0);
 
+  const value = {
+    theme: themes[themeIndex],
+    themeIndex,
+    setThemeIndex,
+  };
+
   return (
-    <ThemeContext.Provider
-      value={{
-        theme: themes[themeIndex],
-        themeIndex,
-        setThemeIndex,
-      }}
-    >
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
-export const useTheme = () => useContext(ThemeContext);
+export function useTheme() {
+  const context = useContext(ThemeContext);
+
+  if (!context) {
+    throw new Error(
+      "useTheme must be used within a ThemeProvider"
+    );
+  }
+
+  return context;
+}

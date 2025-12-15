@@ -1,12 +1,16 @@
+// theme context (같은 폴더)
 import { useTheme } from "./ThemeContext";
 
-import Header from "./Header";
+// shared header
+import Header from "../../../shared/components/Header";
+
+// main feature components
 import StoryBar from "./Storybar";
 import ProfileCard from "./ProfileCard";
 import Guestbook from "./Guestbook";
 import FeedTabs from "./FeedTabs";
 
-import "./Home.css";
+import "../css/Home.css";
 
 function Home() {
   const { theme } = useTheme();

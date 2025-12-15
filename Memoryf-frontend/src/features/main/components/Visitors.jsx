@@ -1,4 +1,4 @@
-import "./Visitors.css";
+import "../css/Visitors.css";
 
 function Visitors() {
   return (
