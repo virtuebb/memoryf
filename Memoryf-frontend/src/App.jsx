@@ -12,6 +12,7 @@ import FeedUploadPage from './features/feed/pages/FeedUploadPage';
 import DiaryPage from './features/cyworld/pages/DiaryPage';
 import GuestbookPage from './features/cyworld/pages/GuestbookPage';
 import DmRoomListPage from './features/dm/pages/DmRoomListPage';
+import DmChatPage from './features/dm/pages/DmChatPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
 import BgmPlayer from './features/cyworld/components/BgmPlayer';
 import HomeVisitorList from './features/cyworld/components/HomeVisitorList';
@@ -52,6 +53,7 @@ function App() {
             <Route path="/diaries" element={<DiaryPage />} />
             <Route path="/guestbook" element={<GuestbookPage />} />
             <Route path="/messages" element={<DmRoomListPage />} />
+            <Route path="/messages/:chatId" element={<DmChatPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>
