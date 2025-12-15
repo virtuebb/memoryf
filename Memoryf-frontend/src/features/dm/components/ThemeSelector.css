@@ -1,0 +1,5 @@
+/* ThemeSelector 전용 보조 스타일 */
+.theme-selector {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
