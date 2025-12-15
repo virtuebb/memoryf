@@ -20,8 +20,7 @@ const LoginForm = () => {
             <img
             className="login-logo"
             src="http://localhost:8006/memoryf/images/Memorif-logo.png"
-            alt="Memorif logo"
-            />
+            alt="Memorif logo" />
         </div>
         <form onSubmit={login}>
             <input type="text" placeholder="id" />

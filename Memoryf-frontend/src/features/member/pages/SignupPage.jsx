@@ -6,7 +6,10 @@ const SignupPage = () => {
     <div className="signup-page">
       {/* 왼쪽 소개 영역 */}
       <div className="signup-intro">
-        <h1>Memoryf</h1>
+            <img
+            className="login-logo"
+            src="http://localhost:8006/memoryf/images/Memorif-logo.png"
+            alt="Memorif logo" />
         <p>
           추억을 기록하고,<br />
           나만의 공간을 만들어보세요.
