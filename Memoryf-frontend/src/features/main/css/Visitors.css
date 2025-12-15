@@ -1,0 +1,48 @@
+.visitors {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.visitors-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #999;
+  letter-spacing: 0.04em;
+}
+
+/* TODAY / TOTAL 영역 */
+.visitors-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #fff6f1;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.label {
+  font-size: 11px;
+  color: #888;
+}
+
+.value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+}
+
+/* 가운데 구분선 */
+.divider {
+  width: 1px;
+  height: 28px;
+  background: #f1d3c3;
+}

@@ -1,0 +1,87 @@
+.menu {
+  width: 100%;
+  overflow: hidden;
+}
+
+.menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ===== 메뉴 아이템 ===== */
+.menu li {
+  align-items: center;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 18px;
+
+  font-size: 18px;         
+  font-weight: 500;
+  color: #444;
+
+  cursor: pointer;
+  position: relative;
+
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease,
+    box-shadow 0.25s ease;
+}
+
+/* 아이콘 */
+.menu .icon {
+  font-size: 22px;
+  width: 22px;
+  text-align: center;
+  margin-top: -1px;
+}
+
+/* 텍스트 */
+.menu .label {
+  flex: 1;
+  font-size: 20px;        /* ← 여기 */
+  font-weight: 500;
+}
+
+/* ===== hover ===== */
+.menu li:hover {
+  background: rgba(255, 255, 255, 0.55);
+  transform: translateX(6px);   /* 🔥 살짝 밀리는 느낌 */
+}
+
+/* ===== active ===== */
+.menu li.active {
+  background: #ffffff;
+  font-weight: 600;
+
+  box-shadow:
+    0 8px 20px rgba(255, 155, 183, 0.25);
+}
+
+.menu li.active .label {
+  color: #333;
+}
+
+/* active 왼쪽 포인트 */
+.menu li.active::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 6px;
+  height: 55%;
+  border-radius: 999px;
+
+  background: #ff9bb7;
+}
