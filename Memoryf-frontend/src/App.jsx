@@ -9,8 +9,6 @@ import SearchPage from './features/search/pages/SearchPage';
 import FeedListPage from './features/feed/pages/FeedListPage';
 import FeedUploadPage from './features/feed/pages/FeedUploadPage';
 import GuestbookPage from './features/cyworld/pages/GuestbookPage';
-import DmRoomListPage from './features/dm/pages/DmRoomListPage';
-import DmChatPage from './features/dm/pages/DmChatPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
 
 import AdminLayout from './features/admin/components/AdminLayout';
@@ -30,6 +28,8 @@ import SignupPage from './features/member/pages/SignupPage';
 import FindIdPage from './features/member/pages/FindIdPage';
 import FindPasswordPage from './features/member/pages/FindPasswordPage';
 import ResetPasswordForm from './features/member/components/ResetPasswordForm';
+
+import DmRoutes from './features/dm/pages/DmRoutes';
 
 function App() {
 
@@ -91,8 +91,7 @@ function App() {
             <Route path="/feeds" element={<FeedListPage />} />
             <Route path="/feeds/new" element={<FeedUploadPage />} />
             <Route path="/guestbook" element={<GuestbookPage />} />
-            <Route path="/messages" element={<DmRoomListPage />} />
-            <Route path="/messages/:chatId" element={<DmChatPage />} />
+            <Route path="/messages/*" element={<DmRoutes />} />
             <Route path="/settings" element={<SettingsPage />} />
 
             {/* 이정민 */}
