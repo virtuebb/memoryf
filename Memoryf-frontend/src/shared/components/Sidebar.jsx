@@ -9,30 +9,56 @@ function Sidebar({ onCreateClick }) {
   return (
     <nav className="sidebar">
       <ul className="menu-list">
+        {/* MAIN */}
         <li className={isActive('/home') ? 'active' : ''}>
-          <Link to="/home">🏠 Home</Link>
+          <Link to="/home">
+            <span className="icon">🏠</span>
+            Home
+          </Link>
         </li>
 
+        {/* CONTENT */}
+        <li className="menu-label">CONTENT</li>
+
         <li className={isActive('/diaries') ? 'active' : ''}>
-          <Link to="/diaries">📔 Diary</Link>
+          <Link to="/diaries">
+            <span className="icon">📔</span>
+            Diary
+          </Link>
         </li>
 
         <li className={isActive('/feeds') ? 'active' : ''}>
-          <Link to="/feeds">📰 Feed</Link>
+          <Link to="/feeds">
+            <span className="icon">📰</span>
+            Feed
+          </Link>
         </li>
 
         <li className={location.pathname.startsWith('/messages') ? 'active' : ''}>
-          <Link to="/messages">💬 DM</Link>
+          <Link to="/messages">
+            <span className="icon">💬</span>
+            DM
+          </Link>
         </li>
 
         <li>
-          <span>🖼 Album</span>
+          <span>
+            <span className="icon">🖼</span>
+            Album
+          </span>
         </li>
+
+        {/* SYSTEM */}
+        <li className="menu-label">SYSTEM</li>
 
         <li className={isActive('/settings') ? 'active' : ''}>
-          <Link to="/settings">⚙️ Settings</Link>
+          <Link to="/settings">
+            <span className="icon">⚙️</span>
+            Settings
+          </Link>
         </li>
 
+        {/* CREATE */}
         {onCreateClick && (
           <li className="create">
             <button onClick={onCreateClick}>

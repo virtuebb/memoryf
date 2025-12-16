@@ -14,13 +14,18 @@ export const themes = [
     desc: "Soft & romantic",
     color: "#F5D2D2",
     bg: "linear-gradient(180deg, #fff7f6 0%, #fdecec 100%)",
-    vars: {
+        vars: {
       "--color-left-bg": "#fff6f4",
       "--color-main-bg": "#F5D2D2",
       "--color-card-bg": "rgba(255, 255, 255, 0.96)",
 
       "--color-accent": "#f798b7ff",
       "--color-accent-strong": "#e89aa6",
+
+      /* ✅ action 의미 분리 */
+      "--color-action-primary": "#e89aa6",     // 팔로우 / 메인 버튼
+      "--color-action-secondary": "#f798b7ff", // 검색 / 서브 버튼
+      "--color-action-text": "#ffffff",
 
       "--color-border-soft": "rgba(0,0,0,0.04)",
       "--color-border-card": "rgba(0,0,0,0.08)",
@@ -32,33 +37,38 @@ export const themes = [
 
       "--color-create-bg": "#e89aa6",
       "--color-create-text": "#4c4b4bff",
-    },
+},
   },
 
   {
     name: "Cream",
     desc: "Warm & cozy",
-    color: "#F8F7BA",
+    color: "#f3dfb9ff",
     bg: "linear-gradient(180deg, #fffaf0 0%, #fff2d8 100%)",
     vars: {
       "--color-left-bg": "#fffaf0",
-      "--color-main-bg": "#F8F7BA",
+      "--color-main-bg": "#f3dfb9ff",
       "--color-card-bg": "rgba(255, 255, 255, 0.98)",
 
       "--color-accent": "#F8F7BA",
       "--color-accent-strong": "#e2d66b",
+
+      /* ✅ action 의미 분리 */
+      "--color-action-primary": "#e2d66b", // 팔로우
+      "--color-action-secondary": "#c56b1f", // 검색
+      "--color-action-text": "#ffffff",
 
       "--color-border-soft": "rgba(210, 180, 140, 0.25)",
       "--color-border-card": "rgba(210, 180, 140, 0.4)",
 
       "--color-label": "#c56b1f",
       "--color-sidebar-link": "#4a2f12",
-      "--color-sidebar-link-active-bg": "#ffe0b3",
+      "--color-sidebar-link-active-bg": "#e6d36aff",
       "--color-sidebar-link-active-text": "#4c4b4bff",
 
-      "--color-create-bg": "#ff9900",
+      "--color-create-bg": "#f0cc6cff",
       "--color-create-text": "#4c4b4bff",
-    },
+},
   },
 
   {
@@ -66,25 +76,30 @@ export const themes = [
     desc: "Calm & fresh",
     color: "#BDE3C3",
     bg: "linear-gradient(180deg, #eef7f2 0%, #e4f3ec 100%)",
-    vars: {
-      "--color-left-bg": "#ecf8f3",
-      "--color-main-bg": "#BDE3C3",
-      "--color-card-bg": "rgba(255, 255, 255, 0.98)",
+      vars: {
+        "--color-left-bg": "#ecf8f3",
+        "--color-main-bg": "#BDE3C3",
+        "--color-card-bg": "rgba(255, 255, 255, 0.98)",
 
-      "--color-accent": "#BDE3C3",
-      "--color-accent-strong": "#6fbf9c",
+        "--color-accent": "#BDE3C3",
+        "--color-accent-strong": "#6fbf9c",
 
-      "--color-border-soft": "rgba(15, 118, 110, 0.12)",
-      "--color-border-card": "rgba(15, 118, 110, 0.28)",
+        /* ✅ action 의미 분리 */
+        "--color-action-primary": "#6fbf9c",
+        "--color-action-secondary": "#0f766e",
+        "--color-action-text": "#ffffff",
 
-      "--color-label": "#0f766e",
-      "--color-sidebar-link": "#064e3b",
-      "--color-sidebar-link-active-bg": "#53dbc0ff",
-      "--color-sidebar-link-active-text": "#4c4b4bff",
+        "--color-border-soft": "rgba(15, 118, 110, 0.12)",
+        "--color-border-card": "rgba(15, 118, 110, 0.28)",
 
-      "--color-create-bg": "#8bdac1ff",
-      "--color-create-text": "#4c4b4bff",
-    },
+        "--color-label": "#0f766e",
+        "--color-sidebar-link": "#064e3b",
+        "--color-sidebar-link-active-bg": "#53dbc0ff",
+        "--color-sidebar-link-active-text": "#4c4b4bff",
+
+        "--color-create-bg": "#8bdac1ff",
+        "--color-create-text": "#4c4b4bff",
+},
   },
 
   {
@@ -92,43 +107,58 @@ export const themes = [
     desc: "Dark & neon",
     color: "#A3CCDA",
     bg: "radial-gradient(1200px at 50% -20%, #0f172a 0%, #020617 65%)",
-    vars: {
-      "--color-left-bg": "#020617",
-      "--color-main-bg": "#A3CCDA",
-      "--color-card-bg": "rgba(15, 23, 42, 0.98)",
+      vars: {
+        "--color-left-bg": "#020617",
+        "--color-main-bg": "#A3CCDA",
+        "--color-card-bg": "rgba(181, 207, 224, 0.63)",
 
-      "--color-accent": "#38bdf8",
-      "--color-accent-strong": "#0ea5e9",
+        "--color-accent": "#38bdf8",
+        "--color-accent-strong": "#0ea5e9",
 
-      "--color-border-soft": "rgba(148, 163, 184, 0.25)",
-      "--color-border-card": "rgba(148, 163, 184, 0.45)",
+        /* ✅ action 의미 분리 */
+        "--color-action-primary": "#38bdf8",
+        "--color-action-secondary": "#7dd3fc",
 
-      "--color-label": "#38bdf8",
-      "--color-sidebar-link": "#e5e7eb",
-      "--color-sidebar-link-active-bg": "rgba(145, 203, 228, 1)",
-      "--color-sidebar-link-active-text": "#4c4b4bff",
+        "--color-border-soft": "rgba(148, 163, 184, 0.25)",
+        "--color-border-card": "rgba(181, 207, 224, 0.63)",
 
-      "--color-create-bg": "#38bdf8",
-      "--color-create-text": "#4c4b4bff",
-    },
+        "--color-label": "#38bdf8",
+        "--color-sidebar-link": "#e5e7eb",  // 🔥 Night 대비 개선
+        "--color-sidebar-link-active-bg": "rgba(145, 203, 228, 1)",
+        "--color-sidebar-link-active-text": "#020617",
+
+        "--color-create-bg": "#38bdf8",
+        "--color-create-text": "#020617",
+  },
   },
 ];
 
 export function ThemeProvider({ children }) {
-  const [themeIndex, setThemeIndex] = useState(0);
+  // ✅ 새로고침 유지: localStorage에서 초기값 로드
+  const [themeIndex, setThemeIndex] = useState(() => {
+    const saved = localStorage.getItem("themeIndex");
+    return saved !== null ? Number(saved) : 0;
+  });
+
   const theme = themes[themeIndex];
 
+  // ✅ 테마 변경 시 localStorage 저장
+  useEffect(() => {
+    localStorage.setItem("themeIndex", themeIndex);
+  }, [themeIndex]);
+
+  // ✅ CSS 변수 + 배경 적용 (기존 로직 유지)
   useEffect(() => {
     if (!theme) return;
 
     const root = document.documentElement;
 
-    // 색상 변수
+    // 색상 변수 적용
     Object.entries(theme.vars).forEach(([key, value]) => {
       root.style.setProperty(key, value);
     });
 
-    // 앱 배경
+    // 앱 전체 배경
     root.style.setProperty("--app-bg", theme.bg);
   }, [theme]);
 

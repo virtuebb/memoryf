@@ -3,19 +3,25 @@
   margin: 16px 0 24px;
   padding: 0;
   width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* li margin 대신 gap으로 정리 */
 }
 
-/* 간격 */
+/* 기존 li margin 제거 (gap으로 대체) */
 .menu-list li {
-  margin-bottom: 8px;
+  margin: 0;
 }
 
 /* =========================
-   MENU ITEM
+   MENU ITEM (기본)
 ========================= */
 .menu-list a,
 .menu-list span,
 .menu-list button {
+  position: relative;
+
   display: flex;
   align-items: center;
   gap: 12px;
@@ -23,11 +29,12 @@
   width: 100%;
   padding: 12px 16px;
 
-  border-radius: 12px;
+  border-radius: 14px; /* 살짝 더 둥글게 */
   border: 1px solid transparent;
 
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 550; /* 500~600 사이로 안정감 */
+  letter-spacing: -0.2px;
 
   color: var(--color-sidebar-link);
   background: transparent;
@@ -37,64 +44,164 @@
 
   transition:
     background-color 0.15s ease,
-    color 0.15s ease;
+    color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 
 /* =========================
-   HOVER – 조용한 반응
+   아이콘 영역 "칩" (허전함 해결 핵심)
+   - 메뉴 안에 첫 번째 요소(아이콘)를 감싸는 span이 있다면 적용
+   - 예: <span className="icon">🏠</span>
+========================= */
+.menu-list .icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+
+  flex: 0 0 30px;
+  font-size: 14px;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+/* =========================
+   HOVER – 좀 더 "살아있는" 반응
 ========================= */
 .menu-list a:hover,
 .menu-list button:hover {
   background: color-mix(
     in srgb,
+    var(--color-sidebar-link-active-bg) 38%,
+    transparent
+  );
+
+  border-color: color-mix(
+    in srgb,
     var(--color-sidebar-link-active-bg) 35%,
     transparent
   );
+
+  transform: translateX(4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.menu-list a:hover .icon,
+.menu-list button:hover .icon {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 /* =========================
-   ACTIVE – 안정감
+   ACTIVE – 안정감 + 포인트 라인
 ========================= */
 .menu-list li.active a {
   background: color-mix(
     in srgb,
-    var(--color-sidebar-link-active-bg) 55%,
+    var(--color-sidebar-link-active-bg) 62%,
     transparent
   );
 
   color: var(--color-sidebar-link-active-text);
-  font-weight: 600;
+  font-weight: 650;
+
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+}
+
+/* 왼쪽 포인트 라인(선택적이지만 예쁨) */
+.menu-list li.active a::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 4px;
+  height: 22px;
+  border-radius: 99px;
+
+  background: color-mix(
+    in srgb,
+    var(--color-sidebar-link-active-bg) 85%,
+    white
+  );
+}
+
+/* active일 때 아이콘도 살짝 강조 */
+.menu-list li.active a .icon {
+  background: rgba(255, 255, 255, 0.85);
+  transform: scale(1.06);
 }
 
 /* =========================
-   CREATE BUTTON
+   (선택) 메뉴 그룹 라벨
+   - JSX에서 <li className="menu-label">CONTENT</li> 이런 식으로 넣으면 됨
+========================= */
+.menu-list .menu-label {
+  margin: 8px 0 2px;
+  padding: 6px 12px;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(0, 0, 0, 0.35);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-list .menu-label::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* =========================
+   CREATE BUTTON (조금 더 주인공)
 ========================= */
 .create {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .create button {
   width: 100%;
-  height: 44px;
+  height: 46px;
 
-  border-radius: 12px;
-  border: none;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
 
   background: var(--color-create-bg);
   color: var(--color-create-text);
 
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
 
   cursor: pointer;
 
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.10);
+
   transition:
     filter 0.15s ease,
-    transform 0.15s ease;
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .create button:hover {
-  filter: brightness(0.96);
+  filter: brightness(0.98);
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.12);
 }
 
 .create button:active {

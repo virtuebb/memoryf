@@ -167,9 +167,8 @@
 .btn.primary {
   background: linear-gradient(
     135deg,
-    #ff9bb7,
-    #ffc1d4
+    var(--color-action-primary),
+    var(--color-accent-strong)
   );
-  color: #fff;
-  font-weight: 600;
+  color: var(--color-create-text);
 }
