@@ -51,6 +51,8 @@ const AVAILABLE_USERS = [
   { userId: 'michael.kang', userName: 'Michael Kang' },
   { userId: 'olivia.shin', userName: 'Olivia Shin' },
   { userId: 'james.yoon', userName: 'James Yoon' },
+  { userId: 'user1.user1', userName: 'user1' },
+  { userId: 'user2.user2', userName: 'user2' },
   { userId: 'sophia.han', userName: 'Sophia Han' }
 ];
 

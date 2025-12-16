@@ -287,3 +287,30 @@
   color: #9ca3af;
   cursor: not-allowed;
 }
+
+/* 🔌 WebSocket 연결 상태 표시 */
+.chat-room-connection-status {
+  margin-left: auto;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chat-room-connection-status.connected {
+  color: #22c55e;
+}
+
+.chat-room-connection-status.disconnected {
+  color: #ef4444;
+}
+
+/* 내 ID 표시 (테스트용) */
+.chat-room-my-id {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}

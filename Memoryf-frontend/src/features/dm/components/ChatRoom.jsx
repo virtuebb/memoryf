@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDm } from '../context/DmContext';
 import '../css/ChatRoom.css';
 
 function ArrowLeftIcon() {
@@ -24,6 +25,9 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
   // 📍 페이지 이동용 navigate
   const navigate = useNavigate();
   
+  // 🔌 WebSocket 연결 상태 가져오기
+  const { isConnected, myUserId, handleLeaveChatRoom } = useDm();
+  
   // ✏️ 입력창에 쓴 메시지 저장
   const [messageInput, setMessageInput] = useState('');
   
@@ -31,16 +35,28 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
   
   // 📜 메시지 컨테이너 참조 (자동 스크롤용)
   const messagesContainerRef = useRef(null);
+  
+  // 🔒 이미 읽음 처리한 채팅방 ID 추적 (무한 루프 방지)
+  const markedAsReadRef = useRef(null);
 
   // ============================================
-  // 👀 채팅방 입장 시 읽음 처리
+  // 👀 채팅방 입장 시 읽음 처리 (한 번만 실행)
   // ============================================
   useEffect(() => {
     // 채팅방에 들어오면 해당 채팅방의 메시지를 읽음 처리
-    if (chat?.id && onMarkAsRead) {
+    // 단, 같은 채팅방에서 이미 읽음 처리했으면 스킵 (무한 루프 방지)
+    if (chat?.id && onMarkAsRead && markedAsReadRef.current !== chat.id) {
+      markedAsReadRef.current = chat.id;  // 읽음 처리한 방 ID 기록
       onMarkAsRead(chat.id);
     }
-  }, [chat?.id, onMarkAsRead]);
+    
+    // 🚪 채팅방 나갈 때 (언마운트 또는 다른 채팅방으로 이동)
+    return () => {
+      if (handleLeaveChatRoom) {
+        handleLeaveChatRoom();
+      }
+    };
+  }, [chat?.id]); // onMarkAsRead를 dependency에서 제거!
 
   // ============================================
   // 🔌 백엔드 연동: 메시지 목록 가져오기
@@ -115,6 +131,12 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
           
           {/* 상대방 이름 */}
           <h2 className={`chat-room-username ${themeClass}`}>{chat.userName}</h2>
+          
+          {/* 🔌 WebSocket 연결 상태 + 내 ID 표시 */}
+          <div className={`chat-room-connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
+            <span className="chat-room-my-id">{myUserId}</span>
+            <span>{isConnected ? '🟢' : '🔴'}</span>
+          </div>
         </div>
       )}
 

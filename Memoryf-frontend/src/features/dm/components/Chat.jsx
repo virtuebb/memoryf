@@ -83,7 +83,8 @@ export default function Chat() {
     try {
       // @stomp/stompjs v7 방식 - Client 사용
       const stompClient = new Client({
-        // SockJS를 사용한 WebSocket 팩토리
+        // SockJS를 사용한 WebSocket 팩토리, WebSocket 팩토리는 웹소켓을 사용하는 팩토리를 의미
+        // WS_URL : http://localhost:8006/memoryf/ws 위에서 정의한 주소를 사용
         webSocketFactory: () => new SockJS(WS_URL),
         
         // 디버그 로그 (필요시 활성화)
@@ -92,17 +93,23 @@ export default function Chat() {
         },
         
         // 재연결 설정
+        // 5초마다 재연결 시도
         reconnectDelay: 5000,
         
         // 연결 성공 시
         onConnect: () => {
           setIsConnected(true);
+          // stompClientRef.current : WebSocket 연결 객체 참조
+          // stompClient : WebSocket 연결 객체
           stompClientRef.current = stompClient;
           addMessage(`✅ [${myId}] 연결 성공`, 'system');
+          // addMessage : 메시지 추가 함수
 
           // 내게 오는 메시지 구독
           stompClient.subscribe(`/sub/private/${myId}`, (msg) => {
             const data = JSON.parse(msg.body);
+            // JSON.parse : 문자열을 JSON 객체로 변환
+            // data : { sender: 'user1', content: '안녕하세요' }
             addMessage(`${data.sender} → 나 : ${data.content}`, 'received');
           });
         },
@@ -140,8 +147,13 @@ export default function Chat() {
    */
   const disconnect = () => {
     if (stompClientRef.current && isConnected) {
+      // stompClientRef.current.deactivate() : WebSocket 연결 해제
       stompClientRef.current.deactivate(); // v7: deactivate() 사용
+
+      // stompClientRef.current = null : WebSocket 연결 객체 초기화
       stompClientRef.current = null;
+
+      // setIsConnected(false) : 연결 상태 업데이트
       setIsConnected(false);
     }
   };
@@ -173,6 +185,9 @@ export default function Chat() {
         sender: myId,
         content: message
       })
+      // JSON.stringify : JSON 객체를 문자열로 변환
+      // { roomId: 'user2', sender: 'user1', content: '안녕하세요' }
+      // destination: '/pub/chat/private' : 서버로 메세지를 보내는 경로
     });
 
     // 내가 보낸 메시지 표시
