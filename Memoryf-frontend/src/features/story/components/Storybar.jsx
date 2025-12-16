@@ -1,11 +1,11 @@
-import "../css/StoryBar.css";
+import "../css/Storybar.css";
 
 function StoryBar() {
   return (
-    <div className="sidebar-section story-wrapper">
+    <div className="story-wrapper">
       <div className="story-bar">
 
-        <div className="story add">
+        <div className="story">
           <div className="story-circle add-circle">+</div>
           <div className="story-label">Add</div>
         </div>

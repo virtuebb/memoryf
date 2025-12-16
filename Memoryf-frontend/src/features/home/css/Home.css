@@ -1,0 +1,102 @@
+/* =========================
+   전체 레이아웃
+========================= */
+.home-wrapper {
+  min-height: 100vh;
+}
+
+/* 3컬럼 레이아웃 */
+.home-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 320px;
+  gap: 32px;
+
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 32px;
+
+  box-sizing: border-box;
+}
+
+/* =========================
+   왼쪽 사이드바
+========================= */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* =========================
+   가운데 메인 영역
+========================= */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* =========================
+   오른쪽 패널
+========================= */
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+
+  position: sticky;
+  top: 48px;
+  height: fit-content;
+}
+
+/* =========================
+   카드 공통
+========================= */
+.card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(6px);
+
+  border-radius: 28px;
+  padding: 24px;
+
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+/* feed는 카드 느낌만 유지 */
+.feed-section {
+  width: 100%;
+}
+
+/* =========================
+   반응형
+========================= */
+@media (max-width: 1024px) {
+  .home-layout {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .right {
+    display: none; /* 태블릿에서는 방명록 숨김 */
+  }
+}
+
+@media (max-width: 768px) {
+  .home-layout {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 24px;
+  }
+
+  .sidebar,
+  .main,
+  .right {
+    position: static;
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(6px);
+  }
+}
