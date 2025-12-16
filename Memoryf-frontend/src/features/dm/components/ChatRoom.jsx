@@ -1,6 +1,23 @@
 import { useState } from 'react';
-import { ArrowLeft, Send } from 'lucide-react';
 import './ChatRoom.css';
+
+function ArrowLeftIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M19 12H5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function SendIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M22 2L11 13" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22 2L15 22l-4-9-9-4 20-7z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
   const [messageInput, setMessageInput] = useState('');
@@ -28,7 +45,7 @@ export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
           onClick={onBack}
           className={`w-10 h-10 rounded-full ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} flex items-center justify-center transition-colors`}
         >
-          <ArrowLeft size={20} />
+          <ArrowLeftIcon />
         </button>
         <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center text-white">
           {chat.avatar}
@@ -96,7 +113,7 @@ export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
                 : isDark ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500'
             }`}
           >
-            <Send size={16} />
+            <SendIcon />
           </button>
         </div>
       </div>
