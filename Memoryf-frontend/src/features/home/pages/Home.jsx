@@ -1,16 +1,20 @@
-// theme context (같은 폴더)
-import { useTheme } from "./ThemeContext";
+// theme
+import { useTheme } from "../../../shared/components/ThemeContext";
 
-// shared header
-import Header from "../../../shared/components/Header";
+// shared (❌ Home에서는 Header/Sidebar 쓰지 말자고 했지)
+ // import Header from "../../../shared/components/Header";
+ // import Sidebar from "../../../shared/components/Sidebar";
 
-// main feature components
-import StoryBar from "../../story/components/Storybar";
-import ProfileCard from "../../main/components/ProfileCard";
-import Guestbook from "../../main/components/Guestbook";
-import FeedTabs from "../../main/components/FeedTabs";
+// story
+import Storybar from "../../story/components/Storybar";
+
+// home components
+import ProfileCard from "../components/ProfileCard";
+import Guestbook from "../components/Guestbook";
+import FeedTabs from "../components/FeedTabs";
 
 import "../css/Home.css";
+
 
 function Home() {
   const { theme } = useTheme();
@@ -18,31 +22,33 @@ function Home() {
   return (
     <div className="home-wrapper" style={{ background: theme.color }}>
       <div className="home-layout">
-        {/* 사이드바 */}
+        {/* 왼쪽 사이드바 */}
         <aside className="sidebar">
           <Header />
+          <Sidebar />
         </aside>
 
-        {/* 메인 콘텐츠 */}
-        <main className="right">
-          <div className="right-stack">
-            <div className="card">
-              <StoryBar />
-            </div>
+        {/* 가운데 메인 */}
+        <main className="main">
+          <div className="card">
+            <Storybar />
+          </div>
 
-            <div className="card">
-              <ProfileCard />
-            </div>
+          <div className="card">
+            <ProfileCard />
+          </div>
 
-            <div className="card">
-              <Guestbook />
-            </div>
-
-            <div className="feed-section">
-              <FeedTabs />
-            </div>
+          <div className="feed-section">
+            <FeedTabs />
           </div>
         </main>
+
+        {/* 오른쪽 패널 */}
+        <aside className="right">
+          <div className="card">
+            <Guestbook />
+          </div>
+        </aside>
       </div>
     </div>
   );

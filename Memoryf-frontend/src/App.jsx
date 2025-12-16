@@ -9,6 +9,7 @@ import Visitors from './shared/components/Visitors.jsx';
 import SkinButton from './shared/components/SkinButton.jsx';
 import { ThemeProvider } from './shared/components/ThemeContext.jsx';
 
+import Home from "./features/home/pages/Home";
 
 // 레이아웃
 import Header from './shared/components/Header.jsx';
@@ -111,13 +112,14 @@ function App() {
           <div className="sidebar-section card">
             <SkinButton />
           </div>
-          
+
           </div>
         </aside>
 
           <main className="main-content">
             <Routes location={backgroundLocation || location}>
               <Route path="/home" element={<Storybar />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
               <Route path="/messages/*" element={<DmRoutes />} />
