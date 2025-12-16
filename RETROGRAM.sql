@@ -354,3 +354,46 @@ CREATE TABLE TB_STORY_VISITOR (
     FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
     FOREIGN KEY (STORY_NO) REFERENCES TB_STORY(STORY_NO)
 );
+
+--------------------------------------------------------
+
+drop table tb_dm_room;
+drop table tb_dm_message;
+
+
+-- 테이블 수정본
+CREATE TABLE TB_DM_ROOM (
+    ROOM_NO         NUMBER PRIMARY KEY,
+    ROOM_TYPE       VARCHAR2(10) DEFAULT 'PRIVATE',  -- 'PRIVATE' / 'GROUP'
+    ROOM_NAME       VARCHAR2(100),                   -- 그룹방 이름 (선택)
+    CREATE_DATE     DATE DEFAULT SYSDATE,
+    LAST_SEND_DATE  DATE DEFAULT SYSDATE,
+    IS_DEL          CHAR(1) DEFAULT 'N'
+    
+    -- ❌ MEMBER_NO, MEMBER_NO2 제거 (별도 테이블로 이동)
+    -- ❌ LAST_READ_NO1, LAST_READ_NO2 제거 (별도 테이블로 이동)
+);
+
+CREATE TABLE TB_DM_ROOM_MEMBER (
+    ROOM_MEMBER_NO  NUMBER PRIMARY KEY,              -- PK
+    ROOM_NO         NUMBER NOT NULL,                 -- FK → TB_DM_ROOM
+    MEMBER_NO       NUMBER NOT NULL,                 -- FK → TB_MEMBER
+    JOINED_DATE     DATE DEFAULT SYSDATE,            -- 참여일
+    LAST_READ_NO    NUMBER DEFAULT 0,                -- 마지막 읽은 메시지 번호
+    IS_ACTIVE       CHAR(1) DEFAULT 'Y',             -- 방 나가기 여부
+    
+    CONSTRAINT FK_ROOM_MEMBER_ROOM FOREIGN KEY (ROOM_NO) REFERENCES TB_DM_ROOM(ROOM_NO),
+    CONSTRAINT FK_ROOM_MEMBER_USER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO)
+);
+
+CREATE TABLE TB_DM_MESSAGE (
+    MESSAGE_NO      NUMBER PRIMARY KEY,
+    ROOM_NO         NUMBER NOT NULL,                 -- FK → TB_DM_ROOM
+    MEMBER_NO       NUMBER NOT NULL,                 -- 보낸 사람
+    CONTENT         VARCHAR2(1500),
+    SEND_DATE       DATE DEFAULT SYSDATE,
+    IS_DEL          CHAR(1) DEFAULT 'N',
+    
+    CONSTRAINT FK_DM_MSG_ROOM FOREIGN KEY (ROOM_NO) REFERENCES TB_DM_ROOM(ROOM_NO),
+    CONSTRAINT FK_DM_MSG_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO)
+);

@@ -1,7 +1,7 @@
 /* ===== BGM PLAYER ===== */
 .bgm-player {
   width: 100%;
-  min-height: 320px;              /* 🔥 세로 길이 2배 */
+  min-height: 320px;        
   display: flex;
   flex-direction: column;
   align-items: center;

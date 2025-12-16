@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDm } from '../context/DmContext';
-import '../css/ChatRoom.css';
+import '../css/DmRoom.css';
 
 function ArrowLeftIcon() {
   return (

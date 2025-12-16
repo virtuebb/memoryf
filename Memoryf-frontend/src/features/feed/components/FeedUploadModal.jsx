@@ -6,6 +6,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
   const [step, setStep] = useState(1); // 1: 사진 선택, 2: 글 작성
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // 캐러셀 현재 이미지 인덱스
   const [content, setContent] = useState('');
   const [tag, setTag] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -39,6 +40,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
 
     Promise.all(previewPromises).then(previewUrls => {
       setPreviews(previewUrls);
+      setCurrentImageIndex(0); // 첫 번째 이미지로 초기화
       setStep(2); // 다음 단계로 이동
     });
   };
@@ -55,9 +57,25 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
     setSelectedFiles(newFiles);
     setPreviews(newPreviews);
     
+    // 현재 인덱스 조정
+    if (currentImageIndex >= newPreviews.length) {
+      setCurrentImageIndex(Math.max(0, newPreviews.length - 1));
+    }
+    
     if (newFiles.length === 0) {
       setStep(1);
+      setCurrentImageIndex(0);
     }
+  };
+
+  // 캐러셀 이전 이미지
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : previews.length - 1));
+  };
+
+  // 캐러셀 다음 이미지
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev < previews.length - 1 ? prev + 1 : 0));
   };
 
   // 해시태그 추출 (공백으로 구분)
@@ -119,6 +137,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
     setStep(1);
     setSelectedFiles([]);
     setPreviews([]);
+    setCurrentImageIndex(0);
     setContent('');
     setTag('');
     setLatitude('');
@@ -176,20 +195,60 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
             // 2단계: 글 작성
             <div className="upload-step-2">
               <div className="upload-preview-section">
-                <div className="image-preview-container">
-                  {previews.map((preview, index) => (
-                    <div key={index} className="preview-item">
-                      <img src={preview} alt={`미리보기 ${index + 1}`} />
-                      {previews.length > 1 && (
+                <div className="image-carousel-container">
+                  {/* 이전 버튼 */}
+                  {previews.length > 1 && (
+                    <button
+                      className="carousel-btn carousel-btn-prev"
+                      onClick={handlePrevImage}
+                      aria-label="이전 이미지"
+                    >
+                      ‹
+                    </button>
+                  )}
+                  
+                  {/* 현재 이미지 */}
+                  <div className="carousel-image-wrapper">
+                    <img 
+                      src={previews[currentImageIndex]} 
+                      alt={`미리보기 ${currentImageIndex + 1}`} 
+                      className="carousel-image"
+                    />
+                    {previews.length > 1 && (
+                      <button
+                        className="remove-image-btn"
+                        onClick={() => handleRemoveFile(currentImageIndex)}
+                        aria-label="이미지 삭제"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* 다음 버튼 */}
+                  {previews.length > 1 && (
+                    <button
+                      className="carousel-btn carousel-btn-next"
+                      onClick={handleNextImage}
+                      aria-label="다음 이미지"
+                    >
+                      ›
+                    </button>
+                  )}
+                  
+                  {/* 이미지 인디케이터 */}
+                  {previews.length > 1 && (
+                    <div className="carousel-indicators">
+                      {previews.map((_, index) => (
                         <button
-                          className="remove-image-btn"
-                          onClick={() => handleRemoveFile(index)}
-                        >
-                          ×
-                        </button>
-                      )}
+                          key={index}
+                          className={`carousel-indicator ${index === currentImageIndex ? 'active' : ''}`}
+                          onClick={() => setCurrentImageIndex(index)}
+                          aria-label={`이미지 ${index + 1}로 이동`}
+                        />
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
               <div className="upload-form-section">

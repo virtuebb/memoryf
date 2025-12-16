@@ -1,39 +1,102 @@
 .menu-list {
   list-style: none;
+  margin: 16px 0 24px;
   padding: 0;
-  margin: 0;
+  width: 100%;
 }
 
+/* 간격 */
 .menu-list li {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
+/* =========================
+   MENU ITEM
+========================= */
 .menu-list a,
 .menu-list span,
 .menu-list button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 
-  padding: 10px 14px;
+  width: 100%;
+  padding: 12px 16px;
+
   border-radius: 12px;
-  text-decoration: none;
+  border: 1px solid transparent;
+
+  font-size: 14px;
+  font-weight: 500;
+
   color: var(--color-sidebar-link);
   background: transparent;
-  border: none;
+
+  cursor: pointer;
+  text-decoration: none;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
+/* =========================
+   HOVER – 조용한 반응
+========================= */
+.menu-list a:hover,
+.menu-list button:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-sidebar-link-active-bg) 35%,
+    transparent
+  );
+}
+
+/* =========================
+   ACTIVE – 안정감
+========================= */
 .menu-list li.active a {
-  background: var(--color-sidebar-link-active-bg);
+  background: color-mix(
+    in srgb,
+    var(--color-sidebar-link-active-bg) 55%,
+    transparent
+  );
+
   color: var(--color-sidebar-link-active-text);
   font-weight: 600;
 }
 
+/* =========================
+   CREATE BUTTON
+========================= */
+.create {
+  margin-top: 20px;
+}
+
 .create button {
   width: 100%;
+  height: 44px;
+
+  border-radius: 12px;
   border: none;
+
   background: var(--color-create-bg);
   color: var(--color-create-text);
+
+  font-size: 14px;
+  font-weight: 600;
+
   cursor: pointer;
-  border-radius: 12px;
+
+  transition:
+    filter 0.15s ease,
+    transform 0.15s ease;
+}
+
+.create button:hover {
+  filter: brightness(0.96);
+}
+
+.create button:active {
+  transform: scale(0.98);
 }

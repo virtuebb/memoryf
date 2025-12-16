@@ -40,6 +40,8 @@ const getCurrentUserId = () => {
   // 1. URL 파라미터에서 userId 확인
   const urlParams = new URLSearchParams(window.location.search);
   const urlUserId = urlParams.get('userId');
+  // url에서 userId를 가져옴. 예: http://localhost:5173/messages?userId=user1
+  // 나중에는 세션에 담긴 사용자 아이디를 가져 오면 될듯
   
   if (urlUserId) {
     // URL에서 가져온 ID를 localStorage에도 저장 (새로고침 대비)

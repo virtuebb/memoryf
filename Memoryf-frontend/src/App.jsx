@@ -3,22 +3,19 @@ import './App.css';
 import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
-// 공통 (사이드바)
+// 공통
 import BgmPlayer from './shared/components/BgmPlayer.jsx';
 import Visitors from './shared/components/Visitors.jsx';
 import SkinButton from './shared/components/SkinButton.jsx';
 import { ThemeProvider } from './shared/components/ThemeContext.jsx';
-
-import Home from "./features/home/pages/Home";
 
 // 레이아웃
 import Header from './shared/components/Header.jsx';
 import Sidebar from './shared/components/Sidebar.jsx';
 import Footer from './shared/components/Footer.jsx';
 
-
-// 홈(스토리)
-import Storybar from './features/story/components/Storybar';
+// 홈
+import Home from './features/home/pages/Home';
 
 // 일반 사용자
 import SearchPage from './features/search/pages/SearchPage';
@@ -57,6 +54,9 @@ function App() {
   const location = useLocation();
   const backgroundLocation = location.state?.backgroundLocation;
   const isAdminRoute = location.pathname.startsWith('/admin');
+  
+  // 설정 페이지 여부
+  const isSettings = location.pathname.startsWith("/settings");
 
   // 로그인 안 했을 때
   if (!isLoggedIn) {
@@ -96,33 +96,35 @@ function App() {
       <DmProvider>
       <div className="app-root">
         <div className="main-layout">
+          {/* ✅ Settings 아닐 때만 사이드바 */}
+          {!isSettings && (
          <aside className="left-column">
-          {/* 1. 로고 */}
-          <Header />
+            {/* 1. 로고 */}
+            <Header />
 
-          {/* 3. BGM 플레이어 */}
-          <div className="sidebar-section card">
-            <BgmPlayer />
-          </div>
+            {/* 2. BGM 플레이어 */}
+            <div className="sidebar-section card">
+              <BgmPlayer />
+            </div>
 
-          {/* 4. 메뉴 */}
-          <Sidebar onCreateClick={() => setIsModalOpen(true)} />
+            {/* 3. 메뉴 */}
+            <Sidebar onCreateClick={() => setIsModalOpen(true)} />
 
-          {/* 5. 방문자 */}
-          <div className="sidebar-section card">
-            <Visitors />
+            {/* 4. 방문자 */}
+            <div className="sidebar-section card">
+              <Visitors />
+            </div>
 
-          {/* 2. 테마 버튼 */}
-          <div className="sidebar-section card">
-            <SkinButton />
-          </div>
+            {/* 5. 테마 버튼 */}
+            <div className="sidebar-section card">
+              <SkinButton />
+            </div>
+          </aside>
+          )}
 
-          </div>
-        </aside>
-
+          {/* 메인 콘텐츠 */}
           <main className="main-content">
             <Routes location={backgroundLocation || location}>
-              <Route path="/home" element={<Storybar />} />
               <Route path="/home" element={<Home />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />

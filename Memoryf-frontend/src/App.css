@@ -2,7 +2,7 @@
    글로벌 레이아웃 & 테마 변수
 ========================= */
 :root {
-  --left-width: 300px;
+  --left-width: 240px;
 
   /* ThemeContext에서 덮어쓸 기본값 (Rose와 동일하게 세팅) */
   --color-left-bg: #fff6f4;
@@ -34,20 +34,36 @@ body,
   transition: background-color 0.2s ease;
 }
 
+/* =========================
+   메인 레이아웃 (사이드바 + 콘텐츠)
+========================= */
 .main-layout {
   display: flex;
   flex: 1;
+
+  justify-content: center; 
+  gap: 40px;
+
+  padding: 32px 24px;
+  box-sizing: border-box;
 }
 
-.left-column {
-  width: var(--left-width);
+/* 사이드바 카드 */
+.left-section {
+  background: var(--color-card-bg);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  min-height: 80px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 18px;
-  background: var(--color-left-bg);
-  border-right: 2px solid var(--color-border-soft);
+  align-items: center;
+  border: 1.5px solid var(--color-border-card);
   box-sizing: border-box;
+}
+
+.left-section.bgm {
+  min-height: 160px;
 }
 
 .left-section {
@@ -64,18 +80,27 @@ body,
   box-sizing: border-box;
 }
 
-.left-section.bgm {
-  min-height: 160px;
-}
-
 .left-section.sidebar-wrap {
   flex: 1;
-  min-height: 260px;
   align-items: flex-start;
 }
 
 .left-section.visitors {
   min-height: 120px;
+}
+
+.left-column {
+  width: var(--left-width);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px; 
+  box-sizing: border-box;
+}
+
+.sidebar-section.card {
+  padding: 18px 16px 20px;
+  border-radius: 18px;
 }
 
 .section-label {
@@ -94,6 +119,9 @@ body,
   justify-content: center;
 }
 
+/* =========================
+   사이드바 링크
+========================= */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -102,15 +130,14 @@ body,
 }
 
 .sidebar-link {
-  display: block;
   padding: 10px 12px;
   border-radius: 10px;
   color: var(--color-sidebar-link);
-  text-decoration: none;
   font-weight: 600;
   border: 1px solid rgba(0, 0, 0, 0.06);
   background: #fff;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .sidebar-link:hover {
@@ -118,6 +145,7 @@ body,
   color: var(--color-sidebar-link-active-text);
   border-color: rgba(184, 90, 107, 0.24);
 }
+
 
 .sidebar-button {
   width: 100%;
@@ -127,12 +155,24 @@ body,
   font-size: inherit;
 }
 
+/* =========================
+   🔥 메인 콘텐츠 영역
+========================= */
 .main-content {
   flex: 1;
-  padding: 28px;
-  background: linear-gradient(180deg, #ffffff, var(--color-main-bg));
-  border-left: 3px solid var(--color-border-soft);
+  padding: 32px 40px;
   box-sizing: border-box;
+  display: block;
+  background: var(--color-main-bg);
+}
+
+/* =========================
+   Home 내부 기본 스타일 (임시/보조)
+========================= */
+.home-page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* Home page placeholders styling */
@@ -184,7 +224,9 @@ body,
   height: 60px;
 }
 
-/* App 레벨 전환 효과 (Tailwind 보완용) */
+/* =========================
+   전환 효과
+========================= */
 .app-shell {
   transition: background-color 0.2s ease, color 0.2s ease;
 }

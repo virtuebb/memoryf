@@ -1,0 +1,97 @@
+.settings-page {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.settings-header {
+  margin-bottom: 24px;
+}
+
+.settings-layout {
+  display: flex;
+  gap: 24px;
+}
+
+.settings-sidebar {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-sidebar button {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.settings-sidebar button.active {
+  background: var(--color-sidebar-link-active-bg);
+  color: var(--color-sidebar-link-active-text);
+  font-weight: 600;
+}
+
+.settings-content {
+  flex: 1;
+}
+
+.settings-card {
+  background: var(--color-card-bg);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.primary {
+  background: var(--color-btn-bg);
+  color: var(--color-btn-text);
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.danger {
+  background: #ff6b6b;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.settings-home-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+
+  background: var(--color-accent);
+  color: #333;
+  font-weight: 600;
+  font-size: 13px;
+
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-home-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}

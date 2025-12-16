@@ -55,7 +55,7 @@
 .feed-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 2px;
   width: 100%;
 }
 
@@ -63,14 +63,12 @@
 @media (max-width: 1024px) {
   .feed-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
   }
 }
 
 @media (max-width: 768px) {
   .feed-grid {
     grid-template-columns: 1fr;
-    gap: 15px;
   }
 
   .feed-list-header {

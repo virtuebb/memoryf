@@ -15,6 +15,18 @@ function SkinButton() {
             className={`skin-item ${themeIndex === i ? "active" : ""}`}
             onClick={() => setThemeIndex(i)}
           >
+            <div className="skin-chip">
+              {/* 메인 컬러 */}
+              <span style={{ background: t.color }} />
+
+              {/* 서브 / 배경 컬러 */}
+              <span
+                style={{
+                  background: t.vars["--color-main-bg"] || t.color,
+                }}
+              />
+            </div>
+
             <div className="skin-name">{t.name}</div>
             <div className="skin-desc">{t.desc}</div>
           </button>
