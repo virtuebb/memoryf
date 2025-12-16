@@ -1,17 +1,43 @@
 import "../css/Login/LoginForm.css";
 import { useNavigate, Link } from "react-router-dom";
+import loginMemberApi from "../api/loginApi";
+import { useState } from "react";
 
 const LoginForm = () => {
 
     const navigate = useNavigate();
 
-    const login = (e) => {
+    const [memberId, setMemberId] = useState("");
+    const [memberPwd, setMemberPwd] = useState("");
+
+    const login = async (e) => {
 
         e.preventDefault();
 
-        navigate("/home")
+        const token = await loginMemberApi(memberId, memberPwd);
+
+        if(token) {
+
+            localStorage.setItem("accessToken", token);
+
+            navigate("/home")
+        } else {
+
+            alert("로그인 정보가 일치하지 않습니다.")
+        }
+
+        
     }
     
+    // onChange 함수
+    const handleChange = (e) => {
+
+        const {name, value} = e.target;
+
+        if(name === "memberId") setMemberId(value);
+        if(name === "memberPwd") setMemberPwd(value);
+
+    }
 
 
   return (
@@ -23,8 +49,8 @@ const LoginForm = () => {
             alt="Memorif logo" />
         </div>
         <form onSubmit={login}>
-            <input type="text" placeholder="id" />
-            <input type="password" placeholder="password" />
+            <input type="text" placeholder="id" name="memberId" value={memberId} onChange={handleChange} />
+            <input type="password" placeholder="password" name="memberPwd" value={memberPwd} onChange={handleChange} />
 
             <button type="submit">로그인</button>
         </form>

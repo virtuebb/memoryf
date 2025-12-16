@@ -22,7 +22,7 @@ public class LoginController {
 	// React에서 전달한 JSON 형식의 아이디/비번을 VO로 변환해서 전달받음
 	// POST 방식으로 처리
 	@PostMapping()
-	public Login loginMember(@RequestBody Login login) {
+	public String loginMember(@RequestBody Login login) {
 		
 		
 		

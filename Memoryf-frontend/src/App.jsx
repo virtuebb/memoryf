@@ -31,7 +31,7 @@ import FloatingDm from './features/dm/components/FloatingDm';
 import Chat from './features/dm/components/Chat';
 import { DmProvider } from './features/dm/context/DmContext';
 
-// 멤버
+// 로그인, 회원가입
 import LoginPage from './features/auth/pages/LoginPage';
 import SignupPage from './features/auth/pages/SignupPage';
 import FindIdPage from './features/auth/pages/FindIdPage';
