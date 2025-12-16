@@ -13,8 +13,8 @@
  *    4. GET /api/dm/rooms/{roomId}/messages - 메시지 목록 가져오기
  */
 
-import { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import ChatList from '../components/ChatList.jsx';
 import ChatRoom from '../components/ChatRoom.jsx';
 import UserSearchModal from '../components/UserSearchModal.jsx';
@@ -30,6 +30,8 @@ import './DmRoutes.css';
 export default function DmRoutes() {
   // 📍 페이지 이동할 때 사용하는 도구
   const navigate = useNavigate();
+  // 📍 현재 URL 정보 가져오기 (라우팅 변경 감지용)
+  const location = useLocation();
   
   // 🎨 테마 설정 (밝은/어두운 모드)
   const [theme, setTheme] = useState('light');
@@ -46,6 +48,48 @@ export default function DmRoutes() {
 
   // 📋 모든 채팅방 합치기 (대기 중 + 진행 중)
   const allChats = [...pendingChats, ...chatRooms];
+
+  /**
+   * 👀 채팅방 읽음 처리 (useCallback으로 메모이제이션하여 무한 루프 방지)
+   * 
+   * @param {string|number} chatId - 읽음 처리할 채팅방 ID
+   * 
+   * 🔌 백엔드 연동 시:
+   *    PUT /api/dm/rooms/{chatId}/read
+   *    → 해당 채팅방의 모든 메시지를 읽음 처리
+   */
+  const handleMarkAsRead = useCallback((chatId) => {
+    // 🔌 백엔드 연동 시 아래 코드로 교체:
+    // try {
+    //   await fetch(`${API_BASE_URL}/rooms/${chatId}/read`, {
+    //     method: 'PUT',
+    //     headers: {
+    //       'Authorization': `Bearer ${로그인토큰}`
+    //     }
+    //   });
+    // } catch (error) {
+    //   console.error('읽음 처리 실패:', error);
+    // }
+
+    // 📌 현재는 더미 데이터로 작동 (백엔드 없이)
+    // 활성화된 채팅방의 unread 카운트를 0으로 만들기
+    setChatRooms((prevRooms) =>
+      prevRooms.map((room) =>
+        String(room.id) === String(chatId)
+          ? { ...room, unread: 0 }
+          : room
+      )
+    );
+    
+    // 대기 중인 채팅방도 처리
+    setPendingChats((prevChats) =>
+      prevChats.map((room) =>
+        String(room.id) === String(chatId)
+          ? { ...room, unread: 0 }
+          : room
+      )
+    );
+  }, []); // 빈 의존성 배열 - 함수가 한 번만 생성됨
 
   // ============================================
   // 🔌 백엔드 연동: 페이지 로드 시 채팅방 목록 가져오기
@@ -171,6 +215,7 @@ export default function DmRoutes() {
           hour12: true 
         }),
         isMine: true,  // 내가 보낸 메시지
+        isRead: false, // 👀 아직 상대방이 안 읽음
       };
 
       const activatedChat = {
@@ -198,6 +243,7 @@ export default function DmRoutes() {
           hour12: true 
         }),
         isMine: true,
+        isRead: false, // 👀 아직 상대방이 안 읽음
       };
 
       // 해당 채팅방에 새 메시지 추가
@@ -223,7 +269,7 @@ export default function DmRoutes() {
     <div className={`dm-container ${theme}`}>
       {/* 📦 카드 형태의 DM 컨테이너 */}
       <div className={`dm-card ${theme}`}>
-        <Routes>
+        <Routes location={location} key={location.pathname}>
           {/* 📋 채팅방 목록 페이지 */}
           <Route
             index
@@ -245,6 +291,7 @@ export default function DmRoutes() {
                 allChats={allChats}
                 onBack={() => navigate('/messages')}
                 onSendMessage={handleSendMessage}
+                onMarkAsRead={handleMarkAsRead}
                 theme={theme}
               />
             }
@@ -290,7 +337,7 @@ function DmRoomListPage({ allChats, theme, setTheme, openSearch, navigateToChat 
  *    GET /api/dm/rooms/{chatId}/messages
  *    → 이 채팅방의 메시지 목록 가져오기
  */
-function DmChatPage({ allChats, onBack, onSendMessage, theme }) {
+function DmChatPage({ allChats, onBack, onSendMessage, onMarkAsRead, theme }) {
   // 🔗 URL에서 채팅방 ID 가져오기 (예: /messages/123 → chatId = "123")
   const { chatId } = useParams();
   
@@ -312,6 +359,7 @@ function DmChatPage({ allChats, onBack, onSendMessage, theme }) {
       chat={selectedChat} 
       onBack={onBack} 
       onSendMessage={onSendMessage} 
+      onMarkAsRead={onMarkAsRead}
       theme={theme} 
     />
   );

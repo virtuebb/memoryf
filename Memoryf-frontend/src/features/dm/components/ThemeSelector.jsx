@@ -1,4 +1,4 @@
-import './ThemeSelector.css';
+import '../css/ThemeSelector.css';
 
 export default function ThemeSelector({ theme, onThemeChange }) {
   const themeClass = theme === 'dark' ? 'dark' : 'light';

@@ -139,6 +139,22 @@
   max-width: 70%;
 }
 
+/* 메시지 메타 정보 (시간 + 읽음 표시) */
+.chat-message-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+/* 👀 읽음 표시 (안 읽음 = "1") */
+.chat-message-unread {
+  font-size: 0.7rem;
+  color: #facc15;
+  font-weight: 600;
+}
+
 /* 메시지 시간 */
 .chat-message-time {
   font-size: 0.75rem;

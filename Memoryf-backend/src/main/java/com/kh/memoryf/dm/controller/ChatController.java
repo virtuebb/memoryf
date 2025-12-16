@@ -16,11 +16,11 @@ import com.kh.memoryf.dm.model.vo.Dm;
 @Controller
 public class ChatController {
 
-    private final SimpMessagingTemplate messagingTemplate;
+    private SimpMessagingTemplate messagingTemplate;
 
-    public ChatController(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
+    // public ChatController(SimpMessagingTemplate messagingTemplate) {
+    //     this.messagingTemplate = messagingTemplate;
+    // }
 
     // ===============================
     // 1️⃣ 단체 채팅 (채팅방)
