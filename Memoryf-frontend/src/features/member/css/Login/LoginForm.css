@@ -18,7 +18,7 @@
 
 /* input 공통 */
 .login-form input {
-  width: 93%;
+  width: 100%;
   height: 44px;
   margin-bottom: 14px;
   padding: 0 12px;
@@ -33,6 +33,7 @@
 
 .login-form input:focus {
   border-color: #F5D2D2;
+  box-shadow: 0 0 0 4px rgba(245, 210, 210, 0.6);
 }
 
 /* 로그인 버튼 */
