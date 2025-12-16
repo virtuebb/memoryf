@@ -1,0 +1,183 @@
+/* =========================
+   Feed Tabs Wrapper
+========================= */
+.feed-tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 18px;
+}
+
+/* =========================
+   Tabs
+========================= */
+.tab-header {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.55);
+  padding: 6px;
+  border-radius: 999px;
+}
+
+.tab-header button {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 999px;
+  border: none;
+
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #777;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.tab-header button:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.tab-header button.active {
+  background: #ffffff;
+  color: #333;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
+/* =========================
+   Content Animation
+========================= */
+.tab-content {
+  animation: fadeUp 0.35s ease both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   Feed Grid
+========================= */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding-bottom: 8px; /* 마지막 줄 잘림 방지 */
+}
+
+/* 카드 */
+.grid-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: #f3f3f3;
+  aspect-ratio: 1 / 1.2; 
+  cursor: pointer;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.grid-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+/* hover */
+.grid-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+.grid-card:hover img {
+  transform: scale(1.05);
+}
+
+/* =========================
+   Diary
+========================= */
+.diary-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.diary-card {
+  padding: 18px 20px;
+  background: linear-gradient(
+    180deg,
+    #fffdfc 0%,
+    #fff4ee 100%
+  );
+  border-radius: 18px;
+
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444;
+
+  animation: fadeUp 0.35s ease both;
+}
+
+/* 잠금 */
+.diary-card .lock {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* =========================
+   Content (스크롤 영역)
+========================= */
+.tab-content {
+  height: 520px;              /* 🔥 네모 크기 (원하면 480~600 조절) */
+  overflow-y: auto;
+  padding-right: 4px;         /* 스크롤 여백 */
+
+  animation: fadeUp 0.35s ease both;
+}
+
+/* 스크롤바 커스텀 (선택) */
+.tab-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tab-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+}
+
+.tab-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.diary-wrap {
+  padding-right: 4px;
+}
+
+.diary-card {
+  cursor: pointer;
+}
+
+.tab-header button {
+  cursor: pointer;
+}
+
+.grid-card:active {
+  transform: scale(0.97);
+}
+
+.tab-header button:active {
+  transform: scale(0.96);
+}

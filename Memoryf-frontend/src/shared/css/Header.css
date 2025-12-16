@@ -1,0 +1,129 @@
+/* =========================
+   전체 사이드바
+========================= */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================
+   공통 카드
+========================= */
+.sidebar-section,
+.card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(8px);
+
+  border-radius: 22px;
+  padding: 18px;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+/* =========================
+   🔥 로고 (카드 완전 제외)
+========================= */
+.logo-section {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+
+  margin-top: -24px;      /* 위로 조금 더 */
+  margin-bottom: 4px;
+
+  display: flex;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+/* 로고 이미지 */
+.logo-section img {
+  width: 360px;           /* 너무 크지 않게 미세 조정 */
+  height: auto;
+
+  filter:
+    drop-shadow(0 8px 20px rgba(255, 160, 190, 0.35))
+    drop-shadow(0 2px 6px rgba(0, 0, 0, 0.06));
+
+  transition:
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.6s ease;
+
+  animation: logoFadeUp 0.9s ease-out both;
+}
+
+/* hover */
+.logo-section img:hover {
+  transform: translateY(-6px) scale(1.05);
+  filter:
+    drop-shadow(0 16px 36px rgba(255, 160, 190, 0.5))
+    drop-shadow(0 8px 16px rgba(0, 0, 0, 0.08));
+}
+
+/* 등장 애니메이션 */
+@keyframes logoFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================
+   BGM
+========================= */
+.bgm-wrapper {
+  margin-top: 0;
+}
+
+/* =========================
+   메뉴
+========================= */
+.menu-section {
+  height: 460px;
+
+  display: flex;
+  align-items: center;       /* 세로 중앙 */
+  justify-content: center;   /* 가로 중앙 */
+
+  padding: 0;
+}
+
+/* Menu 내부 ul 정렬 보정 */
+.menu-section ul {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* =========================
+   하단 (Visitors / Theme)
+========================= */
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  opacity: 0.95;
+}
+
+.sidebar-bottom .sidebar-section {
+  border-radius: 18px;
+}
+
+/* =========================
+   header 태그 무효화
+========================= */
+header {
+  display: none;
+}
