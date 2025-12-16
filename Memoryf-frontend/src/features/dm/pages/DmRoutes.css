@@ -2,7 +2,7 @@
 
 /* 외부 컨테이너 - 핑크 배경 */
 .dm-container {
-  min-height: 100%;
+  min-height: 50%;
   width: 100%;
   display: flex;
   align-items: center;
@@ -21,7 +21,8 @@
 /* 카드 형태의 DM 컨테이너 */
 .dm-card {
   width: 100%;
-  max-width: 28rem; /* max-w-md */
+  /* max-width: 28rem; max-w-md */
+  max-width: 700px; /* max-w-md */
   height: 700px;
   border-radius: 1.5rem; /* rounded-3xl */
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); /* shadow-xl */

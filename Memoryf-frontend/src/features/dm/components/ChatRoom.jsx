@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { ArrowLeft, Send } from 'lucide-react';
-import './ChatRoom.css';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../css/ChatRoom.css';
 
 function ArrowLeftIcon() {
   return (
@@ -20,7 +20,10 @@ function SendIcon() {
   );
 }
 
-export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
+export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, theme }) {
+  // 📍 페이지 이동용 navigate
+  const navigate = useNavigate();
+  
   // ✏️ 입력창에 쓴 메시지 저장
   const [messageInput, setMessageInput] = useState('');
   
@@ -29,6 +32,16 @@ export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
   
   // 📜 메시지 목록 끝부분 참조 (자동 스크롤용)
   const messagesEndRef = useRef(null);
+
+  // ============================================
+  // 👀 채팅방 입장 시 읽음 처리
+  // ============================================
+  useEffect(() => {
+    // 채팅방에 들어오면 해당 채팅방의 메시지를 읽음 처리
+    if (chat?.id && onMarkAsRead) {
+      onMarkAsRead(chat.id);
+    }
+  }, [chat?.id, onMarkAsRead]);
 
   // ============================================
   // 🔌 백엔드 연동: 메시지 목록 가져오기
@@ -84,12 +97,12 @@ export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
   return (
     <div className="flex-1 flex flex-col chat-room">
       {/* Header */}
-      <div className={`p-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} flex items-center gap-3`}>
+      <div className={`chat-room-header ${themeClass}`}>
         <button
-          onClick={onBack}
-          className={`w-10 h-10 rounded-full ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} flex items-center justify-center transition-colors`}
+          onClick={() => navigate('/messages')}
+          className={`chat-room-back-btn ${themeClass}`}
         >
-          <ArrowLeft size={20} />
+          <ArrowLeftIcon />
         </button>
         
         {/* 👤 상대방 프로필 */}
@@ -114,7 +127,7 @@ export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
         ) : (
           <div className="chat-room-message-list">
             {/* 🔄 각 메시지를 하나씩 그리기 */}
-            {chat.messages.map((message) => (
+            {chat.messages.map((message, index) => (
               <div
                 key={message.id}
                 className={`chat-message-row ${message.isMine ? 'mine' : 'theirs'}`}
@@ -122,10 +135,16 @@ export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
                 {/* 💙 내 메시지: 오른쪽 정렬, 파란 배경 */}
                 {message.isMine ? (
                   <div className="chat-message-wrapper">
-                    {/* 시간 먼저, 그 다음 메시지 */}
-                    <span className={`chat-message-time ${themeClass}`}>
-                      {message.time}
-                    </span>
+                    {/* 읽음 표시 + 시간 */}
+                    <div className="chat-message-meta">
+                      {/* 👀 읽음 표시: 상대방이 안 읽었으면 "1" 표시 */}
+                      {!message.isRead && (
+                        <span className="chat-message-unread">1</span>
+                      )}
+                      <span className={`chat-message-time ${themeClass}`}>
+                        {message.time}
+                      </span>
+                    </div>
                     <div className="chat-message-bubble mine">
                       {message.text}
                     </div>

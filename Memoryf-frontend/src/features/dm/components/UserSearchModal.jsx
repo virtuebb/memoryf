@@ -23,7 +23,7 @@
 // 🔌 백엔드 연동 시 이 부분 삭제하고 API에서 가져오기!
 // ============================================
 import { useState } from 'react';
-import './UserSearchModal.css';
+import '../css/UserSearchModal.css';
 
 function CloseIcon() {
   return (

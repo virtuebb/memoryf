@@ -28,7 +28,7 @@
  *    ]
  */
 
-import './ChatList.css';
+import '../css/ChatList.css';
 
 function PlusIcon() {
   return (

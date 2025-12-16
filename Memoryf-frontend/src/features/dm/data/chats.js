@@ -59,7 +59,8 @@ export const chatRoomsSeed = [
         id: 2, 
         text: '네 안녕하세요', 
         time: '오후 4:31', 
-        isMine: true     // 내가 보낸 메시지
+        isMine: true,    // 내가 보낸 메시지
+        isRead: true     // ✅ 상대방이 읽음
       },
       { 
         id: 3, 
@@ -92,7 +93,13 @@ export const chatRoomsSeed = [
     avatar: '👤',
     messages: [
       { id: 1, text: '이번주 어때?', time: '1월 10 오후 2:00', isMine: false },
-      { id: 2, text: '미안 바빠ㅠㅠ', time: '1월 10 오후 2:15', isMine: true },
+      { 
+        id: 2, 
+        text: '미안 바빠ㅠㅠ', 
+        time: '1월 10 오후 2:15', 
+        isMine: true,
+        isRead: false    // ❌ 상대방이 아직 안 읽음 (1 표시됨)
+      },
       { id: 3, text: '커피는 다음주에 가자~', time: '1월 10 오후 2:20', isMine: false },
     ],
   },
