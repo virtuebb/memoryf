@@ -1,6 +1,6 @@
 package com.kh.memoryf.feed.model.vo;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.ibatis.type.Alias;
@@ -22,7 +22,7 @@ public class Feed {
 	private String tag;              // 태그
 	private String latitude;          // 위도
 	private String longitude;         // 경도
-	private Date createdDate;         // 생성일
+	private Date createdDate;         // 생성일 (시간 포함)
 	private String isDel;             // 삭제 여부
 	private int memberNo;             // 회원 번호
 	

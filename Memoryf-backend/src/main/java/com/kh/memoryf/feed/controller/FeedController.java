@@ -26,7 +26,7 @@ import jakarta.servlet.http.HttpSession;
 @RestController
 @RequestMapping("feeds")
 public class FeedController {
-	
+
 	@Autowired
 	private FeedService feedService;
 	

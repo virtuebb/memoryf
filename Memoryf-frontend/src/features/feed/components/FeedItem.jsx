@@ -6,7 +6,7 @@ import './FeedItem.css';
  * @param {Object} feed - 피드 데이터
  * @param {boolean} isGrid - 그리드 레이아웃 여부
  */
-function FeedItem({ feed, isGrid = false }) {
+function FeedItem({ feed, isGrid = true }) {
   const location = useLocation();
   // 피드 이미지 URL 추출 (첫 번째 이미지 사용)
   const getImageUrl = () => {
@@ -62,32 +62,6 @@ function FeedItem({ feed, isGrid = false }) {
       </Link>
     );
   }
-
-  // 리스트 모드: 전체 정보 표시
-  return (
-    <div className="feed-item-list">
-      <div className="feed-header">
-        <div className="feed-author">
-          <span className="author-nick">{feed.memberNick || '익명'}</span>
-        </div>
-        <div className="feed-date">
-          {feed.createdDate ? new Date(feed.createdDate).toLocaleDateString('ko-KR') : ''}
-        </div>
-      </div>
-      {feed.feedFiles && feed.feedFiles.length > 0 && (
-        <div className="feed-image-container">
-          <img src={getImageUrl()} alt={feed.content} className="feed-image-full" />
-        </div>
-      )}
-      <div className="feed-content">
-        <p>{feed.content || '내용 없음'}</p>
-      </div>
-      <div className="feed-footer">
-        <span className="feed-like-count">좋아요 {feed.likeCount || 0}</span>
-        <span className="feed-comment-count">댓글 {feed.commentCount || 0}</span>
-      </div>
-    </div>
-  );
 }
 
 export default FeedItem;
