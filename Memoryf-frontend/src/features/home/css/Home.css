@@ -1,102 +1,145 @@
 /* =========================
-   전체 레이아웃
+   Home Wrapper (배경)
 ========================= */
 .home-wrapper {
+  width: 100%;
   min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+
+  /* ThemeContext에서 내려오는 배경색 사용 */
+  transition: background-color 0.25s ease;
 }
 
-/* 3컬럼 레이아웃 */
+/* =========================
+   Home Layout (중앙 컬럼)
+========================= */
 .home-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr 320px;
-  gap: 32px;
-
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 48px 32px;
+  width: 100%;
+  max-width: 1100px;              /* 🔥 홈은 넉넉하게 */
+  padding: 32px 20px 48px;
 
   box-sizing: border-box;
 }
 
 /* =========================
-   왼쪽 사이드바
-========================= */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-/* =========================
-   가운데 메인 영역
+   Main Column
 ========================= */
 .main {
+  width: 100%;
+
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 28px;                      /* 🔥 카드 간 기본 리듬 */
 }
 
 /* =========================
-   오른쪽 패널
-========================= */
-.right {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-
-  position: sticky;
-  top: 48px;
-  height: fit-content;
-}
-
-/* =========================
-   카드 공통
+   Card (공통)
 ========================= */
 .card {
   width: 100%;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(6px);
-
-  border-radius: 28px;
-  padding: 24px;
-
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
+
+  background: rgba(255, 255, 255, 0.281);
+
+  border-radius: 20px;
+  padding: 20px 22px;
+
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.045);
+
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
-/* feed는 카드 느낌만 유지 */
+/* hover – 과하지 않게 */
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+}
+
+/* =========================
+   Story Card (가볍게)
+========================= */
+.card-story {
+  padding: 14px 16px;
+  border-radius: 16px;
+
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.035);
+}
+
+/* =========================
+   Profile Card (주인공)
+========================= */
+.card-profile {
+  padding: 28px 30px;
+  border-radius: 26px;
+
+  box-shadow:
+    0 18px 42px rgba(255, 160, 180, 0.18);
+
+  margin: 4px 0 12px;             /* 🔥 숨 고르기 */
+}
+
+/* =========================
+   Guestbook Card (보조)
+========================= */
+.card-guestbook {
+  padding: 18px 22px;
+  border-radius: 20px;
+
+  opacity: 0.97;
+}
+
+/* =========================
+   Feed Section
+========================= */
 .feed-section {
   width: 100%;
 }
 
 /* =========================
-   반응형
+   반응형 (태블릿)
 ========================= */
 @media (max-width: 1024px) {
   .home-layout {
-    grid-template-columns: 220px 1fr;
+    padding: 24px 16px 40px;
   }
 
-  .right {
-    display: none; /* 태블릿에서는 방명록 숨김 */
-  }
-}
-
-@media (max-width: 768px) {
-  .home-layout {
-    grid-template-columns: 1fr;
-    padding: 16px;
+  .main {
     gap: 24px;
   }
 
-  .sidebar,
-  .main,
-  .right {
-    position: static;
+  .card-profile {
+    padding: 24px 26px;
+  }
+}
+
+/* =========================
+   반응형 (모바일)
+========================= */
+@media (max-width: 768px) {
+  .home-layout {
+    padding: 20px 14px 32px;
+  }
+
+  .main {
+    gap: 20px;
   }
 
   .card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(6px);
+    padding: 16px 18px;
+    border-radius: 18px;
+  }
+
+  .card-profile {
+    padding: 20px 20px;
+    border-radius: 22px;
+  }
+
+  .card-story {
+    padding: 12px 14px;
+    border-radius: 14px;
   }
 }

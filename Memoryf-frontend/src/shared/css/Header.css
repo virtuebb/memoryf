@@ -1,136 +1,73 @@
 /* =========================
-   전체 사이드바
-========================= */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* =========================
-   공통 카드
-========================= */
-.sidebar-section,
-.card {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.24);
-  backdrop-filter: blur(8px);
-
-  border-radius: 22px;
-  padding: 18px;
-
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  box-sizing: border-box;
-}
-
-/* =========================
-   🔥 로고 (카드 완전 제외)
-========================= */
-.logo-section {
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
-
-  margin-top: -12px;
-  margin-bottom: 12px;
-
-  width: 100%;
-  display: flex;
-  justify-content: center;
-
-  overflow: visible; /* 🔥 중요 */
-}
-
-/* 로고 이미지 */
-.logo-section img {
-  width: 100%;
-  max-width: 220px;   /* 🔥 사이드바 기준 안전값 */
-  height: auto;
-
-  filter:
-    drop-shadow(0 8px 20px rgba(255, 160, 190, 0.35))
-    drop-shadow(0 2px 6px rgba(0, 0, 0, 0.06));
-
-  transition:
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.6s ease;
-
-  animation: logoFadeUp 0.9s ease-out both;
-}
-
-/* hover */
-.logo-section img:hover {
-  transform: translateY(-6px) scale(1.05);
-  filter:
-    drop-shadow(0 16px 36px rgba(255, 160, 190, 0.5))
-    drop-shadow(0 8px 16px rgba(0, 0, 0, 0.08));
-}
-
-/* 등장 애니메이션 */
-@keyframes logoFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* =========================
-   BGM
-========================= */
-.bgm-wrapper {
-  margin-top: 0;
-}
-
-/* =========================
-   메뉴
-========================= */
-.menu-section {
-  height: 460px;
-
-  display: flex;
-  align-items: center;       /* 세로 중앙 */
-  justify-content: center;   /* 가로 중앙 */
-
-  padding: 0;
-}
-
-/* Menu 내부 ul 정렬 보정 */
-.menu-section ul {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-/* =========================
-   하단 (Visitors / Theme)
-========================= */
-.sidebar-bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  opacity: 0.95;
-}
-
-.sidebar-bottom .sidebar-section {
-  border-radius: 18px;
-}
-
-/* =========================
-   header 태그 무효화
+   HEADER (사이드바 상단)
 ========================= */
 .header {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 16px; /* 🔥 살짝 여유 */
+}
 
-  padding: 24px 16px;
+/* =========================
+   로고 카드 래퍼
+========================= */
+.header-logo {
+  width: 100%;
+  max-width: 220px; /* 🔥 사이드바보다 확실히 작게 */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px 16px; /* 🔥 과장 줄임 */
+
+  border-radius: 18px; /* 🔥 26 → 18 (상업 감성) */
+
+  border: 1px solid rgba(0, 0, 0, 0.04);
+
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.06); /* 🔥 하나로 정리 */
+
+  backdrop-filter: blur(6px); /* 🔥 12 → 6 */
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* =========================
+   로고 이미지
+========================= */
+.header-logo img {
+  width: 100%;
+  max-width: 160px; /* 🔥 로고도 살짝 줄임 */
+  height: auto;
+  display: block;
+
+  filter: none; /* 🔥 그림자 제거 (카드가 담당) */
+
+  transition: transform 0.25s ease;
+}
+
+/* hover (절제된 상호작용) */
+.header-logo:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.08);
+}
+
+.header-logo:hover img {
+  transform: scale(1.02);
+}
+
+/* =========================
+   Night 테마 보정
+========================= */
+:root[data-theme="night"] .header-logo {
+  background: rgba(28, 28, 30, 0.92);
+  border-color: rgba(255, 255, 255, 0.08);
+
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.65);
 }

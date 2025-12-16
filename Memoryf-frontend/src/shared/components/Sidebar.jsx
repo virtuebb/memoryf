@@ -36,7 +36,7 @@ function Sidebar({ onCreateClick }) {
         {onCreateClick && (
           <li className="create">
             <button onClick={onCreateClick}>
-              만들기 (피드작성)
+              😀 피드 작성
             </button>
           </li>
         )}

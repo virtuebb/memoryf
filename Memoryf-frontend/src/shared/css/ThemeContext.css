@@ -1,0 +1,13 @@
+/* =========================
+   APP BACKGROUND
+========================= */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--app-bg, #ffffff);
+  transition: background 0.4s ease;
+}

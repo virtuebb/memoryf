@@ -3,7 +3,7 @@ function Footer() {
   // ... 컴포넌트 내용
   return (
     <footer>
-      여긴 푸터입니담ㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁㅁ
+      Footer Content
     </footer>
   );
 }
