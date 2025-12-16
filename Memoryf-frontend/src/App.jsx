@@ -4,11 +4,10 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Header from './shared/components/Header';
 import Sidebar from './shared/components/Sidebar';
 import Footer from './shared/components/Footer';
-import HomePage from './features/home/pages/HomePage';
+import Home from "./features/main/components/Home";
 import SearchPage from './features/search/pages/SearchPage';
 import FeedListPage from './features/feed/pages/FeedListPage';
 import FeedUploadPage from './features/feed/pages/FeedUploadPage';
-import GuestbookPage from './features/cyworld/pages/GuestbookPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
 
 import AdminLayout from './features/admin/components/AdminLayout';
@@ -18,7 +17,7 @@ import ReportManagementPage from './features/admin/pages/ReportManagementPage';
 import PaymentManagementPage from './features/admin/pages/PaymentManagementPage';
 import BgmManagementPage from './features/admin/pages/BgmManagementPage';
 
-import BgmPlayer from './features/cyworld/components/BgmPlayer';
+import BgmPlayer from './features/main/components/BgmPlayer';
 import HomeVisitorList from './features/cyworld/components/HomeVisitorList';
 
 // 이정민 화면
@@ -31,12 +30,11 @@ import ResetPasswordForm from './features/member/components/ResetPasswordForm';
 
 import DmRoutes from './features/dm/pages/DmRoutes';
 import { ThemeProvider } from "./features/main/components/ThemeContext";
-import Home from "./features/main/components/Home";
 
 
 function App() {
 
-  const isLoggedIn = false;
+  const isLoggedIn = true;
   const isAdmin = true;
   const location = useLocation();
   // 현재 경로가 관리자 경로인지 확인 (/admin으로 시작하면 관리자 레이아웃 사용)
@@ -90,11 +88,11 @@ return (
 
           <main className="main-content">
             <Routes>
-              <Route path="/home" element={<HomePage />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/feeds" element={<FeedListPage />} />
               <Route path="/feeds/new" element={<FeedUploadPage />} />
-              <Route path="/guestbook" element={<GuestbookPage />} />
+              <Route path="/guestbook" element={<Guestbook />} />
               <Route path="/messages/*" element={<DmRoutes />} />
               <Route path="/settings" element={<SettingsPage />} />
 
