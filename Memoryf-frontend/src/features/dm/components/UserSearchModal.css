@@ -1,10 +1,160 @@
-/* UserSearchModal 전용 보조 스타일 */
+/* UserSearchModal 전용 스타일 */
+
+/* 모달 오버레이 */
 .user-search-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
   animation: modal-fade 0.15s ease-in;
 }
 
 @keyframes modal-fade {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(4px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
+/* 모달 컨텐츠 */
+.user-search-modal-content {
+  background-color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 28rem;
+  overflow: hidden;
+}
+
+/* 모달 헤더 */
+.user-search-modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.user-search-modal-title {
+  font-size: 1.25rem;
+  color: #111827;
+  margin: 0;
+}
+
+/* 닫기 버튼 */
+.user-search-modal-close-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #f3f4f6;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.user-search-modal-close-btn:hover {
+  background-color: #e5e7eb;
+}
+
+/* 검색 영역 */
+.user-search-modal-search {
+  padding: 1rem;
+}
+
+.user-search-modal-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f3f4f6;
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+}
+
+.user-search-modal-search-icon {
+  color: #6b7280;
+}
+
+.user-search-modal-search-input {
+  flex: 1;
+  background-color: #f3f4f6;
+  color: #111827;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+}
+
+.user-search-modal-search-input::placeholder {
+  color: #6b7280;
+}
+
+/* 유저 리스트 */
+.user-search-modal-list {
+  max-height: 24rem;
+  overflow-y: auto;
+}
+
+/* 빈 상태 */
+.user-search-modal-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* 유저 아이템 */
+.user-search-modal-item {
+  padding: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.user-search-modal-item:hover {
+  background-color: #f9fafb;
+}
+
+/* 유저 아바타 */
+.user-search-modal-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: #60a5fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+/* 유저 정보 */
+.user-search-modal-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-search-modal-user-name {
+  color: #111827;
+  font-weight: 500;
+  margin: 0;
+}
+
+.user-search-modal-user-id {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}

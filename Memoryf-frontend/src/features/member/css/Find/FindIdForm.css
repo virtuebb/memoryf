@@ -57,10 +57,13 @@
   font-weight: 800;
   cursor: pointer;
   margin-top: 6px;
+  
+  transition: background-color 0.2s;
 }
 
 .findid-btn:hover{
   background: #EFB5B5;
+  
 }
 
 .findid-back{
