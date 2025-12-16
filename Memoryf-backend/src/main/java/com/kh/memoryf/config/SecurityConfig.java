@@ -1,11 +1,13 @@
 package com.kh.memoryf.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -13,6 +15,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	
+	@Autowired
+	private JwtAuthFilter jwtAuthFilter;
 
 	// 암호화
     @Bean
@@ -50,7 +55,8 @@ public class SecurityConfig {
     					.requestMatchers("/login/**").permitAll() // 로그인 요청 허용 - @RequestMapping("login") 관련
     					.anyRequest().authenticated() // 나머지는 JWT 인증 필요함
     				)
-    				.formLogin(form -> form.disable()); // 스프링 방식의 로그인 막기
+    				.formLogin(form -> form.disable()) // 스프링 방식의 로그인 막기
+    				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // JWT 검증 필터 추가
     		
     		return http.build();
     	
