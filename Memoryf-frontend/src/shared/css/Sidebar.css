@@ -18,18 +18,22 @@
   padding: 10px 14px;
   border-radius: 12px;
   text-decoration: none;
-  color: #333;
+  color: var(--color-sidebar-link);
+  background: transparent;
+  border: none;
 }
 
 .menu-list li.active a {
-  background: #ffe6d6;
+  background: var(--color-sidebar-link-active-bg);
+  color: var(--color-sidebar-link-active-text);
   font-weight: 600;
 }
 
 .create button {
   width: 100%;
   border: none;
-  background: #ff8a65;
-  color: white;
+  background: var(--color-create-bg);
+  color: var(--color-create-text);
   cursor: pointer;
+  border-radius: 12px;
 }

@@ -1,40 +1,191 @@
-/* Basic layout for app */
-:root{ --left-width:300px; }
-html,body,#root{height:100%;margin:0}
-.app-root{display:flex;flex-direction:column;min-height:100vh;font-family:Arial,Helvetica,sans-serif}
-.main-layout{display:flex;flex:1}
+/* =========================
+   글로벌 레이아웃 & 테마 변수
+========================= */
+:root {
+  --left-width: 300px;
 
-.left-column{width:var(--left-width);display:flex;flex-direction:column;gap:16px;padding:18px;background:#fff6f4;border-right:2px solid rgba(0,0,0,0.04)}
-.left-section{background:#fff;border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,0.04);min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border:1.5px solid rgba(0,0,0,0.08)}
-.left-section.bgm{min-height:160px}
-.left-section.sidebar-wrap{flex:1;min-height:260px;align-items:flex-start}
-.left-section.visitors{min-height:120px}
+  /* ThemeContext에서 덮어쓸 기본값 (Rose와 동일하게 세팅) */
+  --color-left-bg: #fff6f4;
+  --color-main-bg: #fff7f6;
+  --color-card-bg: rgba(255, 255, 255, 0.96);
+  --color-border-soft: rgba(0, 0, 0, 0.04);
+  --color-border-card: rgba(0, 0, 0, 0.08);
+  --color-label: #b85a6b;
+  --color-sidebar-link: #3a2a2a;
+  --color-sidebar-link-active-bg: #ffe5de;
+  --color-sidebar-link-active-text: #b85a6b;
+  --color-create-bg: #ff8a65;
+  --color-create-text: #ffffff;
+}
 
-.section-label{font-size:12px;color:#b85a6b;font-weight:600;letter-spacing:0.06em;margin-bottom:10px}
-.section-content{flex:1;width:100%;display:flex;align-items:center;justify-content:center}
-.sidebar{display:flex;flex-direction:column;gap:10px;width:100%}
-.sidebar-link{display:block;padding:10px 12px;border-radius:10px;color:#3a2a2a;text-decoration:none;font-weight:600;border:1px solid rgba(0,0,0,0.06);background:#fff;transition:all .2s ease}
-.sidebar-link:hover{background:#ffe5de;color:#b85a6b;border-color:rgba(184,90,107,0.24)}
-.sidebar-button{width:100%;text-align:left;cursor:pointer;font-family:inherit;font-size:inherit}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
 
-.main-content{flex:1;padding:28px;background:linear-gradient(180deg,#fff,#fff7f6);border-left:3px solid rgba(0,0,0,0.05)}
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-main-bg);
+  transition: background-color 0.2s ease;
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+}
+
+.left-column {
+  width: var(--left-width);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  background: var(--color-left-bg);
+  border-right: 2px solid var(--color-border-soft);
+  box-sizing: border-box;
+}
+
+.left-section {
+  background: var(--color-card-bg);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  border: 1.5px solid var(--color-border-card);
+  box-sizing: border-box;
+}
+
+.left-section.bgm {
+  min-height: 160px;
+}
+
+.left-section.sidebar-wrap {
+  flex: 1;
+  min-height: 260px;
+  align-items: flex-start;
+}
+
+.left-section.visitors {
+  min-height: 120px;
+}
+
+.section-label {
+  font-size: 12px;
+  color: var(--color-label);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.section-content {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--color-sidebar-link);
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.sidebar-link:hover {
+  background: var(--color-sidebar-link-active-bg);
+  color: var(--color-sidebar-link-active-text);
+  border-color: rgba(184, 90, 107, 0.24);
+}
+
+.sidebar-button {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.main-content {
+  flex: 1;
+  padding: 28px;
+  background: linear-gradient(180deg, #ffffff, var(--color-main-bg));
+  border-left: 3px solid var(--color-border-soft);
+  box-sizing: border-box;
+}
 
 /* Home page placeholders styling */
-.home-page-layout{display:flex;flex-direction:column;gap:16px}
-.stories-row{display:flex;gap:12px;padding:8px}
-.profile-section{background:#fff;border-radius:12px;padding:18px;border:1.5px solid rgba(0,0,0,0.06);box-shadow:0 8px 18px rgba(0,0,0,0.04)}
-.feed-list{display:flex;flex-direction:column;gap:14px}
-.feed-item{background:#fff;border-radius:10px;padding:14px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 6px 14px rgba(0,0,0,0.03)}
+.home-page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-.guestbook{background:#fff;border-radius:12px;padding:14px;border:1px solid rgba(0,0,0,0.06)}
+.stories-row {
+  display: flex;
+  gap: 12px;
+  padding: 8px;
+}
 
-/* Header/Footer */
-.app-root > header,.app-root > footer,.app-root > .header-skeleton{height:60px}
+.profile-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+}
 
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-/* App 레벨 스타일 (Tailwind 보완용) */
+.feed-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.03);
+}
+
+.guestbook {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Header/Footer 자리 확보 */
+.app-root > header,
+.app-root > footer,
+.app-root > .header-skeleton {
+  height: 60px;
+}
+
+/* App 레벨 전환 효과 (Tailwind 보완용) */
 .app-shell {
-    transition: background-color 0.2s ease, color 0.2s ease;
-  }
-  
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
   
