@@ -28,8 +28,15 @@
  *    ]
  */
 
-import { Plus } from 'lucide-react';
 import './ChatList.css';
+
+function PlusIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function ChatList({ chats, onSelectChat, onOpenSearch, theme }) {
   // 🎨 테마에 따라 CSS 클래스 결정
@@ -48,7 +55,7 @@ export default function ChatList({ chats, onSelectChat, onOpenSearch, theme }) {
           onClick={onOpenSearch}  // 클릭하면 사용자 검색 모달 열기
           className={`chat-list-add-btn ${themeClass}`}
         >
-          <Plus size={20} />
+          <PlusIcon />
         </button>
       </div>
 

@@ -1,10 +1,12 @@
 function FeedUploadPage() {
   return (
-    <div>
-      <h1>피드 작성</h1>
-      <p>여기서 새 피드를 작성할 수 있습니다.</p>
+    <div style={{ padding: '20px' }}>
+      <h1>피드 업로드</h1>
+      <p>사이드바의 만들기(피드작성) 버튼을 사용하여 업로드 해주세요.</p>
     </div>
   );
 }
 
 export default FeedUploadPage;
+
+

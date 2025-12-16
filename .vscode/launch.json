@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-MemoryfBackendApplication<memoryf>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.kh.memoryf.MemoryfBackendApplication",
+            "projectName": "memoryf",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

@@ -1,46 +1,24 @@
-/**
- * 💬 채팅방 컴포넌트
- * 
- * 🎯 이 파일이 하는 일:
- *    - 특정 채팅방의 메시지들을 보여줌
- *    - 새 메시지 입력하고 보내기
- *    - 뒤로 가기 버튼으로 목록으로 돌아가기
- * 
- * 📦 부모(DmRoutes)에서 받는 데이터:
- *    - chat: 현재 채팅방 정보
- *    - onBack: 뒤로가기 버튼 클릭 시 실행할 함수
- *    - onSendMessage: 메시지 보내기 함수
- *    - theme: 현재 테마 (light/dark)
- * 
- * 🔌 백엔드 연동 시 필요한 데이터 형식:
- *    chat = {
- *      id: 1,
- *      userName: 'Jenny Kim',
- *      avatar: '👤',
- *      messages: [
- *        {
- *          id: 1,              // 메시지 고유 번호
- *          text: '안녕하세요!',  // 메시지 내용
- *          time: '오후 4:30',   // 보낸 시간
- *          isMine: false        // 내가 보낸 건지? (true: 내 메시지, false: 상대방 메시지)
- *        },
- *        ...
- *      ],
- *      isPending: false  // 대기 중 여부
- *    }
- * 
- * 🔌 실시간 채팅 구현 시:
- *    WebSocket을 사용하면 메시지가 바로바로 보여요!
- *    const socket = new WebSocket('ws://서버주소/dm');
- *    socket.onmessage = (event) => {
- *      const newMessage = JSON.parse(event.data);
- *      // 새 메시지를 화면에 추가
- *    };
- */
-
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Send } from 'lucide-react';
 import './ChatRoom.css';
+
+function ArrowLeftIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M19 12H5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function SendIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M22 2L11 13" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22 2L15 22l-4-9-9-4 20-7z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
   // ✏️ 입력창에 쓴 메시지 저장
@@ -104,13 +82,13 @@ export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
   // 🎨 화면 그리기
   // ============================================
   return (
-    <div className="chat-room">
-      {/* ====================================== */}
-      {/* 📌 헤더: 뒤로가기 + 상대방 정보 */}
-      {/* ====================================== */}
-      <div className={`chat-room-header ${themeClass}`}>
-        {/* ← 뒤로가기 버튼 */}
-        <button onClick={onBack} className={`chat-room-back-btn ${themeClass}`}>
+    <div className="flex-1 flex flex-col chat-room">
+      {/* Header */}
+      <div className={`p-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} flex items-center gap-3`}>
+        <button
+          onClick={onBack}
+          className={`w-10 h-10 rounded-full ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} flex items-center justify-center transition-colors`}
+        >
           <ArrowLeft size={20} />
         </button>
         
@@ -194,7 +172,7 @@ export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
             disabled={!messageInput.trim()}  // 빈 메시지면 비활성화
             className={`chat-room-send-btn ${messageInput.trim() ? 'active' : `disabled ${themeClass}`}`}
           >
-            <Send size={16} />
+            <SendIcon />
           </button>
         </div>
       </div>

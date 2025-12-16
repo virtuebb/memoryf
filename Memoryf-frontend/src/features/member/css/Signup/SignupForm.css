@@ -89,7 +89,8 @@
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform .08s ease, box-shadow .15s ease, background .15s ease;
+  
+  transition: background-color 0.2s;
 }
 
 .signup-buttons button:active{
