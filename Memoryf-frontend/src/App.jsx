@@ -28,11 +28,11 @@ import SettingsPage from './features/settings/pages/SettingsPage';
 import DmRoutes from './features/dm/pages/DmRoutes';
 
 // 멤버
-import LoginPage from './features/member/pages/LoginPage';
-import SignupPage from './features/member/pages/SignupPage';
-import FindIdPage from './features/member/pages/FindIdPage';
-import FindPasswordPage from './features/member/pages/FindPasswordPage';
-import ResetPasswordForm from './features/member/components/ResetPasswordForm';
+import LoginPage from './features/auth/pages/LoginPage';
+import SignupPage from './features/auth/pages/SignupPage';
+import FindIdPage from './features/auth/pages/FindIdPage';
+import FindPasswordPage from './features/auth/pages/FindPasswordPage';
+import ResetPasswordForm from './features/auth/components/ResetPasswordForm';
 
 // 관리자
 import AdminLayout from './features/admin/components/AdminLayout';
@@ -62,8 +62,8 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/member/find-id" element={<FindIdPage />} />
-          <Route path="/member/find-pw" element={<FindPasswordPage />} />
+          <Route path="/auth/find-id" element={<FindIdPage />} />
+          <Route path="/auth/find-pw" element={<FindPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordForm />} />
         </Routes>
       </div>

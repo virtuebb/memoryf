@@ -35,15 +35,14 @@ const LoginForm = () => {
                     <input type="checkbox" />
                     <span>아이디 저장</span>
                 </label>
+            
+            {/* id/pw 찾기 */}
             <div className="login-find">
-                <Link to="/member/find-id">id 찾기</Link>
+                <Link to="/auth/find-id">id 찾기</Link>
                 <span className="divider">|</span>
-                <Link to="/member/find-pw">password 찾기</Link>
+                <Link to="/auth/find-pw">password 찾기</Link>
             </div>
         </ div>
-
-        {/* id/pw 찾기 */}
-
 
         {/* 회원가입 */}
         <div className="login-links">
