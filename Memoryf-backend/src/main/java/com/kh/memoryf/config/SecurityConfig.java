@@ -41,11 +41,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     	
     		http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용 - 리액트 요청 허용
-<<<<<<< Updated upstream
     			.csrf(csrf -> csrf.disable()) // CSRF 방어가 필요 없음 - 쿠키 기반 세션 안 씀, JWT 방식이라서
-=======
-    			.csrf(csrf -> csrf.disable()) // CSRF 방어가 필요 없음 - JWT 방식이라서
->>>>>>> Stashed changes
+
     			.sessionManagement(session -> session.sessionCreationPolicy(
     					org.springframework.security.config.http.SessionCreationPolicy.STATELESS)) // JWT 인증방식임 - 세션 아님
     			.authorizeHttpRequests(auth -> auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // 프리플라이트(OPTIONS) 요청 모두 허용
