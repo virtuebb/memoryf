@@ -17,8 +17,8 @@
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTheme } from '../../../shared/components/ThemeContext';
 import { useDm } from '../context/DmContext';
-import ChatList from '../components/ChatList.jsx';
-import ChatRoom from '../components/ChatRoom.jsx';
+import ChatList from '../components/DmList.jsx';
+import ChatRoom from '../components/DmRoom.jsx';
 import UserSearchModal from '../components/UserSearchModal.jsx';
 import ThemeSelector from '../components/ThemeSelector.jsx';
 import './css/DmRoutes.css';

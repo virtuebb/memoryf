@@ -182,15 +182,4 @@ export const pendingChatsSeed = [
     messages: [],
     isPending: true,
   },
-  {
-    id: 'pending-3',
-    userId: 'user2',
-    userName: 'user2',
-    lastMessage: '대기 중',
-    time: '대기',
-    unread: 0,
-    avatar: '👤',
-    messages: [],
-    isPending: true,
-  },
 ];
