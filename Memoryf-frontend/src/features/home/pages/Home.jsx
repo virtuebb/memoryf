@@ -5,10 +5,10 @@ import { useTheme } from "./ThemeContext";
 import Header from "../../../shared/components/Header";
 
 // main feature components
-import StoryBar from "./Storybar";
-import ProfileCard from "./ProfileCard";
-import Guestbook from "./Guestbook";
-import FeedTabs from "./FeedTabs";
+import StoryBar from "../../story/components/Storybar";
+import ProfileCard from "../../main/components/ProfileCard";
+import Guestbook from "../../main/components/Guestbook";
+import FeedTabs from "../../main/components/FeedTabs";
 
 import "../css/Home.css";
 

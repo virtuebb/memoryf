@@ -1,0 +1,35 @@
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-list li {
+  margin-bottom: 10px;
+}
+
+.menu-list a,
+.menu-list span,
+.menu-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 14px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #333;
+}
+
+.menu-list li.active a {
+  background: #ffe6d6;
+  font-weight: 600;
+}
+
+.create button {
+  width: 100%;
+  border: none;
+  background: #ff8a65;
+  color: white;
+  cursor: pointer;
+}

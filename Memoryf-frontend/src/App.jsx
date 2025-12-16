@@ -3,22 +3,28 @@ import './App.css';
 import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
+// 공통 (사이드바)
+import BgmPlayer from './shared/components/BgmPlayer.jsx';
+import Visitors from './shared/components/Visitors.jsx';
+import SkinButton from './shared/components/SkinButton.jsx';
+import { ThemeProvider } from './shared/components/ThemeContext.jsx';
+
+
 // 레이아웃
-import Header from './shared/components/Header';
-import Sidebar from './shared/components/Sidebar';
-import Footer from './shared/components/Footer';
+import Header from './shared/components/Header.jsx';
+import Sidebar from './shared/components/Sidebar.jsx';
+import Footer from './shared/components/Footer.jsx';
+
+
+// 홈(스토리)
+import Storybar from './features/story/components/Storybar';
 
 // 일반 사용자
-import HomePage from './features/home/pages/HomePage';
 import SearchPage from './features/search/pages/SearchPage';
 import FeedListPage from './features/feed/pages/FeedListPage';
 import FeedDetailPage from './features/feed/pages/FeedDetailPage';
 import FeedUploadModal from './features/feed/components/FeedUploadModal';
-import DiaryPage from './features/cyworld/pages/DiaryPage';
-import GuestbookPage from './features/cyworld/pages/GuestbookPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
-import BgmPlayer from './features/cyworld/components/BgmPlayer';
-import HomeVisitorList from './features/cyworld/components/HomeVisitorList';
 import DmRoutes from './features/dm/pages/DmRoutes';
 
 // 멤버
@@ -35,9 +41,6 @@ import UserManagementPage from './features/admin/pages/UserManagementPage';
 import ReportManagementPage from './features/admin/pages/ReportManagementPage';
 import PaymentManagementPage from './features/admin/pages/PaymentManagementPage';
 import BgmManagementPage from './features/admin/pages/BgmManagementPage';
-
-// 기타
-import { ThemeProvider } from "./features/main/components/ThemeContext";
 
 function App() {
   const isLoggedIn = true;
@@ -84,26 +87,41 @@ function App() {
   }
 
   // 일반 사용자
-  return (
+   return (
     <ThemeProvider>
       <div className="app-root">
         <div className="main-layout">
-          <aside className="left-column">
-            <Header />
+         <aside className="left-column">
+          {/* 1. 로고 */}
+          <Header />
+
+          {/* 3. BGM 플레이어 */}
+          <div className="sidebar-section card">
             <BgmPlayer />
-            <Sidebar onCreateClick={() => setIsModalOpen(true)} />
-            <HomeVisitorList />
-          </aside>
+          </div>
+
+          {/* 4. 메뉴 */}
+          <Sidebar onCreateClick={() => setIsModalOpen(true)} />
+
+          {/* 5. 방문자 */}
+          <div className="sidebar-section card">
+            <Visitors />
+
+          {/* 2. 테마 버튼 */}
+          <div className="sidebar-section card">
+            <SkinButton />
+          </div>
+          
+          </div>
+        </aside>
 
           <main className="main-content">
             <Routes location={backgroundLocation || location}>
-              <Route path="/home" element={<HomePage />} />
+              <Route path="/home" element={<Storybar />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
-              <Route path="/guestbook" element={<GuestbookPage />} />
               <Route path="/messages/*" element={<DmRoutes />} />
               <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/diaries" element={<DiaryPage />} />
               <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
 
