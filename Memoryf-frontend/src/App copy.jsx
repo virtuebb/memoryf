@@ -9,7 +9,6 @@ import Visitors from './shared/components/Visitors.jsx';
 import SkinButton from './shared/components/SkinButton.jsx';
 import { ThemeProvider } from './shared/components/ThemeContext.jsx';
 
-import Home from "./features/home/pages/Home";
 
 // 레이아웃
 import Header from './shared/components/Header.jsx';
@@ -31,11 +30,11 @@ import FloatingDm from './features/dm/components/FloatingDm';
 import { DmProvider } from './features/dm/context/DmContext';
 
 // 멤버
-import LoginPage from './features/auth/pages/LoginPage';
-import SignupPage from './features/auth/pages/SignupPage';
-import FindIdPage from './features/auth/pages/FindIdPage';
-import FindPasswordPage from './features/auth/pages/FindPasswordPage';
-import ResetPasswordForm from './features/auth/components/ResetPasswordForm';
+import LoginPage from './features/member/pages/LoginPage';
+import SignupPage from './features/member/pages/SignupPage';
+import FindIdPage from './features/member/pages/FindIdPage';
+import FindPasswordPage from './features/member/pages/FindPasswordPage';
+import ResetPasswordForm from './features/member/components/ResetPasswordForm';
 
 // 관리자
 import AdminLayout from './features/admin/components/AdminLayout';
@@ -65,8 +64,8 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/auth/find-id" element={<FindIdPage />} />
-          <Route path="/auth/find-pw" element={<FindPasswordPage />} />
+          <Route path="/member/find-id" element={<FindIdPage />} />
+          <Route path="/member/find-pw" element={<FindPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordForm />} />
         </Routes>
       </div>
@@ -115,14 +114,13 @@ function App() {
           <div className="sidebar-section card">
             <SkinButton />
           </div>
-
+          
           </div>
         </aside>
 
           <main className="main-content">
             <Routes location={backgroundLocation || location}>
               <Route path="/home" element={<Storybar />} />
-              <Route path="/home" element={<Home />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
               <Route path="/messages/*" element={<DmRoutes />} />

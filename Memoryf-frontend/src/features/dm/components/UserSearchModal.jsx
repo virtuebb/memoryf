@@ -36,7 +36,7 @@ function CloseIcon() {
 
 function SearchIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="user-search-modal-search-icon">
       <circle cx="11" cy="11" r="7" />
       <path d="M20 20l-3.5-3.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -127,7 +127,7 @@ export default function UserSearchModal({ onClose, onAddUser, existingUserIds })
           
           {/* ✖️ 닫기 버튼 */}
           <button onClick={onClose} className="user-search-modal-close-btn">
-            <X size={20} />
+            <CloseIcon />
           </button>
         </div>
 
@@ -136,7 +136,7 @@ export default function UserSearchModal({ onClose, onAddUser, existingUserIds })
         {/* ====================================== */}
         <div className="user-search-modal-search">
           <div className="user-search-modal-search-wrapper">
-            <Search size={18} className="user-search-modal-search-icon" />
+            <SearchIcon />
             <input
               type="text"
               value={searchQuery}

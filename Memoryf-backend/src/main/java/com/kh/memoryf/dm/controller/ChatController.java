@@ -2,6 +2,7 @@ package com.kh.memoryf.dm.controller;
 
 import java.security.Principal;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -16,11 +17,16 @@ import com.kh.memoryf.dm.model.vo.Dm;
 @Controller
 public class ChatController {
 
+    @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    /*
+    어노테이션을 사용하거나 직접 생성자 주입을 하거나
+    private final SimpMessagingTemplate messagingTemplate;
 
-    // public ChatController(SimpMessagingTemplate messagingTemplate) {
-    //     this.messagingTemplate = messagingTemplate;
-    // }
+    public ChatController(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
+    */
 
     // ===============================
     // 1️⃣ 단체 채팅 (채팅방)
@@ -43,6 +49,7 @@ public class ChatController {
     public void privateChat(Dm message) {
 
         // 🔥 사용자 전용 채널로 직접 전송
+        System.out.println("📨 메시지 수신: " + message.getContent() + " to " + message.getRoomId());
         messagingTemplate.convertAndSend(
                 "/sub/private/" + message.getRoomId(), // 받는 사람 ID
                 message

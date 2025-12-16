@@ -1,6 +1,6 @@
-/* DmRoutes 전용 스타일 */
+/* DmRoutes 전용 스타일 - CSS 변수 기반 (ThemeContext 연동) */
 
-/* 외부 컨테이너 - 핑크 배경 */
+/* 외부 컨테이너 - 전역 테마 색상 사용 */
 .dm-container {
   min-height: 50%;
   width: 100%;
@@ -8,35 +8,23 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-}
-
-.dm-container.light {
-  background-color: #fce7f3; /* pink-100 */
-}
-
-.dm-container.dark {
-  background-color: #111827; /* gray-900 */
+  /* background-color: var(--color-main-bg); */
+  transition: background-color 0.3s ease;
 }
 
 /* 카드 형태의 DM 컨테이너 */
 .dm-card {
   width: 100%;
-  /* max-width: 28rem; max-w-md */
-  max-width: 700px; /* max-w-md */
+  max-width: 800px;
   height: 700px;
-  border-radius: 1.5rem; /* rounded-3xl */
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); /* shadow-xl */
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.dm-card.light {
-  background-color: #ffffff;
-}
-
-.dm-card.dark {
-  background-color: #1f2937; /* gray-800 */
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border-card);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* DmRoomListPage 컨테이너 */
@@ -53,6 +41,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280; /* gray-500 */
+  color: var(--color-label);
 }
-

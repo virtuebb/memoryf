@@ -38,9 +38,8 @@ function PlusIcon() {
   );
 }
 
-export default function ChatList({ chats, onSelectChat, onOpenSearch, theme }) {
-  // 🎨 테마에 따라 CSS 클래스 결정
-  const themeClass = theme === 'dark' ? 'dark' : 'light';
+export default function ChatList({ chats, onSelectChat, onOpenSearch, themeClass = 'light' }) {
+  // 🎨 themeClass는 부모에서 직접 전달받음 (전역 ThemeContext 사용)
 
   return (
     <div className="chat-list">

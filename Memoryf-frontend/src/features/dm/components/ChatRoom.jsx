@@ -20,18 +20,17 @@ function SendIcon() {
   );
 }
 
-export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, theme }) {
+export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, themeClass = 'light', hideHeader = false }) {
   // 📍 페이지 이동용 navigate
   const navigate = useNavigate();
   
   // ✏️ 입력창에 쓴 메시지 저장
   const [messageInput, setMessageInput] = useState('');
   
-  // 🎨 테마에 따라 CSS 클래스 결정
-  const themeClass = theme === 'dark' ? 'dark' : 'light';
+  // 🎨 themeClass는 부모에서 직접 전달받음 (전역 ThemeContext 사용)
   
-  // 📜 메시지 목록 끝부분 참조 (자동 스크롤용)
-  const messagesEndRef = useRef(null);
+  // 📜 메시지 컨테이너 참조 (자동 스크롤용)
+  const messagesContainerRef = useRef(null);
 
   // ============================================
   // 👀 채팅방 입장 시 읽음 처리
@@ -65,9 +64,11 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
   //   fetchMessages();
   // }, [chat.id]);
 
-  // 📜 새 메시지 오면 자동으로 맨 아래로 스크롤
+  // 📜 새 메시지 오면 자동으로 맨 아래로 스크롤 (메시지 영역 내부만)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [chat.messages]);
 
   /**
@@ -96,29 +97,31 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
   // ============================================
   return (
     <div className="flex-1 flex flex-col chat-room">
-      {/* Header */}
-      <div className={`chat-room-header ${themeClass}`}>
-        <button
-          onClick={() => navigate('/messages')}
-          className={`chat-room-back-btn ${themeClass}`}
-        >
-          <ArrowLeftIcon />
-        </button>
-        
-        {/* 👤 상대방 프로필 */}
-        <div className="chat-room-avatar">
-          {chat.avatar}
-          {/* 🔌 백엔드 연동 시: <img src={chat.avatarUrl} /> */}
+      {/* Header - hideHeader가 true면 숨김 (FloatingDm에서 사용 시) */}
+      {!hideHeader && (
+        <div className={`chat-room-header ${themeClass}`}>
+          <button
+            onClick={() => navigate('/messages')}
+            className={`chat-room-back-btn ${themeClass}`}
+          >
+            <ArrowLeftIcon />
+          </button>
+          
+          {/* 👤 상대방 프로필 */}
+          <div className="chat-room-avatar">
+            {chat.avatar}
+            {/* 🔌 백엔드 연동 시: <img src={chat.avatarUrl} /> */}
+          </div>
+          
+          {/* 상대방 이름 */}
+          <h2 className={`chat-room-username ${themeClass}`}>{chat.userName}</h2>
         </div>
-        
-        {/* 상대방 이름 */}
-        <h2 className={`chat-room-username ${themeClass}`}>{chat.userName}</h2>
-      </div>
+      )}
 
       {/* ====================================== */}
       {/* 💬 메시지 목록 영역 */}
       {/* ====================================== */}
-      <div className={`chat-room-messages ${themeClass}`}>
+      <div ref={messagesContainerRef} className={`chat-room-messages ${themeClass}`}>
         {/* 아직 메시지가 없으면 안내 문구 표시 */}
         {chat.isPending && chat.messages.length === 0 ? (
           <div className={`chat-room-empty-state ${themeClass}`}>
@@ -163,9 +166,6 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
                 )}
               </div>
             ))}
-            
-            {/* 📜 자동 스크롤을 위한 빈 요소 */}
-            <div ref={messagesEndRef} />
           </div>
         )}
       </div>
@@ -180,7 +180,7 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyPress={handleKeyPress} // 엔터로 메세지 보내기
             placeholder="메시지를 입력하세요..."
             className={`chat-room-input ${themeClass}`}
           />

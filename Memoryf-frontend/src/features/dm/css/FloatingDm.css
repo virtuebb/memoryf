@@ -1,0 +1,285 @@
+/**
+ * 🎈 플로팅 DM 스타일 (PIP 스타일)
+ * CSS 변수는 ThemeContext에서 설정됨
+ */
+
+/* ============================================ */
+/* 🎈 플로팅 버튼 */
+/* ============================================ */
+.floating-dm-btn {
+  position: fixed;
+  z-index: 9999;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.floating-dm-btn:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+.floating-dm-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Light 테마 */
+.floating-dm-btn.light {
+  background: linear-gradient(135deg, #ff8a65 0%, #ff6b6b 100%);
+  color: white;
+}
+
+/* Dark 테마 */
+.floating-dm-btn.dark {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  color: #020617;
+}
+
+/* 🔴 읽지 않은 메시지 배지 */
+.floating-dm-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ============================================ */
+/* 💬 플로팅 채팅창 */
+/* ============================================ */
+.floating-dm-window {
+  position: fixed;
+  z-index: 9999;
+  width: 380px;
+  height: 550px;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Light 테마 */
+.floating-dm-window.light {
+  background-color: var(--color-card-bg, #ffffff);
+  border: 1px solid var(--color-border-card, rgba(0, 0, 0, 0.08));
+}
+
+/* Dark 테마 */
+.floating-dm-window.dark {
+  background-color: var(--color-card-bg, rgba(15, 23, 42, 0.98));
+  border: 1px solid var(--color-border-card, rgba(148, 163, 184, 0.45));
+}
+
+/* ============================================ */
+/* 📌 헤더 */
+/* ============================================ */
+.floating-dm-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 8px;
+  cursor: grab;
+  user-select: none;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.floating-dm-header:active {
+  cursor: grabbing;
+}
+
+.floating-dm-header.light {
+  background: linear-gradient(135deg, #fff6f4 0%, #ffe5de 100%);
+  border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.04));
+}
+
+.floating-dm-header.dark {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.floating-dm-header-title {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.floating-dm-header.light .floating-dm-header-title {
+  color: var(--color-label, #b85a6b);
+}
+
+.floating-dm-header.dark .floating-dm-header-title {
+  color: #38bdf8;
+}
+
+.floating-dm-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.floating-dm-header-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.floating-dm-header-btn.light {
+  background: transparent;
+  color: var(--color-label, #b85a6b);
+}
+
+.floating-dm-header-btn.light:hover {
+  background: rgba(184, 90, 107, 0.1);
+}
+
+.floating-dm-header-btn.dark {
+  background: transparent;
+  color: #94a3b8;
+}
+
+.floating-dm-header-btn.dark:hover {
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+}
+
+/* ============================================ */
+/* 📋 내용 영역 */
+/* ============================================ */
+.floating-dm-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-dm-list-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 채팅 목록 스크롤 영역 조정 */
+.floating-dm-list-wrapper .chat-list {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-dm-list-wrapper .chat-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 채팅방 스타일 조정 */
+.floating-dm-content .chat-room {
+  height: 100%;
+}
+
+.floating-dm-content .chat-room-header {
+  padding: 8px 12px;
+}
+
+.floating-dm-content .chat-room-messages {
+  flex: 1;
+  padding: 12px;
+}
+
+.floating-dm-content .chat-room-input-area {
+  padding: 8px 12px;
+}
+
+/* 테마 선택기 조정 */
+.floating-dm-list-wrapper .theme-selector {
+  padding: 12px;
+  flex-shrink: 0;
+}
+
+.floating-dm-list-wrapper .theme-selector-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+/* ============================================ */
+/* 📱 반응형 */
+/* ============================================ */
+@media (max-width: 480px) {
+  .floating-dm-window {
+    width: calc(100vw - 20px);
+    height: calc(100vh - 100px);
+    right: 10px !important;
+    bottom: 80px !important;
+    border-radius: 12px;
+  }
+  
+  .floating-dm-btn {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* ============================================ */
+/* ✨ 애니메이션 */
+/* ============================================ */
+.floating-dm-window {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.floating-dm-btn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+

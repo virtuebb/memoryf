@@ -1,29 +1,31 @@
+/**
+ * 🎨 테마 선택기 컴포넌트
+ * 
+ * 전역 ThemeContext의 테마(Rose, Cream, Forest, Night)를 사용합니다.
+ */
+import { useTheme, themes } from '../../../shared/components/ThemeContext';
 import '../css/ThemeSelector.css';
 
-export default function ThemeSelector({ theme, onThemeChange }) {
-  const themeClass = theme === 'dark' ? 'dark' : 'light';
+export default function ThemeSelector() {
+  const { themeIndex, setThemeIndex, theme } = useTheme();
   
-  const themes = [
-    { id: 'light', label: '라이트' },
-    { id: 'dark', label: '다크' },
-    { id: 'blue', label: '블루' },
-    { id: 'green', label: '그린' }
-  ];
+  // Night 테마인지 확인 (다크 모드)
+  const isDark = theme?.name === 'Night';
 
   return (
-    <div className={`theme-selector ${themeClass}`}>
+    <div className={`theme-selector ${isDark ? 'dark' : 'light'}`}>
       <div className="theme-selector-buttons">
-        {themes.map((t) => (
+        {themes.map((t, index) => (
           <button
-            key={t.id}
-            onClick={() => onThemeChange(t.id)}
-            className={`theme-selector-btn theme-${t.id} ${theme === t.id ? 'active' : ''}`}
-            title={t.label}
+            key={t.name}
+            onClick={() => setThemeIndex(index)}
+            className={`theme-selector-btn theme-${t.name.toLowerCase()} ${themeIndex === index ? 'active' : ''}`}
+            title={`${t.name} - ${t.desc}`}
           />
         ))}
       </div>
-      <p className={`theme-selector-label ${themeClass}`}>
-        테마 변경
+      <p className={`theme-selector-label ${isDark ? 'dark' : 'light'}`}>
+        {theme?.name} 테마
       </p>
     </div>
   );

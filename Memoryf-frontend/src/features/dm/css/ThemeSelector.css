@@ -1,17 +1,9 @@
-/* ThemeSelector 전용 스타일 */
+/* ThemeSelector 전용 스타일 - CSS 변수 기반 (ThemeContext 연동) */
 
 .theme-selector {
   padding: 1.5rem;
-  border-top: 1px solid;
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-.theme-selector.light {
-  border-color: #e5e7eb;
-}
-
-.theme-selector.dark {
-  border-color: #374151;
+  border-top: 1px solid var(--color-border-soft);
+  transition: border-color 0.3s ease;
 }
 
 /* 테마 버튼 컨테이너 */
@@ -22,14 +14,14 @@
   gap: 1rem;
 }
 
-/* 테마 버튼 */
+/* 테마 버튼 기본 스타일 */
 .theme-selector-btn {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  border: none;
+  border: 2px solid transparent;
   cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s, border-color 0.2s;
   opacity: 0.7;
 }
 
@@ -41,37 +33,51 @@
 .theme-selector-btn.active {
   transform: scale(1.1);
   opacity: 1;
-  box-shadow: 0 0 0 4px #3b82f6;
+  box-shadow: 0 0 0 4px var(--color-label);
+  border-color: var(--color-label);
 }
 
-/* 테마 색상 */
-.theme-selector-btn.theme-light {
-  background-color: #fbcfe8;
+/* 테마별 색상 (ThemeContext의 테마와 매칭) */
+
+/* Rose 테마 - 부드럽고 로맨틱한 핑크 */
+.theme-selector-btn.theme-rose {
+  background: linear-gradient(135deg, #fff6f4 0%, #ffe5de 100%);
+  border-color: #b85a6b;
 }
 
-.theme-selector-btn.theme-dark {
-  background-color: #1f2937;
+/* Cream 테마 - 따뜻하고 아늑한 크림색 */
+.theme-selector-btn.theme-cream {
+  background: linear-gradient(135deg, #fffaf0 0%, #ffe0b3 100%);
+  border-color: #c56b1f;
 }
 
-.theme-selector-btn.theme-blue {
-  background-color: #bfdbfe;
+/* Forest 테마 - 차분하고 상쾌한 초록 */
+.theme-selector-btn.theme-forest {
+  background: linear-gradient(135deg, #ecf8f3 0%, #ccfbf1 100%);
+  border-color: #0f766e;
 }
 
-.theme-selector-btn.theme-green {
-  background-color: #bbf7d0;
+/* Night 테마 - 다크 & 네온 */
+.theme-selector-btn.theme-night {
+  background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+  border-color: #38bdf8;
 }
 
-/* 레이블 */
+/* 레이블 - CSS 변수 사용 */
 .theme-selector-label {
   text-align: center;
   font-size: 0.875rem;
   margin-top: 0.75rem;
+  color: var(--color-label);
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-.theme-selector-label.light {
-  color: #6b7280;
+/* 다크 모드 호환 (Night 테마) */
+.theme-selector.dark {
+  border-color: rgba(148, 163, 184, 0.25);
 }
 
 .theme-selector-label.dark {
-  color: #9ca3af;
+  color: #38bdf8;
 }

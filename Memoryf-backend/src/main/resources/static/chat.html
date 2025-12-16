@@ -46,7 +46,7 @@
         }
 
         // SockJS로 서버에 연결해.
-        const socket = new SockJS("/ws");
+        const socket = new SockJS("/memoryf/ws");
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function () {
