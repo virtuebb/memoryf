@@ -44,8 +44,8 @@ import PaymentManagementPage from './features/admin/pages/PaymentManagementPage'
 import BgmManagementPage from './features/admin/pages/BgmManagementPage';
 
 function App() {
-  const isLoggedIn = true;
-  const isAdmin = true;
+  const isLoggedIn = !!localStorage.getItem("accessToken");
+  const isAdmin = false;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [feedReloadKey, setFeedReloadKey] = useState(0);
