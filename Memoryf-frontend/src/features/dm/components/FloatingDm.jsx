@@ -16,8 +16,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTheme } from '../../../shared/components/ThemeContext';
 import { useDm } from '../context/DmContext';
-import ChatList from './ChatList.jsx';
-import ChatRoom from './ChatRoom.jsx';
+import ChatList from './DmList.jsx';
+import ChatRoom from './DmRoom.jsx';
 import UserSearchModal from './UserSearchModal.jsx';
 import ThemeSelector from './ThemeSelector.jsx';
 import '../css/FloatingDm.css';
