@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="loginMapper">
+	
+	<resultMap id="loginResultSet" type="login">
+		<id column="MEMBER_NO" property="memberNo" />
+		<result column="MEMBER_ID" property="memberId" />
+		<result column="MEMBER_PWD" property="memberPwd" />
+		<result column="MEMBER_NAME" property="memberName" />
+		<result column="STATUS" property="status" />
+	</resultMap>
+	
+	<!-- 로그인 쿼리 -->
+	<select id="loginMember" parameterType="login" resultMap="loginResultSet">
+		SELECT MEMBER_NO, MEMBER_ID, MEMBER_PWD, MEMBER_NAME, STATUS
+		  FROM TB_MEMBER
+		 WHERE MEMBER_ID = #{memberId}
+		   AND STATUS = 'Y'
+	</select>
+
+</mapper>
