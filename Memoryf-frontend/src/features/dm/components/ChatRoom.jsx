@@ -1,100 +1,198 @@
-import { useState } from 'react';
+/**
+ * 💬 채팅방 컴포넌트
+ * 
+ * 🎯 이 파일이 하는 일:
+ *    - 특정 채팅방의 메시지들을 보여줌
+ *    - 새 메시지 입력하고 보내기
+ *    - 뒤로 가기 버튼으로 목록으로 돌아가기
+ * 
+ * 📦 부모(DmRoutes)에서 받는 데이터:
+ *    - chat: 현재 채팅방 정보
+ *    - onBack: 뒤로가기 버튼 클릭 시 실행할 함수
+ *    - onSendMessage: 메시지 보내기 함수
+ *    - theme: 현재 테마 (light/dark)
+ * 
+ * 🔌 백엔드 연동 시 필요한 데이터 형식:
+ *    chat = {
+ *      id: 1,
+ *      userName: 'Jenny Kim',
+ *      avatar: '👤',
+ *      messages: [
+ *        {
+ *          id: 1,              // 메시지 고유 번호
+ *          text: '안녕하세요!',  // 메시지 내용
+ *          time: '오후 4:30',   // 보낸 시간
+ *          isMine: false        // 내가 보낸 건지? (true: 내 메시지, false: 상대방 메시지)
+ *        },
+ *        ...
+ *      ],
+ *      isPending: false  // 대기 중 여부
+ *    }
+ * 
+ * 🔌 실시간 채팅 구현 시:
+ *    WebSocket을 사용하면 메시지가 바로바로 보여요!
+ *    const socket = new WebSocket('ws://서버주소/dm');
+ *    socket.onmessage = (event) => {
+ *      const newMessage = JSON.parse(event.data);
+ *      // 새 메시지를 화면에 추가
+ *    };
+ */
+
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send } from 'lucide-react';
 import './ChatRoom.css';
 
 export default function ChatRoom({ chat, onBack, onSendMessage, theme }) {
+  // ✏️ 입력창에 쓴 메시지 저장
   const [messageInput, setMessageInput] = useState('');
-  const isDark = theme === 'dark';
+  
+  // 🎨 테마에 따라 CSS 클래스 결정
+  const themeClass = theme === 'dark' ? 'dark' : 'light';
+  
+  // 📜 메시지 목록 끝부분 참조 (자동 스크롤용)
+  const messagesEndRef = useRef(null);
 
+  // ============================================
+  // 🔌 백엔드 연동: 메시지 목록 가져오기
+  // ============================================
+  // useEffect(() => {
+  //   const fetchMessages = async () => {
+  //     try {
+  //       // 📡 서버에 "이 채팅방의 메시지들 줘!" 요청
+  //       const response = await fetch(`${API_BASE_URL}/rooms/${chat.id}/messages`, {
+  //         headers: {
+  //           'Authorization': `Bearer ${로그인토큰}`
+  //         }
+  //       });
+  //       const messages = await response.json();
+  //       // ✅ 메시지 목록 업데이트
+  //     } catch (error) {
+  //       console.error('메시지 가져오기 실패:', error);
+  //     }
+  //   };
+  //   
+  //   fetchMessages();
+  // }, [chat.id]);
+
+  // 📜 새 메시지 오면 자동으로 맨 아래로 스크롤
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chat.messages]);
+
+  /**
+   * 📤 메시지 보내기 버튼 클릭 시
+   */
   const handleSend = () => {
+    // 빈 메시지는 안 보냄
     if (messageInput.trim()) {
-      onSendMessage(chat.id, messageInput);
-      setMessageInput('');
+      onSendMessage(chat.id, messageInput);  // 부모한테 "이 메시지 보내줘!" 요청
+      setMessageInput('');  // 입력창 비우기
     }
   };
 
+  /**
+   * ⌨️ 엔터 키 누르면 메시지 보내기
+   */
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+      e.preventDefault();  // 줄바꿈 방지
       handleSend();
     }
   };
 
+  // ============================================
+  // 🎨 화면 그리기
+  // ============================================
   return (
-    <div className="flex-1 flex flex-col chat-room">
-      {/* Header */}
-      <div className={`p-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} flex items-center gap-3`}>
-        <button
-          onClick={onBack}
-          className={`w-10 h-10 rounded-full ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} flex items-center justify-center transition-colors`}
-        >
+    <div className="chat-room">
+      {/* ====================================== */}
+      {/* 📌 헤더: 뒤로가기 + 상대방 정보 */}
+      {/* ====================================== */}
+      <div className={`chat-room-header ${themeClass}`}>
+        {/* ← 뒤로가기 버튼 */}
+        <button onClick={onBack} className={`chat-room-back-btn ${themeClass}`}>
           <ArrowLeft size={20} />
         </button>
-        <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center text-white">
+        
+        {/* 👤 상대방 프로필 */}
+        <div className="chat-room-avatar">
           {chat.avatar}
+          {/* 🔌 백엔드 연동 시: <img src={chat.avatarUrl} /> */}
         </div>
-        <h2 className={`${isDark ? 'text-white' : 'text-gray-900'}`}>{chat.userName}</h2>
+        
+        {/* 상대방 이름 */}
+        <h2 className={`chat-room-username ${themeClass}`}>{chat.userName}</h2>
       </div>
 
-      {/* Messages */}
-      <div className={`flex-1 overflow-y-auto p-6 ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
+      {/* ====================================== */}
+      {/* 💬 메시지 목록 영역 */}
+      {/* ====================================== */}
+      <div className={`chat-room-messages ${themeClass}`}>
+        {/* 아직 메시지가 없으면 안내 문구 표시 */}
         {chat.isPending && chat.messages.length === 0 ? (
-          <div className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-500'} mt-8`}>
+          <div className={`chat-room-empty-state ${themeClass}`}>
             <p>메시지를 보내서 대화를 시작하세요</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="chat-room-message-list">
+            {/* 🔄 각 메시지를 하나씩 그리기 */}
             {chat.messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.isMine ? 'justify-end' : 'justify-start'}`}
+                className={`chat-message-row ${message.isMine ? 'mine' : 'theirs'}`}
               >
+                {/* 💙 내 메시지: 오른쪽 정렬, 파란 배경 */}
                 {message.isMine ? (
-                  // 내 메시지: 시간 + 내용
-                  <div className="flex items-end gap-2 max-w-[70%]">
-                    <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'} flex-shrink-0`}>
+                  <div className="chat-message-wrapper">
+                    {/* 시간 먼저, 그 다음 메시지 */}
+                    <span className={`chat-message-time ${themeClass}`}>
                       {message.time}
                     </span>
-                    <div className="bg-blue-500 text-white px-4 py-2 rounded-2xl rounded-br-sm">
+                    <div className="chat-message-bubble mine">
                       {message.text}
                     </div>
                   </div>
                 ) : (
-                  // 상대방 메시지: 내용 + 시간
-                  <div className="flex items-end gap-2 max-w-[70%]">
-                    <div className={`${isDark ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'} px-4 py-2 rounded-2xl rounded-bl-sm shadow-sm`}>
+                  /* 🤍 상대방 메시지: 왼쪽 정렬, 흰 배경 */
+                  <div className="chat-message-wrapper">
+                    {/* 메시지 먼저, 그 다음 시간 */}
+                    <div className={`chat-message-bubble theirs ${themeClass}`}>
                       {message.text}
                     </div>
-                    <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'} flex-shrink-0`}>
+                    <span className={`chat-message-time ${themeClass}`}>
                       {message.time}
                     </span>
                   </div>
                 )}
               </div>
             ))}
+            
+            {/* 📜 자동 스크롤을 위한 빈 요소 */}
+            <div ref={messagesEndRef} />
           </div>
         )}
       </div>
 
-      {/* Input */}
-      <div className={`p-4 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-        <div className={`flex items-center gap-2 ${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded-full px-4 py-2`}>
+      {/* ====================================== */}
+      {/* ✏️ 메시지 입력 영역 */}
+      {/* ====================================== */}
+      <div className={`chat-room-input-area ${themeClass}`}>
+        <div className={`chat-room-input-wrapper ${themeClass}`}>
+          {/* 텍스트 입력창 */}
           <input
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="메시지를 입력하세요..."
-            className={`flex-1 ${isDark ? 'bg-gray-700 text-white placeholder-gray-400' : 'bg-gray-100 text-gray-900 placeholder-gray-500'} outline-none`}
+            className={`chat-room-input ${themeClass}`}
           />
+          
+          {/* 📤 보내기 버튼 */}
           <button
             onClick={handleSend}
-            disabled={!messageInput.trim()}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-              messageInput.trim()
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                : isDark ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500'
-            }`}
+            disabled={!messageInput.trim()}  // 빈 메시지면 비활성화
+            className={`chat-room-send-btn ${messageInput.trim() ? 'active' : `disabled ${themeClass}`}`}
           >
             <Send size={16} />
           </button>

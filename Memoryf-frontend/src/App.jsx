@@ -36,7 +36,7 @@ import Home from "./features/main/components/Home";
 
 function App() {
 
-  const isLoggedIn = false;
+  const isLoggedIn = true;
   const isAdmin = true;
   const location = useLocation();
   // 현재 경로가 관리자 경로인지 확인 (/admin으로 시작하면 관리자 레이아웃 사용)
