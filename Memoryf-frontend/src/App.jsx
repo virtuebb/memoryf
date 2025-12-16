@@ -28,6 +28,7 @@ import FeedUploadModal from './features/feed/components/FeedUploadModal';
 import SettingsPage from './features/settings/pages/SettingsPage';
 import DmRoutes from './features/dm/pages/DmRoutes';
 import FloatingDm from './features/dm/components/FloatingDm';
+import Chat from './features/dm/components/Chat';
 import { DmProvider } from './features/dm/context/DmContext';
 
 // 멤버
@@ -126,6 +127,8 @@ function App() {
               <Route path="/search" element={<SearchPage />} />
               <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
               <Route path="/messages/*" element={<DmRoutes />} />
+              {/* 채팅 테스트 주소 */}
+              <Route path="/chat-test" element={<Chat />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>

@@ -1,0 +1,318 @@
+/**
+ * 🧪 WebSocket 채팅 테스트 스타일
+ */
+
+.chat-test-container {
+  min-height: 100%;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.chat-test-card {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.chat-test-card.light {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.chat-test-card.dark {
+  background-color: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* ============================================ */
+/* 📌 헤더 */
+/* ============================================ */
+.chat-test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.chat-test-header.light {
+  background: linear-gradient(135deg, #fff6f4 0%, #ffe5de 100%);
+}
+
+.chat-test-header.dark {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.chat-test-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.chat-test-header.light h2 {
+  color: #b85a6b;
+}
+
+.chat-test-header.dark h2 {
+  color: #38bdf8;
+}
+
+.chat-test-status {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.chat-test-status.connected {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+
+.chat-test-status.disconnected {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+/* ============================================ */
+/* 📝 입력 영역 */
+/* ============================================ */
+.chat-test-inputs {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chat-test-inputs.dark {
+  border-color: rgba(148, 163, 184, 0.15);
+}
+
+.chat-test-input-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.chat-test-input {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+  transition: border-color 0.2s, background-color 0.3s;
+}
+
+.chat-test-input.light {
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+.chat-test-input.light:focus {
+  outline: none;
+  border-color: #ff8a65;
+  background-color: #ffffff;
+}
+
+.chat-test-input.dark {
+  background-color: rgba(30, 41, 59, 0.8);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #e2e8f0;
+}
+
+.chat-test-input.dark:focus {
+  outline: none;
+  border-color: #38bdf8;
+  background-color: rgba(30, 41, 59, 1);
+}
+
+.chat-test-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 🔘 버튼들 */
+.chat-test-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.chat-test-btn {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s;
+}
+
+.chat-test-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.chat-test-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-test-btn.connect {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+}
+
+.chat-test-btn.disconnect {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.chat-test-btn.send.light {
+  background: linear-gradient(135deg, #ff8a65 0%, #ff6b6b 100%);
+  color: white;
+}
+
+.chat-test-btn.send.dark {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  color: #020617;
+}
+
+/* ============================================ */
+/* 💬 메시지 목록 */
+/* ============================================ */
+.chat-test-messages {
+  height: 250px;
+  overflow-y: auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chat-test-messages.light {
+  background-color: #fafafa;
+}
+
+.chat-test-messages.dark {
+  background-color: rgba(15, 23, 42, 0.5);
+}
+
+.chat-test-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.chat-test-message {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.chat-test-message-time {
+  color: #9ca3af;
+  margin-right: 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* 시스템 메시지 */
+.chat-test-message.system {
+  background-color: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+  text-align: center;
+}
+
+/* 보낸 메시지 */
+.chat-test-message.sent.light {
+  background-color: rgba(255, 138, 101, 0.15);
+  color: #c2410c;
+}
+
+.chat-test-message.sent.dark {
+  background-color: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+/* 받은 메시지 */
+.chat-test-message.received.light {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+}
+
+.chat-test-message.received.dark {
+  background-color: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+/* ============================================ */
+/* ✏️ 메시지 전송 영역 */
+/* ============================================ */
+.chat-test-send {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chat-test-send.dark {
+  border-color: rgba(148, 163, 184, 0.15);
+}
+
+.chat-test-send .chat-test-input.message {
+  flex: 1;
+}
+
+.chat-test-send .chat-test-btn.send {
+  flex: none;
+  width: auto;
+  padding: 0.6rem 1.25rem;
+}
+
+/* ============================================ */
+/* 📖 사용 가이드 */
+/* ============================================ */
+.chat-test-guide {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 0.85rem;
+}
+
+.chat-test-guide.light {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.chat-test-guide.dark {
+  background-color: rgba(251, 191, 36, 0.1);
+  border-color: rgba(148, 163, 184, 0.15);
+  color: #fbbf24;
+}
+
+.chat-test-guide h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.chat-test-guide ol {
+  margin: 0 0 0.5rem 1.25rem;
+  padding: 0;
+}
+
+.chat-test-guide li {
+  margin-bottom: 0.25rem;
+}
+
+.chat-test-note {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+

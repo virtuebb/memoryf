@@ -21,7 +21,7 @@ import ChatList from '../components/ChatList.jsx';
 import ChatRoom from '../components/ChatRoom.jsx';
 import UserSearchModal from '../components/UserSearchModal.jsx';
 import ThemeSelector from '../components/ThemeSelector.jsx';
-import './DmRoutes.css';
+import './css/DmRoutes.css';
 
 export default function DmRoutes() {
   // 📍 페이지 이동할 때 사용하는 도구

@@ -8,14 +8,15 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.memoryf.dm.model.vo.Dm;
 
 // 이 클래스는 채팅 메시지를 처리하는 컨트롤러야.
 // 메시지가 오면, 어디로 보낼지 결정해.
 // @RequestMapping("m")
-@Controller
-public class ChatController {
+@RestController
+public class DmController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
