@@ -5,13 +5,21 @@ const API_BASE_URL = 'http://localhost:8006/memoryf';
 export { API_BASE_URL };
 
 // Axios 인스턴스 생성 (RESTful API 원칙 준수)
+// ⚠️ JWT 적용 후 accessToken 사용 & 매 요청마다 헤더에 실어보내도록 수정
 const feedApi = axios.create({
   baseURL: `${API_BASE_URL}/feeds`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
   timeout: 10000, // 10초 타임아웃
-  withCredentials: false, // CORS 문제 방지
+  withCredentials: true, // CORS 문제 방지
+});
+
+// 요청 인터셉터에서 항상 최신 accessToken을 Authorization 헤더에 추가
+feedApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 /**
@@ -87,11 +95,11 @@ export const getFeedDetail = async (feedNo) => {
  */
 export const createFeed = async (formData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/feeds`, formData, {
+    // JWT 인증이 필요한 엔드포인트이므로 feedApi 사용 + 토큰 자동 첨부
+    const response = await feedApi.post('', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      withCredentials: true, // 세션 쿠키 포함
       timeout: 30000, // 파일 업로드는 시간이 걸릴 수 있으므로 30초로 설정
     });
     return response.data;

@@ -39,7 +39,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (path.startsWith("/images")
             || path.startsWith("/resources")
             || path.startsWith("/css")
-            || path.startsWith("/js")) return true;
+            || path.startsWith("/js")
+            || path.startsWith("/feed_upfiles")) return true; // 업로드된 피드 이미지도 JWT 검사 제외
 
         return false;
     }
