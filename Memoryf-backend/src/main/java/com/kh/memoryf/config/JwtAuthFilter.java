@@ -29,7 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    // 로그인/정적리소스는 토큰 검사 제외 (필요시 추가)
+    // 로그인, 정적리소스는 토큰 검사 제외
     private boolean isSkipPath(String path) {
 
         // 로그인 요청은 인증 없이 허용이므로 필터 검사 제외
@@ -85,7 +85,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     .parseClaimsJws(token)
                     .getBody();
 
-            // 만료 시간 추가 안전 체크(원하면)
+            // 만료 시간 추가 안전 체크
             Date exp = claims.getExpiration();
             if (exp != null && exp.before(new Date())) {
                 filterChain.doFilter(request, response);
