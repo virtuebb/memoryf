@@ -7,7 +7,7 @@ INSERT INTO TB_MEMBER (
 ) VALUES (
     20,
     'test1',
-    1234,
+    "$2a$10$zpNtFqus2QwHF4LfxyoAo.SpRjcnZlSS6hHf5hfzZYDvW7.7xdlie",
     '테스트유저',
     'Y'
 );

@@ -1,7 +1,7 @@
 import "../css/Login/LoginForm.css";
 import { useNavigate, Link } from "react-router-dom";
 import loginMemberApi from "../api/loginApi";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const LoginForm = () => {
 
@@ -9,6 +9,20 @@ const LoginForm = () => {
 
     const [memberId, setMemberId] = useState("");
     const [memberPwd, setMemberPwd] = useState("");
+
+    // 아이디 저장
+    const [saveId, setSaveId] = useState(false);
+
+    useEffect(() => {
+
+        const idSave = localStorage.getItem("saveId");
+
+        if(idSave) {
+
+            setMemberId(idSave);
+            setSaveId(true);
+        }
+    }, []);
 
     const login = async (e) => {
 
@@ -20,22 +34,62 @@ const LoginForm = () => {
 
             localStorage.setItem("accessToken", token);
 
-            navigate("/home")
+            if (saveId) {
+
+                localStorage.setItem("saveId", memberId);
+
         } else {
 
-            alert("로그인 정보가 일치하지 않습니다.")
+            localStorage.removeItem("saveId");
+
         }
 
-        
-    }
+            navigate("/home");
+
+        } else {
+
+            alert("로그인 정보가 일치하지 않습니다.");
+        }
+    };
     
-    // onChange 함수
+    // onChange - handleChange 함수
     const handleChange = (e) => {
 
         const {name, value} = e.target;
 
-        if(name === "memberId") setMemberId(value);
-        if(name === "memberPwd") setMemberPwd(value);
+        if(name === "memberId") {
+            
+            setMemberId(value);
+
+            // 아이디 저장
+            if(saveId) {
+
+                localStorage.setItem("saveId", value);
+            }
+        }
+
+        if(name === "memberPwd") {
+            
+            setMemberPwd(value);
+        
+        }
+    }
+
+    // onChange - handleSaveIdChange 함수
+    const handleSaveIdChange = (e) => {
+
+        const checked = e.target.checked;
+
+        setSaveId(checked);
+
+        if(checked) {
+
+            localStorage.setItem("saveId", memberId);
+            
+        } else {
+
+            localStorage.removeItem("saveId");
+        }
 
     }
 
@@ -58,7 +112,7 @@ const LoginForm = () => {
             {/* 아이디 저장 */}
             <div className="login-remember">
                 <label className="remember-id">
-                    <input type="checkbox" />
+                    <input type="checkbox" checked={saveId} onChange={handleSaveIdChange} />
                     <span>아이디 저장</span>
                 </label>
             
