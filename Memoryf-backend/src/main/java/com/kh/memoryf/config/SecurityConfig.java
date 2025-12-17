@@ -30,12 +30,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
     	
     		CorsConfiguration config = new CorsConfiguration();
-    		// 프론트엔드 포트 둘 다 허용 (5173, 5174)
-    		config.addAllowedOrigin("http://localhost:5173");
-    		config.addAllowedOrigin("http://localhost:5174");
+    		
+    		// 🌐 네트워크 내 모든 Origin 허용 (개발/테스트용)
+    		// setAllowedOriginPatterns: 와일드카드 패턴 지원 + allowCredentials(true) 호환
+    		config.addAllowedOriginPattern("http://localhost:*");
+    		config.addAllowedOriginPattern("http://192.168.*.*:*");
+    		config.addAllowedOriginPattern("http://127.0.0.1:*");
+        	
     		config.addAllowedHeader("*");
     		config.addAllowedMethod("*");
     		config.setAllowCredentials(true);
+    		config.setMaxAge(3600L);
     		
     		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     		source.registerCorsConfiguration("/**", config);

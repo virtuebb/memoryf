@@ -8,4 +8,8 @@ export default defineConfig({
     // sockjs-client가 Node.js의 global 객체를 참조하는 문제 해결
     global: 'globalThis',
   },
+  server: {
+
+    host: true,
+  }
 })

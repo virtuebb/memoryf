@@ -11,14 +11,17 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class CorsConfig {
 
-    @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
+    // ⚠️ SecurityConfig에서 CORS 설정하므로 이 빈은 비활성화
+    // (두 곳에서 CORS 설정하면 충돌 발생)
+    // @Bean
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration_disabled() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
         // 허용할 Origin 설정
         config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedOrigin("http://localhost:5174");
+        config.addAllowedOrigin("http://192.168.150.10:5173");
         
         // 허용할 HTTP 메서드 설정
         config.addAllowedMethod("GET");
