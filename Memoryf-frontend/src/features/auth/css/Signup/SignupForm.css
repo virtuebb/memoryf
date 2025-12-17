@@ -118,3 +118,86 @@
 .signup-buttons button[type="button"]:hover{
   background: #e9ebef;
 }
+
+/* 이용약관 */
+.signup-terms{
+  margin-top: 12px;
+  padding: 14px 12px;
+
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  background: #fafafa;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signup-terms label{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  color: #333;
+}
+
+.signup-terms input[type="checkbox"]{
+  width: 16px;
+  height: 16px;
+  accent-color: #5b8def;
+}
+
+.signup-terms hr{
+  margin: 2px 0;
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* details / summary */
+.signup-terms details{
+  padding-left: 24px; /* 체크박스 라인 들여쓰기 느낌 */
+}
+
+.signup-terms summary{
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+  list-style: none;
+}
+
+.signup-terms summary::-webkit-details-marker{
+  display: none;
+}
+
+.signup-terms summary::before{
+  content: "▸";
+  display: inline-block;
+  margin-right: 6px;
+  transform: translateY(-1px);
+}
+
+.signup-terms details[open] summary::before{
+  content: "▾";
+}
+
+/* 약관 내용 박스 */
+.signup-terms pre{
+  margin-top: 8px;
+  padding: 10px 12px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #333;
+
+  white-space: pre-wrap;
+
+  max-height: 160px;
+  overflow: auto;
+}
