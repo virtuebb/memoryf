@@ -13,6 +13,15 @@ function SettingsPage() {
   const [activeTab, setActiveTab] = useState("account");
   const navigate = useNavigate(); // ✅ 이 줄 필수
 
+  // onClick - 로그아웃 함수
+  const handleLogout = () => {
+
+    localStorage.removeItem("accessToken");
+
+    // 뒤로가기 막기
+    navigate("/login", {replace : true});
+  };
+
   return (
     <div className="settings-page">
       <header className="settings-header">
@@ -49,6 +58,9 @@ function SettingsPage() {
           <button className={activeTab === "preferences" ? "active" : ""} onClick={() => setActiveTab("preferences")}>
             환경 설정
           </button>
+
+          {/* 로그아웃 버튼 추가 */}
+          <button type="button" onClick={handleLogout}>로그아웃</button>
         </aside>
 
         <section className="settings-content">
