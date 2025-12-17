@@ -23,6 +23,7 @@
 // 🔌 백엔드 연동 시 이 부분 삭제하고 API에서 가져오기!
 // ============================================
 import { useState } from 'react';
+import { useDm } from '../context/DmContext';
 import '../css/UserSearchModal.css';
 
 function CloseIcon() {
@@ -43,20 +44,22 @@ function SearchIcon() {
   );
 }
 
+// 🧪 테스트용 사용자 목록 (팔로우 관계 대체)
+// 📌 실제 서비스에서는 백엔드 API에서 팔로우 목록을 가져옴
 const AVAILABLE_USERS = [
+  { userId: 'test1', userName: '테스트1' },
+  { userId: 'test2', userName: '테스트2' },
   { userId: 'alex.park', userName: 'Alex Park' },
   { userId: 'sarah.lee', userName: 'Sarah Lee' },
   { userId: 'david.choi', userName: 'David Choi' },
-  { userId: 'emma.jung', userName: 'Emma Jung' },
-  { userId: 'michael.kang', userName: 'Michael Kang' },
-  { userId: 'olivia.shin', userName: 'Olivia Shin' },
-  { userId: 'james.yoon', userName: 'James Yoon' },
-  { userId: 'sophia.han', userName: 'Sophia Han' }
 ];
 
 export default function UserSearchModal({ onClose, onAddUser, existingUserIds }) {
   // 🔍 검색어 저장
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // 👤 현재 로그인한 사용자 ID (자기 자신 제외용)
+  const { myUserId } = useDm();
   
   // 📋 검색 결과 저장 (백엔드 연동 시 사용)
   // const [searchResults, setSearchResults] = useState([]);
@@ -106,6 +109,8 @@ export default function UserSearchModal({ onClose, onAddUser, existingUserIds })
   // 🔌 백엔드 연동 시: filteredUsers → searchResults 사용
   const filteredUsers = AVAILABLE_USERS.filter(
     user => 
+      // 🚫 자기 자신은 제외!
+      user.userId !== myUserId &&
       // 이미 채팅 중인 사용자는 제외
       !existingUserIds.includes(user.userId) &&
       // 검색어와 이름 또는 아이디가 일치하는 사용자만 표시
