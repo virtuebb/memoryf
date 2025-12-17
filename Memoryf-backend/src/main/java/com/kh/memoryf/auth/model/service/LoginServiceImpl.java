@@ -41,13 +41,11 @@ public class LoginServiceImpl implements LoginService {
 	
 	// 로그인 요청 처리
 	@Override
-	public Login loginMember(Login login) {
+	public String loginMember(Login login) {
 		
 		// 회원 조회
 		Login loginUser = loginDao.loginMember(login, sqlSession);
 
-		Login user = loginUser;
-		
 		// 아이디 없는 경우
 		if(loginUser == null) {
 			
@@ -74,9 +72,10 @@ public class LoginServiceImpl implements LoginService {
 				.setExpiration(new Date(System.currentTimeMillis() + expiration)) // 토큰 만료시간 설정
 				.signWith(key, SignatureAlgorithm.HS256) // 위에서 생성한 Key와 HS256 알고리즘으로 서명
 				.compact(); // JWT 문자열 생성
+
 		
 		// 로그인 성공
-		return loginUser;
+		return jwt;
 	}
 	
 

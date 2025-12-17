@@ -39,7 +39,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8006/memoryf/ws'
 const getCurrentUserId = () => {
   // 1. URL 파라미터에서 userId 확인
   const urlParams = new URLSearchParams(window.location.search);
-  const urlUserId = urlParams.get('userId');
+  const urlUserId = localStorage.getItem("memberId")
   // url에서 userId를 가져옴. 예: http://localhost:5173/messages?userId=user1
   // 나중에는 세션에 담긴 사용자 아이디를 가져 오면 될듯
   
