@@ -18,45 +18,31 @@
 
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { chatRoomsSeed, pendingChatsSeed } from '../data/chats.js';
-import * as SockJSModule from 'sockjs-client';
+import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
-
-// CommonJS/ESM 호환성 처리
-const SockJS = SockJSModule.default || SockJSModule;
+import { getUserIdFromToken, getAccessToken } from '../../../utils/jwt.js';
 
 // 🌐 WebSocket 서버 URL
 const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8006/memoryf/ws';
 
 /**
- * 🧪 테스트용 사용자 ID 가져오기
+ * 🔐 JWT 토큰에서 사용자 ID 가져오기
  * 
- * 사용 방법:
- *   탭 1: http://localhost:5173/messages?userId=user1
- *   탭 2: http://localhost:5173/messages?userId=user2
- * 
- * URL에 userId가 없으면 localStorage 확인, 그것도 없으면 'user1' 기본값 사용
+ * JWT 토큰의 payload에서 사용자 ID(sub 또는 memberId)를 추출합니다.
+ * 토큰이 없거나 유효하지 않으면 'guest'를 반환합니다.
  */
 const getCurrentUserId = () => {
-  // 1. URL 파라미터에서 userId 확인
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlUserId = localStorage.getItem("memberId")
-  // url에서 userId를 가져옴. 예: http://localhost:5173/messages?userId=user1
-  // 나중에는 세션에 담긴 사용자 아이디를 가져 오면 될듯
+  // 1. JWT 토큰에서 사용자 ID 추출
+  const userId = getUserIdFromToken();
   
-  if (urlUserId) {
-    // URL에서 가져온 ID를 localStorage에도 저장 (새로고침 대비)
-    localStorage.setItem('testUserId', urlUserId);
-    return urlUserId;
+  if (userId) {
+    console.log('🔐 JWT 토큰에서 사용자 ID 추출:', userId);
+    return userId;
   }
   
-  // 2. localStorage에서 확인
-  const storedUserId = localStorage.getItem('testUserId');
-  if (storedUserId) {
-    return storedUserId;
-  }
-  
-  // 3. 기본값
-  return 'user1';
+  // 2. 토큰이 없으면 guest
+  console.warn('⚠️ JWT 토큰이 없거나 유효하지 않습니다. guest로 접속합니다.');
+  return 'guest';
 };
 
 // Context 생성
@@ -104,11 +90,25 @@ export function DmProvider({ children }) {
       return;
     }
 
+    // 🔐 토큰 없으면 연결하지 않음
+    const token = getAccessToken();
+    if (!token || myUserId === 'guest') {
+      console.warn('⚠️ 로그인 후 WebSocket 연결이 가능합니다.');
+      return;
+    }
+
     console.log(`📡 WebSocket 연결 시도: ${WS_URL} (사용자: ${myUserId})`);
 
     try {
       const stompClient = new Client({
         webSocketFactory: () => new SockJS(WS_URL),
+        
+        // 🔐 STOMP 연결 시 JWT 토큰을 헤더에 포함
+        connectHeaders: {
+          Authorization: `Bearer ${token}`,
+          'user-id': myUserId,  // 백엔드에서 사용자 식별용
+        },
+        
         debug: (str) => {
           // 디버그 로그 (필요시 활성화)
           // console.log('STOMP:', str);
@@ -116,7 +116,7 @@ export function DmProvider({ children }) {
         reconnectDelay: 5000,
         
         onConnect: () => {
-          console.log(`✅ [${myUserId}] WebSocket 연결 성공`);
+          console.log(`✅ [${myUserId}] WebSocket 연결 성공 (JWT 인증)`);
           setIsConnected(true);
           stompClientRef.current = stompClient;
 
@@ -132,6 +132,10 @@ export function DmProvider({ children }) {
         
         onStompError: (frame) => {
           console.error('❌ STOMP 에러:', frame.headers['message']);
+          // 인증 실패 시 처리
+          if (frame.headers['message']?.includes('Unauthorized')) {
+            console.error('❌ JWT 토큰 인증 실패. 다시 로그인해주세요.');
+          }
         },
         
         onWebSocketError: (event) => {
@@ -337,7 +341,7 @@ export function DmProvider({ children }) {
     const newPendingChat = {
       id: `pending-${Date.now()}`,
       userId: user.userId,
-      userName: user.userName,
+      userName: user.userId,
       lastMessage: '대기 중',
       time: '대기',
       unread: 0,
