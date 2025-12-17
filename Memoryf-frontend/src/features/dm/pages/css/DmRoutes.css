@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 0;  /* 이전 버전과 동일하게 여백 제거 */
   /* background-color: var(--color-main-bg); */
   transition: background-color 0.3s ease;
 }
@@ -16,7 +16,7 @@
 .dm-card {
   width: 100%;
   max-width: 800px;
-  height: 700px;
+  height: 780px;  /* 이전 버전과 동일하게 높이 증가 */
   border-radius: 1.5rem;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   overflow: hidden;

@@ -10,7 +10,7 @@ public class LoginDao {
 
 	public Login loginMember(Login login, SqlSessionTemplate sqlSession) {
 		
-		return sqlSession.selectOne("loginMapper.loginMember", login);
+		return (Login)sqlSession.selectOne("loginMapper.loginMember", login);
 	}
 
 }

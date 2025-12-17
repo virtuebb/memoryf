@@ -41,10 +41,12 @@ public class LoginServiceImpl implements LoginService {
 	
 	// 로그인 요청 처리
 	@Override
-	public String loginMember(Login login) {
+	public Login loginMember(Login login) {
 		
 		// 회원 조회
 		Login loginUser = loginDao.loginMember(login, sqlSession);
+
+		Login user = loginUser;
 		
 		// 아이디 없는 경우
 		if(loginUser == null) {
@@ -74,7 +76,7 @@ public class LoginServiceImpl implements LoginService {
 				.compact(); // JWT 문자열 생성
 		
 		// 로그인 성공
-		return jwt;
+		return loginUser;
 	}
 	
 

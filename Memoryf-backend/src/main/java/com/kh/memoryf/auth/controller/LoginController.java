@@ -23,11 +23,19 @@ public class LoginController {
 	// React에서 전달한 JSON 형식의 아이디/비번을 VO로 변환해서 전달받음
 	// POST 방식으로 처리
 	@PostMapping()
-	public String loginMember(@RequestBody Login login) {
+	public Login loginMember(@RequestBody Login login) {
 		
 		
-		return loginService.loginMember(login);
+		// return loginService.loginMember(login);
+		Login loginUser =  loginService.loginMember(login);
 		
+		System.out.println("memberNo : " + loginUser.getMemberNo());
+		System.out.println("memberId : " + loginUser.getMemberId());
+		System.out.println("memberPwd : " + loginUser.getMemberPwd());
+		System.out.println("memberName : " + loginUser.getMemberName());
+		System.out.println("status : " + loginUser.getStatus());
+
+		return loginUser;
 		
 	}
 	
