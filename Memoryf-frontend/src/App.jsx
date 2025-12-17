@@ -44,8 +44,13 @@ import PaymentManagementPage from './features/admin/pages/PaymentManagementPage'
 import BgmManagementPage from './features/admin/pages/BgmManagementPage';
 
 function App() {
+<<<<<<< Updated upstream
   const isLoggedIn = !!localStorage.getItem("accessToken");
   const isAdmin = false;
+=======
+  const isLoggedIn = false;
+  const isAdmin = true;
+>>>>>>> Stashed changes
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [feedReloadKey, setFeedReloadKey] = useState(0);
