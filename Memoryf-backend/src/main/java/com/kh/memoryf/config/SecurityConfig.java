@@ -30,12 +30,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
     	
     		CorsConfiguration config = new CorsConfiguration();
-    		// 프론트엔드 포트 둘 다 허용 (5173, 5174)
-    		config.addAllowedOrigin("http://localhost:5173");
-    		config.addAllowedOrigin("http://localhost:5174");
+    		
+    		// 🌐 네트워크 내 모든 Origin 허용 (개발/테스트용)
+    		// setAllowedOriginPatterns: 와일드카드 패턴 지원 + allowCredentials(true) 호환
+    		config.addAllowedOriginPattern("http://localhost:*");
+    		config.addAllowedOriginPattern("http://192.168.*.*:*");
+    		config.addAllowedOriginPattern("http://127.0.0.1:*");
+        	
     		config.addAllowedHeader("*");
     		config.addAllowedMethod("*");
     		config.setAllowCredentials(true);
+    		config.setMaxAge(3600L);
     		
     		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     		source.registerCorsConfiguration("/**", config);
@@ -54,8 +59,8 @@ public class SecurityConfig {
     					org.springframework.security.config.http.SessionCreationPolicy.STATELESS)) // JWT 인증방식임 - 세션 아님
     			.authorizeHttpRequests(auth -> auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // 프리플라이트(OPTIONS) 요청 모두 허용
     					.requestMatchers("/images/**", "/resources/**", "/css/**", "/js/**").permitAll() // 해당 정적 리소스 모두 허용
-    					.requestMatchers("/login/**").permitAll() // 로그인 요청 허용 - @RequestMapping("login") 관련
-    					.requestMatchers("/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
+    					.requestMatchers("/login/**").permitAll() // 로그인 요청 허용 - context path 포함
+    					.requestMatchers("/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함) spring이 자동으로 contextpath를 추가하기 때문에 넣지 않아도됨
     					.anyRequest().authenticated() // 나머지는 JWT 인증 필요함
     				)
     				.formLogin(form -> form.disable()) // 스프링 방식의 로그인 막기

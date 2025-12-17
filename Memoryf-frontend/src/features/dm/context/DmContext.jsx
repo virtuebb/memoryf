@@ -22,8 +22,14 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { getUserIdFromToken, getAccessToken } from '../../../utils/jwt.js';
 
-// 🌐 WebSocket 서버 URL
-const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8006/memoryf/ws';
+// 🌐 WebSocket 서버 URL (동적 설정)
+// - localhost 접속 시: http://localhost:8006/memoryf/ws
+// - 네트워크 IP 접속 시: http://192.168.x.x:8006/memoryf/ws
+const getWsUrl = () => {
+  const hostname = window.location.hostname;
+  return `http://${hostname}:8006/memoryf/ws`;
+};
+const WS_URL = import.meta.env.VITE_WS_URL || getWsUrl();
 
 /**
  * 🔐 JWT 토큰에서 사용자 ID 가져오기

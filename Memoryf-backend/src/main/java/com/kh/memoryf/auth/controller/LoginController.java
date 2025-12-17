@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kh.memoryf.auth.model.service.LoginService;
 import com.kh.memoryf.auth.model.vo.Login;
 
-@CrossOrigin(origins="http://localhost:5173")
+@CrossOrigin(origins={"http://192.168.150.10:5173", "http://localhost:5173"})
 @RestController
 @RequestMapping("login")
 public class LoginController {
