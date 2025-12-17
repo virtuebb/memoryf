@@ -1,18 +1,22 @@
 package com.kh.memoryf.dm.controller;
 
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.memoryf.dm.model.vo.Dm;
+import com.kh.memoryf.dm.model.vo.DmRoom;
 
 // 이 클래스는 채팅 메시지를 처리하는 컨트롤러야.
 // 메시지가 오면, 어디로 보낼지 결정해.
-// @RequestMapping("m")
+@RequestMapping("m") 
 @RestController
 public class DmController {
 
@@ -55,6 +59,19 @@ public class DmController {
         );
     }
 
+    // dm 방 목록 조회
+    @GetMapping("/dm/rooms")
+    // public ArrayList<DmRoom> selectMyDmRooms( ) {
+        
+    // }
+
+    // dm 방 상세 조회
+
+    // 읽음 처리
+
+    // 새 메세지 저장
+
+    // 새로운 채팅 추가
 
 
 

@@ -120,6 +120,7 @@ export function DmProvider({ children }) {
           // console.log('STOMP:', str);
         },
         reconnectDelay: 5000,
+        // 5초마다 재연결 시도
         
         onConnect: () => {
           console.log(`✅ [${myUserId}] WebSocket 연결 성공 (JWT 인증)`);
