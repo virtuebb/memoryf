@@ -45,6 +45,8 @@ const SignupForm = () => {
   const pwdRegex  = /^(?=.*[A-Za-z])(?=.*\d).{8,16}$/;
   const nickRegex = /^[A-Za-z0-9가-힣_.]{2,10}$/;
 
+  // 이메일 인증 완료 여부state
+  const [emailVerified, setEmailVerified] = useState(false);
 
   // 약관동의 정보 state
   const [agree, setAgree] = useState({
@@ -173,6 +175,11 @@ const SignupForm = () => {
         return;
       }
 
+      if (!emailVerified) {
+        alert("이메일 인증을 완료해주세요.");
+        return;
+      }
+
       if(!nickRegex.test(form.memberNick)) {
         alert("닉네임 형식을 확인해주세요.");
         return;
@@ -220,6 +227,12 @@ const SignupForm = () => {
 
     const {name, value} = e.target;
 
+    // 이메일 바꾸면 인증 초기화
+    if(name === "email") {
+      
+      setEmailVerified(false);
+    }
+
     setForm(prev => {
       const next = {...prev};
 
@@ -227,6 +240,8 @@ const SignupForm = () => {
 
       return next;
     })
+
+
   }
 
   // 비밀번호 일치 여부 블러메시지
@@ -333,7 +348,7 @@ const SignupForm = () => {
       <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="전화번호 ex) 01012345678" />
 
       {/* ✅ 이메일 인증 공통 컴포넌트 */}
-      <EmailVerify email={form.email} onChange={handleChange} />
+      <EmailVerify email={form.email} onChange={handleChange} onVerified={(v) => setEmailVerified(v)} />
 
       <div className="id-row">
         <input type="text" name="memberNick" value={form.memberNick} onBlur={checkNickType} onChange={(e) => {handleChange(e); setNickChecked(null);}} placeholder="닉네임(2 ~ 10자, 한글, 영문, 숫자, 기호 _, . 가능)" />
