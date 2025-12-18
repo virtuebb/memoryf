@@ -17,11 +17,10 @@
  */
 
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
-import { chatRoomsSeed, pendingChatsSeed } from '../data/chats.js';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { getUserIdFromToken, getAccessToken } from '../../../utils/jwt.js';
-import selectDmRoomList from '../api/dmApi.js';
+import selectDmRoomList, { createDmRoom } from '../api/dmApi.js';
 
 // 🌐 WebSocket 서버 URL (동적 설정)
 // - localhost 접속 시: http://localhost:8006/memoryf/ws
@@ -60,10 +59,10 @@ const DmContext = createContext(null);
  */
 export function DmProvider({ children }) {
   // 💬 채팅방 목록 (실제 대화가 있는 방)
-  const [chatRooms, setChatRooms] = useState(chatRoomsSeed);
+  const [chatRooms, setChatRooms] = useState([]);
   
   // ⏳ 대기 중인 채팅 (아직 메시지를 안 보낸 방)
-  const [pendingChats, setPendingChats] = useState(pendingChatsSeed);
+  const [pendingChats, setPendingChats] = useState([]);
   
   // 🔍 사용자 검색 모달 열기/닫기
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -110,10 +109,11 @@ export function DmProvider({ children }) {
       const stompClient = new Client({
         webSocketFactory: () => new SockJS(WS_URL),
         
-        // 🔐 STOMP 연결 시 JWT 토큰을 헤더에 포함
+        // 🔐 STOMP 연결 시 JWT 토큰과 로그인 식별 헤더를 포함
         connectHeaders: {
           Authorization: `Bearer ${token}`,
-          'user-id': myUserId,  // 백엔드에서 사용자 식별용
+          'user-id': myUserId,  // 기존 헤더
+          login: myUserId,       // StompHandler에서 읽는 native header
         },
         
         debug: (str) => {
@@ -297,10 +297,15 @@ export function DmProvider({ children }) {
               })()
             : room.time || '대기';
 
+          // 백엔드에서 상대방 식별자가 여러 필드명으로 올 수 있으므로 안전하게 추출
+          const opponentId = room.targetUserId || room.target_user_id || room.targetUser || room.roomName || room.room_name || room.roomNm || room.room_nm || room.room; 
+
           return {
             id: room.roomNo,
-            userId: room.targetUserId,
-            userName: room.targetUserName || room.roomName || room.targetUserId,
+            // room_name이 상대방 ID로 오는 경우가 있으므로 우선 사용
+            // 현재 세팅이 room_name이 상대방 아이디임
+            userId: opponentId || String(room.roomNo),
+            userName: room.targetUserName || opponentId || room.roomName || String(room.roomNo),
             lastMessage: room.lastMessage || '대화 없음',
             time,
             unread: room.unreadCount || 0,
@@ -400,21 +405,44 @@ export function DmProvider({ children }) {
    * 👤 새로운 사용자와 채팅 시작하기
    * @returns {Object} 새로 생성된 채팅방 객체
    */
-  const handleAddUser = useCallback((user) => {
-    const newPendingChat = {
-      id: `pending-${Date.now()}`,
-      userId: user.userId,
-      userName: user.userId,
-      lastMessage: '대기 중',
-      time: '대기',
-      unread: 0,
-      avatar: '👤',
-      messages: [],
-      isPending: true,
-    };
-    
-    setPendingChats((prev) => [newPendingChat, ...prev]);
-    return newPendingChat;
+  const handleAddUser = useCallback(async (user) => {
+    // 서버에 새 채팅방 생성 요청
+    try {
+      const targetUserId = user.userId;
+      const created = await createDmRoom(targetUserId);
+
+      const newChat = {
+        // id: created.roomNo || created.roomNoString || Date.now(),
+        id: created.roomNo,
+        userId: created.roomName || created.targetUserId || targetUserId,
+        userName: created.targetUserName || created.roomName || targetUserId,
+        lastMessage: created.lastMessage || '대화 없음',
+        time: created.lastSendDate || '방금',
+        unread: created.unreadCount || 0,
+        avatar: created.avatar || '👤',
+        messages: created.messages || [],
+        isPending: false,
+      };
+
+      setChatRooms((prev) => [newChat, ...prev]);
+      return newChat;
+    } catch (error) {
+      console.error('❌ 서버에 방 생성 실패, 로컬로 임시 방 생성:', error);
+      const newPendingChat = {
+        id: `pending-${Date.now()}`,
+        userId: user.userId,
+        userName: user.userId,
+        lastMessage: '대기 중',
+        time: '대기',
+        unread: 0,
+        avatar: '👤',
+        messages: [],
+        isPending: true,
+      };
+
+      setPendingChats((prev) => [newPendingChat, ...prev]);
+      return newPendingChat;
+    }
   }, []);
 
   /**

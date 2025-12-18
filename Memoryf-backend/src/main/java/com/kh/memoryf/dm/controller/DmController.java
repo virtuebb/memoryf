@@ -7,11 +7,10 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.memoryf.dm.model.service.DmService;
@@ -60,7 +59,7 @@ public class DmController {
     public void privateChat(Dm message) {
 
         // 🔥 사용자 전용 채널로 직접 전송
-        System.out.println("📨 메시지 수신: " + message.getContent() + " to " + message.getRoomId());
+        System.out.println("📨 메시지 수신: " + message.getContent() + " to " + message.getSender());
         messagingTemplate.convertAndSend(
                 "/sub/private/" + message.getRoomId(), // 받는 사람 ID
                 message
@@ -80,13 +79,21 @@ public class DmController {
         return list;
     }
 
+    // dm 방 추가
+    @PostMapping("/insertRoom")
+    public void insertRoom(@PathVariable String userId, String targetUserId) {
+
+        System.out.println(userId);
+        System.out.println(targetUserId);
+
+    }
+
     // dm 방 상세 조회
 
     // 읽음 처리
 
     // 새 메세지 저장
 
-    // 새로운 채팅 추가
 
 
 

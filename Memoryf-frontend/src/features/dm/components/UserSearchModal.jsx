@@ -49,6 +49,7 @@ function SearchIcon() {
 const AVAILABLE_USERS = [
   { userId: 'test1', userName: '테스트1' },
   { userId: 'test2', userName: '테스트2' },
+  { userId: 'test3', userName: '테스트3' },
   { userId: 'alex.park', userName: 'Alex Park' },
   { userId: 'sarah.lee', userName: 'Sarah Lee' },
   { userId: 'david.choi', userName: 'David Choi' },

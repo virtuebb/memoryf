@@ -48,10 +48,16 @@ export default function DmRoutes() {
   /**
    * 👤 새로운 사용자와 채팅 시작하기
    */
-  const onAddUser = (user) => {
-    const newChat = handleAddUser(user);
-    closeSearchModal();
-    navigate(`/messages/${newChat.id}`);
+  const onAddUser = async (user) => {
+    try {
+      const newChat = await handleAddUser(user);
+      closeSearchModal();
+      navigate(`/messages/${newChat.id}`);
+    } catch (error) {
+      console.error('새 채팅 생성 실패:', error);
+      // 실패해도 모달 닫기
+      closeSearchModal();
+    }
   };
 
   /**
@@ -59,6 +65,8 @@ export default function DmRoutes() {
    */
   const onSendMessage = (chatId, messageText) => {
     const activatedChat = handleSendMessage(chatId, messageText);
+
+    // 성공했을 시
     if (activatedChat) {
       navigate(`/messages/${activatedChat.id}`);
     }

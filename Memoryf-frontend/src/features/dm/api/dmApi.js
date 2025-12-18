@@ -33,4 +33,32 @@ const selectDmRoomList = async () => {
     }
 };
 
+/**
+ * 새 DM 방 생성
+ * @param {string} targetUserId
+ * @returns {Promise<Object>} 생성된 DmRoom 객체
+ */
+export const createDmRoom = async (targetUserId) => {
+    try {
+        const token = getAccessToken();
+        const url = `${API_BASE}/messages/insertRoom`;
+
+        const response = await axios({
+            url,
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            data: { targetUserId }
+        });
+
+        console.log('✅ DM 방 생성 성공:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ DM 방 생성 실패:', error);
+        throw error;
+    }
+};
+
 export default selectDmRoomList;

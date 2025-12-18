@@ -133,10 +133,15 @@ export default function FloatingDm() {
   /**
    * 👤 새로운 사용자와 채팅 시작 (플로팅 DM 전용)
    */
-  const onAddUser = (user) => {
-    const newChat = handleAddUser(user);
-    closeSearchModal();
-    setSelectedChatId(newChat.id);
+  const onAddUser = async (user) => {
+    try {
+      const newChat = await handleAddUser(user);
+      closeSearchModal();
+      setSelectedChatId(newChat.id);
+    } catch (error) {
+      console.error('새 채팅 생성 실패:', error);
+      closeSearchModal();
+    }
   };
 
   /**
