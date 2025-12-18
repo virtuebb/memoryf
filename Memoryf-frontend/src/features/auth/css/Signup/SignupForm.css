@@ -203,14 +203,14 @@
 }
 
 /* 비밀번호 일치 / 불일치 메시지 */
-.pwd-ok {
+.type-ok {
   margin-top: 6px;
   font-size: 13px;
   color: #2e7d32;          /* 초록 */
   font-weight: 500;
 }
 
-.pwd-fail {
+.type-fail {
   margin-top: 6px;
   font-size: 13px;
   color: #d32f2f;          /* 빨강 */
@@ -226,7 +226,7 @@ input.success {
   border: 1px solid #2e7d32;
 }
 
-.pwd-ok, .pwd-fail {
+.type-ok, .type-fail {
   animation: fadeIn 0.2s ease-in;
 }
 

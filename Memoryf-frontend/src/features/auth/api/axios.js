@@ -14,9 +14,16 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
-  if (token) {
+
+  // API는 토큰 안 붙이기
+  const url = config.url || "";
+
+  const isPublic = url.startsWith("/login") || url.startsWith("/signup");
+
+  if (token && !isPublic) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
   return config;
 });
 

@@ -21,6 +21,7 @@ import { chatRoomsSeed, pendingChatsSeed } from '../data/chats.js';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { getUserIdFromToken, getAccessToken } from '../../../utils/jwt.js';
+import selectDmRoomList from '../api/dmApi.js';
 
 // 🌐 WebSocket 서버 URL (동적 설정)
 // - localhost 접속 시: http://localhost:8006/memoryf/ws
@@ -273,15 +274,70 @@ export function DmProvider({ children }) {
     });
   }, [myUserId]);
 
-  // 🚀 컴포넌트 마운트 시 WebSocket 자동 연결
+  const loadData = useCallback(async () => {
+    try {
+      console.log('📡 채팅방 목록 로드 중... (사용자: ' + myUserId + ')');
+      const response = await selectDmRoomList();
+      
+      console.log('📥 백엔드 응답:', response);
+      
+      // 응답이 배열이면 chatRooms으로, 객체면 해당 필드 사용
+      if (Array.isArray(response)) {
+        // 백엔드 DmRoom 객체를 프론트용 chat 객체로 변환
+        const mapped = response.map((room) => {
+          const time = room.lastSendDate
+            ? (() => {
+                try {
+                  return new Date(room.lastSendDate).toLocaleTimeString('ko-KR', {
+                    hour: '2-digit', minute: '2-digit', hour12: true
+                  });
+                } catch (e) {
+                  return String(room.lastSendDate || '');
+                }
+              })()
+            : room.time || '대기';
+
+          return {
+            id: room.roomNo,
+            userId: room.targetUserId,
+            userName: room.targetUserName || room.roomName || room.targetUserId,
+            lastMessage: room.lastMessage || '대화 없음',
+            time,
+            unread: room.unreadCount || 0,
+            avatar: room.avatar || '👤',
+            messages: room.messages || [],
+            isPending: false,
+          };
+        });
+
+        setChatRooms(mapped);
+        console.log('✅ 채팅방 로드 성공 (배열 → 매핑됨):', mapped);
+      } else if (response && response.chatRooms) {
+        setChatRooms(response.chatRooms);
+        setPendingChats(response.pendingChats || []);
+        console.log('✅ 채팅방 로드 성공 (객체):', response);
+      } else {
+        console.warn('⚠️ 예상치 못한 응답 형식:', response);
+      }
+    } catch (error) {
+      console.error('❌ 채팅방 로드 실패:', error.message);
+      console.error('❌ 상세 에러:', error);
+      // 에러 시 더미 데이터 유지
+    }
+  }, [myUserId]);
+
+  // 🚀 컴포넌트 마운트 시에만 1회 실행 (무한 루프 방지)
   useEffect(() => {
-    connectWebSocket();
+    loadData();         // 📡 백엔드에서 채팅방 목록 조회
+    connectWebSocket(); // 🔌 WebSocket 연결
     
     // 언마운트 시 연결 해제
     return () => {
       disconnectWebSocket();
     };
-  }, []);
+  }, []);  // ✅ 의존성 배열 비워서 마운트 시에만 실행
+
+
 
   /**
    * 👀 채팅방 읽음 처리 + WebSocket으로 상대방에게 알림
