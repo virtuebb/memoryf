@@ -201,3 +201,36 @@
   max-height: 160px;
   overflow: auto;
 }
+
+/* 비밀번호 일치 / 불일치 메시지 */
+.pwd-ok {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #2e7d32;          /* 초록 */
+  font-weight: 500;
+}
+
+.pwd-fail {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #d32f2f;          /* 빨강 */
+  font-weight: 500;
+}
+
+/* 입력창 강조 (선택) */
+input.error {
+  border: 1px solid #d32f2f;
+}
+
+input.success {
+  border: 1px solid #2e7d32;
+}
+
+.pwd-ok, .pwd-fail {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../css/EmailVerify/EmailVerify.css"
 
-const EmailVerify = ({ placeholder = "이메일" }) => {
+const EmailVerify = ({ placeholder = "이메일", email, onChange }) => {
 
   const [codeOpen, setCodeOpen] = useState(false);
   const [verifyResult, setVerifyResult] = useState(""); 
@@ -19,7 +19,7 @@ const EmailVerify = ({ placeholder = "이메일" }) => {
   return (
     <>
       <div className="email-row">
-        <input type="email" placeholder={placeholder} />
+        <input type="email" name="email" value={email} placeholder={placeholder} />
         <button
           type="button"
           className="email-btn"
@@ -53,11 +53,11 @@ const EmailVerify = ({ placeholder = "이메일" }) => {
           )}
 
           {verifyResult === "success" && (
-            <p className="code-ment success">✔ 인증되었습니다</p>
+            <p className="code-ment success">O 인증되었습니다</p>
           )}
 
           {verifyResult === "fail" && (
-            <p className="code-ment fail">✖ 인증번호가 올바르지 않습니다</p>
+            <p className="code-ment fail">X 인증번호가 올바르지 않습니다</p>
           )}
         </div>
       )}
