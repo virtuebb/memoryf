@@ -32,4 +32,5 @@ public class Feed {
 	private int commentCount;         // 댓글 수
 	private List<FeedFile> feedFiles; // 피드 파일 리스트
 	private boolean isLiked;          // 현재 사용자가 좋아요 했는지 여부
+	private boolean isBookmarked;     // 현재 사용자가 북마크 했는지 여부
 }

@@ -18,38 +18,38 @@ import jakarta.servlet.http.HttpServletRequest;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-	
+
 	@Autowired
 	private JwtAuthFilter jwtAuthFilter;
 
 	// 암호화
-    @Bean
-    public static BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    
-    // 로그인 CORS 설정 ( cors 활성화 + OPTIONS 허용)
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-    	
-    		CorsConfiguration config = new CorsConfiguration();
-    		
-    		// ✅ 명시적 Origin 지정 (패턴보다 정확함)
-    		config.addAllowedOrigin("http://localhost:5173");
-    		config.addAllowedOrigin("http://192.168.150.10:5173");
-        	
-    		config.addAllowedHeader("*");
-    		config.addAllowedMethod("*");
-    		config.setAllowCredentials(true);
-    		config.setMaxAge(3600L);
-    		
-    		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    		source.registerCorsConfiguration("/**", config);
-    		
-    		return source;
-    }
-    
-    // Spring Security 보안 규칙과 필터 체인 설정
+	@Bean
+	public static BCryptPasswordEncoder bCryptPasswordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	// 로그인 CORS 설정 ( cors 활성화 + OPTIONS 허용)
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+
+		CorsConfiguration config = new CorsConfiguration();
+
+		// ✅ 명시적 Origin 지정 (패턴보다 정확함)
+		config.addAllowedOrigin("http://localhost:5173");
+		config.addAllowedOrigin("http://192.168.150.10:5173");
+
+		config.addAllowedHeader("*");
+		config.addAllowedMethod("*");
+		config.setAllowCredentials(true);
+		config.setMaxAge(3600L);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+
+		return source;
+	}
+
+	// Spring Security 보안 규칙과 필터 체인 설정
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -59,7 +59,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(
 					org.springframework.security.config.http.SessionCreationPolicy.STATELESS)) // JWT 인증방식임 - 세션 아님
 			.authorizeHttpRequests(auth -> auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // 프리플라이트(OPTIONS) 요청 모두 허용
-					.requestMatchers("/images/**", "/resources/**", "/css/**", "/js/**", "/feed_upfiles/**").permitAll() // 정적 리소스 및 업로드 이미지 모두 허용
+					.requestMatchers("/messages/**","/images/**", "/resources/**", "/css/**", "/js/**", "/feed_upfiles/**").permitAll() // 정적 리소스 및 업로드 이미지 모두 허용
 					.requestMatchers("/login/**", "/signup/**").permitAll() // 로그인 요청 허용 - @RequestMapping("login") 관련
 					.requestMatchers("/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.anyRequest().authenticated() // 나머지는 JWT 인증 필요함
@@ -76,6 +76,7 @@ public class SecurityConfig {
 	
     
 }
+
 
 
 

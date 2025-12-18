@@ -107,4 +107,56 @@ public class FeedDao {
 	public int deleteFeed(SqlSession sqlSession, int feedNo) {
 		return sqlSession.update("feedMapper.deleteFeed", feedNo);
 	}
+	
+	/**
+	 * 피드 수정
+	 * @param sqlSession
+	 * @param feed 수정할 피드 정보
+	 * @return 수정 건수
+	 */
+	public int updateFeed(SqlSession sqlSession, Feed feed) {
+		return sqlSession.update("feedMapper.updateFeed", feed);
+	}
+	
+	/**
+	 * 피드 북마크 추가
+	 * @param sqlSession
+	 * @param feedNo 피드 번호
+	 * @param memberNo 회원 번호
+	 * @return 성공 여부
+	 */
+	public int insertFeedBookmark(SqlSession sqlSession, int feedNo, int memberNo) {
+		HashMap<String, Object> params = new HashMap<>();
+		params.put("feedNo", feedNo);
+		params.put("memberNo", memberNo);
+		return sqlSession.insert("feedMapper.insertFeedBookmark", params);
+	}
+	
+	/**
+	 * 피드 북마크 삭제
+	 * @param sqlSession
+	 * @param feedNo 피드 번호
+	 * @param memberNo 회원 번호
+	 * @return 성공 여부
+	 */
+	public int deleteFeedBookmark(SqlSession sqlSession, int feedNo, int memberNo) {
+		HashMap<String, Object> params = new HashMap<>();
+		params.put("feedNo", feedNo);
+		params.put("memberNo", memberNo);
+		return sqlSession.delete("feedMapper.deleteFeedBookmark", params);
+	}
+	
+	/**
+	 * 피드 북마크 여부 확인
+	 * @param sqlSession
+	 * @param feedNo 피드 번호
+	 * @param memberNo 회원 번호
+	 * @return 북마크 여부
+	 */
+	public int checkFeedBookmark(SqlSession sqlSession, int feedNo, int memberNo) {
+		HashMap<String, Object> params = new HashMap<>();
+		params.put("feedNo", feedNo);
+		params.put("memberNo", memberNo);
+		return sqlSession.selectOne("feedMapper.checkFeedBookmark", params);
+	}
 }

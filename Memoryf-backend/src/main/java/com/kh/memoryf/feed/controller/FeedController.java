@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kh.memoryf.comment.model.service.CommentService;
+import com.kh.memoryf.comment.model.vo.Comment;
 import com.kh.memoryf.common.template.FileRenamePolicy;
 import com.kh.memoryf.feed.model.service.FeedService;
 import com.kh.memoryf.feed.model.vo.Feed;
@@ -29,6 +32,9 @@ public class FeedController {
 
 	@Autowired
 	private FeedService feedService;
+	
+	@Autowired
+	private CommentService commentService;
 	
 	/**
 	 * 피드 목록 조회 (RESTful: GET /feed)
@@ -252,6 +258,181 @@ public class FeedController {
 		} catch (Exception e) {
 			response.put("success", false);
 			response.put("message", "피드 삭제 실패: " + e.getMessage());
+		}
+		
+		return response;
+	}
+	
+	/**
+	 * 피드 수정 (내용/태그/위치)
+	 * @param feedNo 피드 번호
+	 * @param feed   수정할 내용
+	 * @return 수정 결과
+	 */
+	@PutMapping("/{feedNo}")
+	public HashMap<String, Object> updateFeed(
+			@PathVariable("feedNo") int feedNo,
+			@RequestBody Feed feed) {
+		
+		HashMap<String, Object> response = new HashMap<>();
+		
+		try {
+			feed.setFeedNo(feedNo);
+			int result = feedService.updateFeed(feed);
+			if (result > 0) {
+				response.put("success", true);
+				response.put("message", "피드가 수정되었습니다.");
+			} else {
+				response.put("success", false);
+				response.put("message", "피드 수정에 실패했습니다.");
+			}
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "피드 수정 실패: " + e.getMessage());
+		}
+		
+		return response;
+	}
+	
+	/**
+	 * 피드 북마크 토글 (RESTful: POST /feed/{feedNo}/bookmarks)
+	 * @param feedNo 피드 번호
+	 * @param request 요청 본문 (memberNo)
+	 * @return 북마크 결과
+	 */
+	@PostMapping("/{feedNo}/bookmarks")
+	public HashMap<String, Object> toggleFeedBookmark(
+			@PathVariable("feedNo") int feedNo,
+			@RequestBody HashMap<String, Object> request) {
+		
+		HashMap<String, Object> response = new HashMap<>();
+		
+		try {
+			int memberNo = (Integer) request.get("memberNo");
+			boolean isBookmarked = feedService.toggleFeedBookmark(feedNo, memberNo);
+			
+			response.put("success", true);
+			response.put("isBookmarked", isBookmarked);
+			response.put("message", isBookmarked ? "북마크에 추가했습니다." : "북마크를 취소했습니다.");
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "북마크 처리 실패: " + e.getMessage());
+		}
+		
+		return response;
+	}
+	
+	/**
+	 * 특정 피드의 댓글 목록 조회 (RESTful: GET /feed/{feedNo}/comments)
+	 * @param feedNo 피드 번호
+	 * @param memberNo 현재 로그인한 회원 번호
+	 * @return 댓글 목록
+	 */
+	@GetMapping("/{feedNo}/comments")
+	public HashMap<String, Object> getComments(
+			@PathVariable("feedNo") int feedNo,
+			@RequestParam(value = "memberNo", required = false) Integer memberNo) {
+		
+		HashMap<String, Object> response = new HashMap<>();
+		
+		try {
+			ArrayList<Comment> comments = commentService.selectCommentList(feedNo, memberNo);
+			response.put("success", true);
+			response.put("data", comments);
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "댓글 조회 실패: " + e.getMessage());
+		}
+		
+		return response;
+	}
+	
+	/**
+	 * 댓글 생성 (RESTful: POST /feed/{feedNo}/comments)
+	 * @param feedNo 피드 번호
+	 * @param comment 댓글 정보
+	 * @return 생성 결과
+	 */
+	@PostMapping("/{feedNo}/comments")
+	public HashMap<String, Object> createComment(
+			@PathVariable("feedNo") int feedNo,
+			@RequestBody Comment comment) {
+		
+		HashMap<String, Object> response = new HashMap<>();
+		
+		try {
+			comment.setFeedNo(feedNo);
+			int result = commentService.insertComment(comment);
+			if (result > 0) {
+				response.put("success", true);
+				response.put("message", "댓글이 등록되었습니다.");
+			} else {
+				response.put("success", false);
+				response.put("message", "댓글 등록에 실패했습니다.");
+			}
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "댓글 등록 실패: " + e.getMessage());
+		}
+		
+		return response;
+	}
+	
+	/**
+	 * 댓글 삭제 (RESTful: DELETE /feed/{feedNo}/comments/{commentNo})
+	 * @param feedNo 피드 번호
+	 * @param commentNo 댓글 번호
+	 * @return 삭제 결과
+	 */
+	@DeleteMapping("/{feedNo}/comments/{commentNo}")
+	public HashMap<String, Object> deleteComment(
+			@PathVariable("feedNo") int feedNo,
+			@PathVariable("commentNo") int commentNo) {
+		
+		HashMap<String, Object> response = new HashMap<>();
+		
+		try {
+			int result = commentService.deleteComment(commentNo);
+			if (result > 0) {
+				response.put("success", true);
+				response.put("message", "댓글이 삭제되었습니다.");
+			} else {
+				response.put("success", false);
+				response.put("message", "댓글 삭제에 실패했습니다.");
+			}
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "댓글 삭제 실패: " + e.getMessage());
+		}
+		
+		return response;
+	}
+	
+	/**
+	 * 댓글 좋아요 토글 (RESTful: POST /feed/{feedNo}/comments/{commentNo}/likes)
+	 * @param feedNo 피드 번호
+	 * @param commentNo 댓글 번호
+	 * @param request 요청 본문 (memberNo)
+	 * @return 좋아요 결과
+	 */
+	@PostMapping("/{feedNo}/comments/{commentNo}/likes")
+	public HashMap<String, Object> toggleCommentLike(
+			@PathVariable("feedNo") int feedNo,
+			@PathVariable("commentNo") int commentNo,
+			@RequestBody HashMap<String, Object> request) {
+		
+		HashMap<String, Object> response = new HashMap<>();
+		
+		try {
+			int memberNo = (Integer) request.get("memberNo");
+			boolean isLiked = commentService.toggleCommentLike(commentNo, memberNo);
+			
+			response.put("success", true);
+			response.put("isLiked", isLiked);
+			response.put("message", isLiked ? "좋아요를 추가했습니다." : "좋아요를 취소했습니다.");
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "좋아요 처리 실패: " + e.getMessage());
 		}
 		
 		return response;

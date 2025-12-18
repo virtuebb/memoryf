@@ -29,5 +29,7 @@ public interface MemberService {
 	
 	// 팔로워 팔로우 조회 서비스
 	
+	// 회원 닉네임 수정 서비스
+	int updateMemberNick(Member m);
 	
 }

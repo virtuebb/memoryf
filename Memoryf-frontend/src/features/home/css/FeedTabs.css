@@ -17,32 +17,49 @@
   background: rgba(255, 255, 255, 0.55);
   padding: 6px;
   border-radius: 999px;
+  justify-content: center;
+  border-top: 1px solid #dbdbdb;
+  padding-top: 12px;
+  margin-top: 12px;
+  background: transparent;
 }
 
 .tab-header button {
   flex: 1;
-  padding: 10px 0;
-  border-radius: 999px;
+  padding: 10px 16px;
+  border-radius: 0;
   border: none;
-
   background: transparent;
-  font-size: 14px;
-  font-weight: 500;
-  color: #777;
-
+  font-size: 13px;
+  font-weight: 600;
+  color: #8e8e8e;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-top: 1px solid transparent;
+  margin-top: -12px;
+  padding-top: 12px;
 }
 
 .tab-header button:hover {
-  background: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: #262626;
 }
 
 .tab-header button.active {
-  background: #ffffff;
-  color: #333;
-  font-weight: 700;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+  background: transparent;
+  color: #262626;
+  font-weight: 600;
+  box-shadow: none;
+  border-top-color: #262626;
+}
+
+.tab-header button svg {
+  width: 12px;
+  height: 12px;
 }
 
 /* =========================
@@ -76,32 +93,83 @@
 /* 카드 */
 .grid-card {
   position: relative;
-  border-radius: 18px;
+  border-radius: 4px;
   overflow: hidden;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1 / 1;
   background: #f3f3f3;
-  aspect-ratio: 1 / 1.2; 
   cursor: pointer;
   transition:
-    transform 0.35s ease,
-    box-shadow 0.35s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .grid-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s ease;
+  transition: opacity 0.2s ease;
+}
+
+.grid-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.grid-card:hover .grid-card-overlay {
+  opacity: 1;
 }
 
 /* hover */
 .grid-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
-.grid-card:hover img {
-  transform: scale(1.05);
+/* 빈 상태 */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #8e8e8e;
+}
+
+.empty-state p {
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.empty-state button {
+  padding: 8px 16px;
+  background: #0095f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empty-state button:hover {
+  background: #0084d9;
+}
+
+/* 로딩 상태 */
+.feed-tabs-loading {
+  text-align: center;
+  padding: 40px;
+  color: #8e8e8e;
+  font-size: 14px;
 }
 
 /* =========================

@@ -19,8 +19,8 @@
 ========================= */
 .profile-row {
   display: grid;
-  grid-template-columns: 160px 1fr; /* 🔥 아바타 : 콘텐츠 */
-  gap: 36px;
+  grid-template-columns: 210px 1fr; /* 🔥 아바타 : 콘텐츠 */
+  gap: 32px;
   align-items: center;
 }
 
@@ -31,11 +31,18 @@
   position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
+  width: 210px;
+  height: 210px;
+  cursor: pointer;
+  /* nudge avatar slightly right to avoid overflowing card edge */
+  margin-left: 80px;
 }
 
 .profile-avatar img {
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 160px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: cover;
 
@@ -43,21 +50,32 @@
   background: #fff;
 
   box-shadow: 0 8px 20px rgba(255, 160, 190, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* 온라인 점 */
-.online-dot {
+.profile-avatar:hover img {
+  transform: scale(0.95);
+  box-shadow: 0 4px 12px rgba(255, 160, 190, 0.35);
+}
+
+.profile-avatar:active img {
+  transform: scale(0.9);
+}
+
+.profile-avatar img.uploading {
+  opacity: 0.5;
+}
+
+.upload-overlay {
   position: absolute;
-  right: 14px;
-  bottom: 14px;
-
-  width: 14px;
-  height: 14px;
-
-  background: #4cd964;
-  border: 3px solid #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(76, 217, 100, 0.15);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ff8fae;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
 }
 
 /* =========================

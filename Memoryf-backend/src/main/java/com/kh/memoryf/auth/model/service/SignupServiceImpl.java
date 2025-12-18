@@ -61,7 +61,14 @@ public class SignupServiceImpl implements SignupService {
 		// 암호화
 		signup.setMemberPwd(bCryptPasswordEncoder.encode(memberPwd));
 		
-		return signupDao.insertMember(sqlSession, signup);
+		int result = signupDao.insertMember(sqlSession, signup);
+		
+		if(result > 0) {
+			// 홈 생성
+			signupDao.insertHome(sqlSession, signup);
+		}
+		
+		return result;
 	}
 
 	// 아이디 중복 체크

@@ -23,4 +23,12 @@ public class Home {
 	private String isPrivateVisit;
 	private String isPrivateFollow;
 	private int memberNo;	// 회원 번호 - MEMBER 테이블의 memberNo를 외래키로 받음
+	
+	// 조인 및 통계를 위한 필드
+	private String memberNick;          // 회원 닉네임
+	private String memberName;          // 회원 이름
+	private int feedCount;              // 게시물 수
+	private int followerCount;          // 팔로워 수
+	private int followingCount;         // 팔로잉 수
+	private boolean isFollowing;        // 현재 사용자가 팔로우 했는지 여부
 }

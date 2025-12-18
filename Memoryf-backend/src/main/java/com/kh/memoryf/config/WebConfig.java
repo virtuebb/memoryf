@@ -26,9 +26,15 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
         // 업로드된 피드 이미지 제공 (file system)
-        String uploadPath = System.getProperty("user.home") + "/memoryf/feed_upfiles/";
+        String feedUploadPath = System.getProperty("user.home") + "/memoryf/feed_upfiles/";
         registry.addResourceHandler("/feed_upfiles/**")
-                .addResourceLocations("file:" + uploadPath)
+                .addResourceLocations("file:" + feedUploadPath)
+                .setCachePeriod(3600);
+        
+        // 업로드된 프로필 이미지 제공 (file system)
+        String profileUploadPath = System.getProperty("user.home") + "/memoryf/profile_images/";
+        registry.addResourceHandler("/profile_images/**")
+                .addResourceLocations("file:" + profileUploadPath)
                 .setCachePeriod(3600);
     }
 }

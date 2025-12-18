@@ -48,6 +48,12 @@ body,
   box-sizing: border-box;
 }
 
+.main-layout.settings-mode {
+  justify-content: flex-start;
+  gap: 0;
+  padding: 20px 16px 24px 16px;
+}
+
 /* 사이드바 카드 */
 .left-section {
   background: var(--color-card-bg);
@@ -163,6 +169,11 @@ body,
   padding: 32px 40px;
   box-sizing: border-box;
   display: block;
+  background: var(--color-main-bg);
+}
+
+.main-content.settings-mode {
+  padding: 0;
   background: var(--color-main-bg);
 }
 

@@ -4,11 +4,10 @@
             "type": "java",
             "name": "Spring Boot-MemoryfBackendApplication<memoryf>",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/Memoryf-backend",
             "mainClass": "com.kh.memoryf.MemoryfBackendApplication",
             "projectName": "memoryf",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "args": ""
         }
     ]
 }

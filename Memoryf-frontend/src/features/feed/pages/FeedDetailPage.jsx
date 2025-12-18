@@ -4,7 +4,17 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import 'dayjs/locale/ko';
-import { getFeedDetail } from '../api/feedApi';
+import { 
+  getFeedDetail, 
+  deleteFeed, 
+  likeFeed, 
+  toggleFeedBookmark, 
+  getComments, 
+  createComment, 
+  deleteComment, 
+  toggleCommentLike 
+} from '../api/feedApi';
+import { getMemberNoFromToken } from '../../../utils/jwt';
 import './FeedDetailPage.css';
 
 dayjs.extend(relativeTime);
@@ -30,7 +40,7 @@ dayjs.updateLocale('ko', {
   },
 });
 
-function FeedDetailPage({ isModal = false }) {
+function FeedDetailPage({ isModal = false, onEditFeed }) {
   const { feedNo } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,6 +48,12 @@ function FeedDetailPage({ isModal = false }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // 캐러셀 현재 이미지 인덱스
+  const [comments, setComments] = useState([]); // 댓글 리스트
+  const [newComment, setNewComment] = useState(''); // 신규 댓글 입력값
+  const [isMoreOpen, setIsMoreOpen] = useState(false); // 설정(점점점) 모달
+  const [isLiked, setIsLiked] = useState(false); // 좋아요 상태
+  const [likeCount, setLikeCount] = useState(0); // 좋아요 수
+  const [isBookmarked, setIsBookmarked] = useState(false); // 북마크 상태
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -46,7 +62,14 @@ function FeedDetailPage({ isModal = false }) {
         setError(null);
         const data = await getFeedDetail(feedNo);
         setFeed(data);
+        setIsLiked(data.isLiked || false);
+        setLikeCount(data.likeCount || 0);
+        setIsBookmarked(data.isBookmarked || false);
         setCurrentImageIndex(0); // 피드 로드 시 첫 번째 이미지로 초기화
+        
+        // 댓글 목록 로드
+        const commentsData = await getComments(feedNo);
+        setComments(commentsData || []);
       } catch (err) {
         console.error('피드 상세 조회 오류:', err);
         setError('피드를 불러오는데 실패했습니다.');
@@ -59,6 +82,30 @@ function FeedDetailPage({ isModal = false }) {
       fetchFeed();
     }
   }, [feedNo]);
+
+  // 피드 수정/삭제 후 상세 페이지 갱신
+  useEffect(() => {
+    const handleFeedChanged = async () => {
+      if (feedNo) {
+        try {
+          const data = await getFeedDetail(feedNo);
+          setFeed(data);
+        } catch (err) {
+          console.error('피드 갱신 오류:', err);
+        }
+      }
+    };
+
+    window.addEventListener('feedChanged', handleFeedChanged);
+    return () => {
+      window.removeEventListener('feedChanged', handleFeedChanged);
+    };
+  }, [feedNo]);
+
+  const isOwner = (() => {
+    const me = getMemberNoFromToken();
+    return me && feed?.memberNo === me;
+  })();
 
   // 인스타그램 스타일 시간 경과 표시
   const formatTimeAgo = (dateString) => {
@@ -145,6 +192,138 @@ function FeedDetailPage({ isModal = false }) {
     }
   };
 
+  // 모달 바깥 클릭 시 닫기 (인스타 스타일)
+  const handleOverlayClick = (e) => {
+    if (!isModal) return;
+    if (e.target.classList.contains('feed-modal-overlay')) {
+      handleClose();
+    }
+  };
+
+  // 인스타그램 스타일 텍스트 + 해시태그 렌더링
+  const renderTextWithTags = (text) => {
+    if (!text) return null;
+
+    // 공백을 포함해서 그대로 유지하기 위해 캡쳐 그룹 사용
+    const parts = text.split(/(\s+)/);
+
+    return parts.map((part, index) => {
+      // 공백만 있는 부분은 그대로 반환
+      if (/^\s+$/.test(part)) {
+        return part;
+      }
+      // 해시태그(#으로 시작하는 연속 문자열)
+      if (/^#\S+/.test(part)) {
+        return (
+          <span key={index} className="inline-tag">
+            {part}
+          </span>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
+  // 댓글 등록
+  const handleSubmitComment = async (e) => {
+    e.preventDefault();
+    const trimmed = newComment.trim();
+    if (!trimmed) return;
+
+    const memberNo = getMemberNoFromToken();
+    if (!memberNo) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      const result = await createComment(feedNo, trimmed, memberNo);
+      if (result.success) {
+        // 댓글 목록 새로고침
+        const commentsData = await getComments(feedNo);
+        setComments(commentsData || []);
+        setNewComment('');
+      }
+    } catch (error) {
+      console.error('댓글 등록 실패:', error);
+      alert('댓글 등록에 실패했습니다.');
+    }
+  };
+
+  // 피드 좋아요 토글
+  const handleToggleLike = async () => {
+    const memberNo = getMemberNoFromToken();
+    if (!memberNo) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      const result = await likeFeed(feedNo, memberNo);
+      if (result.success) {
+        setIsLiked(result.isLiked);
+        setLikeCount((prev) => (result.isLiked ? prev + 1 : prev - 1));
+      }
+    } catch (error) {
+      console.error('좋아요 처리 실패:', error);
+    }
+  };
+
+  // 피드 북마크 토글
+  const handleToggleBookmark = async () => {
+    const memberNo = getMemberNoFromToken();
+    if (!memberNo) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      const result = await toggleFeedBookmark(feedNo, memberNo);
+      if (result.success) {
+        setIsBookmarked(result.isBookmarked);
+      }
+    } catch (error) {
+      console.error('북마크 처리 실패:', error);
+    }
+  };
+
+  // 댓글 좋아요 토글
+  const handleToggleCommentLike = async (commentNo) => {
+    const memberNo = getMemberNoFromToken();
+    if (!memberNo) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      const result = await toggleCommentLike(feedNo, commentNo, memberNo);
+      if (result.success) {
+        // 댓글 목록 새로고침
+        const commentsData = await getComments(feedNo);
+        setComments(commentsData || []);
+      }
+    } catch (error) {
+      console.error('댓글 좋아요 처리 실패:', error);
+    }
+  };
+
+  // 댓글 삭제
+  const handleDeleteComment = async (commentNo) => {
+    if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
+
+    try {
+      const result = await deleteComment(feedNo, commentNo);
+      if (result.success) {
+        // 댓글 목록 새로고침
+        const commentsData = await getComments(feedNo);
+        setComments(commentsData || []);
+      }
+    } catch (error) {
+      console.error('댓글 삭제 실패:', error);
+      alert('댓글 삭제에 실패했습니다.');
+    }
+  };
+
   if (loading) {
     return (
       <div className={`feed-detail-page ${isModal ? 'modal' : ''}`}>
@@ -165,14 +344,14 @@ function FeedDetailPage({ isModal = false }) {
   const hasMultipleImages = feedFiles.length > 1;
 
   return (
-    <div className={isModal ? 'feed-modal-overlay' : ''}>
-      <div className={`feed-detail-page ${isModal ? 'modal' : ''}`}>
-        {isModal && (
-          <button className="modal-close-btn" onClick={handleClose}>
-            ×
-          </button>
-        )}
-        
+    <div
+      className={isModal ? 'feed-modal-overlay' : ''}
+      onClick={handleOverlayClick}
+    >
+      <div
+        className={`feed-detail-page ${isModal ? 'modal' : ''}`}
+        onClick={(e) => e.stopPropagation()} // 모달 내부 클릭 시 닫힘 방지
+      >
         <div className="feed-detail-container">
           {/* 왼쪽: 이미지 캐러셀 */}
           <div className="feed-detail-image-section">
@@ -238,40 +417,111 @@ function FeedDetailPage({ isModal = false }) {
                 <div className="author-avatar">👤</div>
                 <span className="author-nick">{feed?.memberNick || '익명'}</span>
               </div>
+              {isModal && (
+                <button
+                  className="feed-header-menu-btn"
+                  aria-label="더보기"
+                  type="button"
+                  onClick={() => setIsMoreOpen(true)}
+                >
+                  ⋯
+                </button>
+              )}
             </div>
 
             {/* 댓글 영역 */}
             <div className="feed-detail-comments">
               {/* 피드 내용 */}
               <div className="feed-detail-content-item">
-                <div className="comment-author">
-                  <span className="comment-author-name">{feed?.memberNick || '익명'}</span>
+                <div className="feed-main-text">
+                  <span className="comment-author-name">
+                    {feed?.memberNick || '익명'}
+                  </span>
+                  <span className="comment-text-inline">
+                    {feed?.content ? renderTextWithTags(feed.content) : '내용 없음'}
+                  </span>
                 </div>
-                <div className="comment-text">
-                  {feed?.content || '내용 없음'}
-                </div>
+                {/* 태그 영역 - 인스타그램처럼 내용 아래 노출 */}
+                {feed?.tag && (
+                  <div className="feed-detail-tags">
+                    {feed.tag
+                      .split(/[ ,#]+/)
+                      .filter(Boolean)
+                      .map((tag, idx) => (
+                        <span key={idx} className="feed-tag-item">
+                          #{tag}
+                        </span>
+                      ))}
+                  </div>
+                )}
                 <div className="comment-time">
-                  {feed?.createdDate 
-                    ? new Date(feed.createdDate).toLocaleDateString('ko-KR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })
-                    : ''}
+                  {feed?.createdDate ? formatTimeAgo(feed.createdDate) : ''}
                 </div>
               </div>
 
-              {/* 댓글 목록 (추후 구현) */}
+              {/* 댓글 목록 */}
               <div className="comments-list">
-                <p className="comments-placeholder">댓글 기능은 추후 구현 예정입니다</p>
+                {comments.length === 0 ? (
+                  <p className="comments-placeholder">
+                    {likeCount === 0 
+                      ? '가장 먼저 좋아요를 눌러보세요' 
+                      : '첫 댓글을 남겨보세요'}
+                  </p>
+                ) : (
+                  comments.map((comment) => (
+                    <div key={comment.commentNo} className="feed-detail-content-item">
+                      <div className="feed-main-text">
+                        <span className="comment-author-name">
+                          {comment.writerNick}
+                        </span>
+                        <span className="comment-text-inline">
+                          {renderTextWithTags(comment.content)}
+                        </span>
+                      </div>
+                      <div className="comment-actions">
+                        <span className="comment-time">
+                          {comment.createDate
+                            ? formatTimeAgo(comment.createDate)
+                            : ''}
+                        </span>
+                        {comment.likeCount > 0 && (
+                          <span className="comment-likes">
+                            좋아요 {comment.likeCount}개
+                          </span>
+                        )}
+                        <button
+                          className={`comment-like-btn ${comment.isLiked ? 'liked' : ''}`}
+                          onClick={() => handleToggleCommentLike(comment.commentNo)}
+                          aria-label="댓글 좋아요"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill={comment.isLiked ? '#ed4956' : 'none'} stroke="currentColor" strokeWidth="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                          </svg>
+                        </button>
+                        {getMemberNoFromToken() === comment.writer && (
+                          <button
+                            className="comment-delete-btn"
+                            onClick={() => handleDeleteComment(comment.commentNo)}
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
             {/* 하단 액션 영역 */}
             <div className="feed-detail-actions">
               <div className="feed-actions-icons">
-                <button className="action-btn like-btn" aria-label="좋아요">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <button 
+                  className={`action-btn like-btn ${isLiked ? 'liked' : ''}`} 
+                  aria-label="좋아요"
+                  onClick={handleToggleLike}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? '#ed4956' : 'none'} stroke="currentColor" strokeWidth="2">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                   </svg>
                 </button>
@@ -289,8 +539,18 @@ function FeedDetailPage({ isModal = false }) {
                 </button>
               </div>
               
+              <button
+                className={`action-btn bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+                aria-label="북마크"
+                onClick={handleToggleBookmark}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+              
               <div className="feed-stats">
-                <span className="feed-like-count">좋아요 {feed?.likeCount || 0}개</span>
+                <span className="feed-like-count">좋아요 {likeCount}개</span>
               </div>
 
               <span className="feed-time-ago">
@@ -298,20 +558,129 @@ function FeedDetailPage({ isModal = false }) {
               </span>
 
               {/* 댓글 입력 */}
-              <div className="comment-input-area">
+              <form className="comment-input-area" onSubmit={handleSubmitComment}>
                 <input
                   type="text"
                   className="comment-input"
                   placeholder="댓글 달기..."
-                  disabled
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
                 />
-                <button className="comment-submit-btn" disabled>
+                <button
+                  type="submit"
+                  className="comment-submit-btn"
+                  disabled={!newComment.trim()}
+                >
                   게시
                 </button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
+
+        {/* 설정(점점점) 모달 - 인스타그램 스타일 액션 시트 */}
+        {isMoreOpen && (
+          <div
+            className="more-menu-overlay"
+            onClick={() => setIsMoreOpen(false)}
+          >
+            <div
+              className="more-menu-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {isOwner ? (
+                <>
+                  <button
+                    type="button"
+                    className="more-menu-item more-menu-danger"
+                    onClick={async () => {
+                      if (!window.confirm('이 피드를 삭제하시겠습니까?')) return;
+                      try {
+                        const res = await deleteFeed(feed.feedNo);
+                        if (res?.success) {
+                          alert('삭제되었습니다.');
+                          // 피드 목록 새로고침을 위해 전역 이벤트 발행
+                          window.dispatchEvent(new Event('feedChanged'));
+                          setIsMoreOpen(false);
+                          navigate('/feeds');
+                        } else {
+                          alert(res?.message || '삭제에 실패했습니다.');
+                        }
+                      } catch (err) {
+                        alert('삭제 중 오류가 발생했습니다.');
+                      }
+                    }}
+                  >
+                    삭제
+                  </button>
+                  <button
+                    type="button"
+                    className="more-menu-item"
+                    onClick={() => {
+                      setIsMoreOpen(false);
+                      if (onEditFeed) {
+                        onEditFeed(feed);
+                        handleClose(); // 상세 모달 닫기
+                      }
+                    }}
+                  >
+                    수정
+                  </button>
+                  <button
+                    type="button"
+                    className="more-menu-item"
+                    onClick={() => {
+                      const url = `${window.location.origin}/feeds/${feed.feedNo}`;
+                      if (navigator.clipboard?.writeText) {
+                        navigator.clipboard.writeText(url).catch(() => {});
+                      }
+                      setIsMoreOpen(false);
+                    }}
+                  >
+                    링크 복사
+                  </button>
+                  <button
+                    type="button"
+                    className="more-menu-item more-menu-cancel"
+                    onClick={() => setIsMoreOpen(false)}
+                  >
+                    취소
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="more-menu-item more-menu-danger"
+                  >
+                    신고
+                  </button>
+                  <button
+                    type="button"
+                    className="more-menu-item"
+                    onClick={() => {
+                      const url = `${window.location.origin}/feeds/${feed.feedNo}`;
+                      if (navigator.clipboard?.writeText) {
+                        navigator.clipboard.writeText(url).catch(() => {});
+                      }
+                      setIsMoreOpen(false);
+                    }}
+                  >
+                    링크 복사
+                  </button>
+                  <button
+                    type="button"
+                    className="more-menu-item more-menu-cancel"
+                    onClick={() => setIsMoreOpen(false)}
+                  >
+                    취소
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

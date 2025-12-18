@@ -136,4 +136,123 @@ export const likeFeed = async (feedNo, memberNo) => {
   }
 };
 
+/**
+ * 피드 삭제 (DELETE /feeds/:id)
+ */
+export const deleteFeed = async (feedNo) => {
+  try {
+    const response = await feedApi.delete(`/${feedNo}`);
+    return response.data;
+  } catch (error) {
+    console.error('피드 삭제 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 피드 수정 (PUT /feeds/:id)
+ * @param {number} feedNo
+ * @param {{content?: string, tag?: string, latitude?: string, longitude?: string}} payload
+ */
+export const updateFeed = async (feedNo, payload) => {
+  try {
+    const response = await feedApi.put(`/${feedNo}`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('피드 수정 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 피드 북마크 토글 (RESTful: POST /feeds/:id/bookmarks)
+ * @param {number} feedNo - 피드 번호
+ * @param {number} memberNo - 회원 번호
+ * @returns {Promise} 북마크 결과
+ */
+export const toggleFeedBookmark = async (feedNo, memberNo) => {
+  try {
+    const response = await feedApi.post(`/${feedNo}/bookmarks`, {
+      memberNo,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('피드 북마크 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 특정 피드의 댓글 목록 조회 (RESTful: GET /feeds/:id/comments)
+ * @param {number} feedNo - 피드 번호
+ * @returns {Promise} 댓글 목록
+ */
+export const getComments = async (feedNo) => {
+  try {
+    const response = await feedApi.get(`/${feedNo}/comments`);
+    if (response.data && response.data.success) {
+      return response.data.data;
+    }
+    return [];
+  } catch (error) {
+    console.error('댓글 조회 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 댓글 생성 (RESTful: POST /feeds/:id/comments)
+ * @param {number} feedNo - 피드 번호
+ * @param {string} content - 댓글 내용
+ * @param {number} writer - 작성자 회원 번호
+ * @returns {Promise} 생성 결과
+ */
+export const createComment = async (feedNo, content, writer) => {
+  try {
+    const response = await feedApi.post(`/${feedNo}/comments`, {
+      content,
+      writer,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('댓글 생성 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 댓글 삭제 (RESTful: DELETE /feeds/:feedNo/comments/:commentNo)
+ * @param {number} feedNo - 피드 번호
+ * @param {number} commentNo - 댓글 번호
+ * @returns {Promise} 삭제 결과
+ */
+export const deleteComment = async (feedNo, commentNo) => {
+  try {
+    const response = await feedApi.delete(`/${feedNo}/comments/${commentNo}`);
+    return response.data;
+  } catch (error) {
+    console.error('댓글 삭제 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 댓글 좋아요 토글 (RESTful: POST /feeds/:feedNo/comments/:commentNo/likes)
+ * @param {number} feedNo - 피드 번호
+ * @param {number} commentNo - 댓글 번호
+ * @param {number} memberNo - 회원 번호
+ * @returns {Promise} 좋아요 결과
+ */
+export const toggleCommentLike = async (feedNo, commentNo, memberNo) => {
+  try {
+    const response = await feedApi.post(`/${feedNo}/comments/${commentNo}/likes`, {
+      memberNo,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('댓글 좋아요 실패:', error);
+    throw error;
+  }
+};
+
 export default feedApi;
