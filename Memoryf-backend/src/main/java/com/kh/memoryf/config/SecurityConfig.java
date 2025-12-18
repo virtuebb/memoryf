@@ -59,7 +59,7 @@ public class SecurityConfig {
     					org.springframework.security.config.http.SessionCreationPolicy.STATELESS)) // JWT 인증방식임 - 세션 아님
     			.authorizeHttpRequests(auth -> auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // 프리플라이트(OPTIONS) 요청 모두 허용
     					.requestMatchers("/images/**", "/resources/**", "/css/**", "/js/**", "/feed_upfiles/**").permitAll() // 정적 리소스 및 업로드 이미지 모두 허용
-    					.requestMatchers("/login/**").permitAll() // 로그인 요청 허용 - @RequestMapping("login") 관련
+    					.requestMatchers("/login/**", "/signup/**").permitAll() // 로그인 요청 허용 - @RequestMapping("login") 관련
     					.requestMatchers("/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
     					.anyRequest().authenticated() // 나머지는 JWT 인증 필요함
     				)
