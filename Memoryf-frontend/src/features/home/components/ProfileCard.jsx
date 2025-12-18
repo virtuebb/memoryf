@@ -1,51 +1,157 @@
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { getHomeByMemberNo, uploadProfileImage } from "../api/homeApi";
+import { getMemberNoFromToken } from "../../../utils/jwt";
+import defaultProfileImg from "../../../assets/images/profiles/default-profile.svg";
 import "../css/ProfileCard.css";
 
 function ProfileCard() {
+  const navigate = useNavigate();
+  const [home, setHome] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const currentMemberNo = getMemberNoFromToken();
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      if (!currentMemberNo) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
+        setHome(homeData);
+      } catch (error) {
+        console.error('홈 데이터 조회 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, [currentMemberNo, navigate]);
+
+  const handleEditProfile = () => {
+    navigate('/settings/edit');
+  };
+
+  const handleMessage = () => {
+    navigate('/dm');
+  };
+
+  const handleProfileImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 이미지 파일 확인
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드 가능합니다.');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const result = await uploadProfileImage(currentMemberNo, file);
+      
+      if (result.success) {
+        // 프로필 이미지 업데이트 성공 - 홈 데이터 다시 조회
+        const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
+        setHome(homeData);
+        alert('프로필 이미지가 변경되었습니다.');
+      }
+    } catch (error) {
+      console.error('프로필 이미지 업로드 실패:', error);
+      alert('프로필 이미지 업로드에 실패했습니다.');
+    } finally {
+      setUploading(false);
+      // 파일 input 초기화
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="profile-card card">
+        <div className="profile-loading">로딩 중...</div>
+      </section>
+    );
+  }
+
+  if (!home) {
+    return (
+      <section className="profile-card card">
+        <div className="profile-error">프로필을 불러올 수 없습니다.</div>
+      </section>
+    );
+  }
+
+  const profileImageUrl = home.profileChangeName 
+    ? `http://localhost:8006/memoryf/profile_images/${home.profileChangeName}`
+    : defaultProfileImg;
+
   return (
     <section className="profile-card card">
       <div className="profile-row">
         
         {/* 왼쪽 : 아바타 */}
-        <div className="profile-avatar">
-          <img src="/avatar-dummy.png" alt="profile" />
+        <div className="profile-avatar" onClick={handleProfileImageClick}>
+          <img 
+            src={profileImageUrl} 
+            alt="profile" 
+            className={uploading ? 'uploading' : ''}
+          />
           <span className="online-dot" />
+          {uploading && <div className="upload-overlay">업로드 중...</div>}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
         </div>
 
         {/* 오른쪽 : 정보 */}
         <div className="profile-content">
-          <h2 className="name">김제니</h2>
-          <span className="username">@jenny_dreamer</span>
+          <h2 className="name">{home.memberNick}</h2>
+          <span className="username">@{home.memberNick}</span>
 
-          <p className="bio">
-            ✨ 일상의 순간을 기록하는 크리에이터<br />
-            📷 서울의 파스텔 같은 풍경을 담아요<br />
-            💌 협업은 DM으로 편하게 연락 주세요
-          </p>
+          {home.statusMsg && (
+            <p className="bio">{home.statusMsg}</p>
+          )}
 
-          {/* 통계 → 메시지 바로 아래 */}
+          {/* 통계 */}
           <div className="stats inline">
             <div>
-              <strong>1,240</strong>
+              <strong>{home.feedCount || 0}</strong>
               <span>게시물</span>
             </div>
             <div>
-              <strong>45.2k</strong>
+              <strong>{home.followerCount || 0}</strong>
               <span>팔로워</span>
             </div>
             <div>
-              <strong>380</strong>
+              <strong>{home.followingCount || 0}</strong>
               <span>팔로잉</span>
             </div>
           </div>
 
-          <div className="meta">
-            <span>📍 서울, 대한민국</span>
-            <span className="link">jenny.world</span>
-          </div>
-
           <div className="actions">
-            <button className="btn primary">팔로우</button>
-            <button className="btn">메시지</button>
+            <button className="btn primary" onClick={handleEditProfile}>
+              프로필 편집
+            </button>
+            <button className="btn" onClick={handleMessage}>
+              메시지
+            </button>
           </div>
         </div>
 

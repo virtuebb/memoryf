@@ -26,5 +26,6 @@ public class Signup {
 	private String phone;
 	private String gender;
 	private Date birthday;
+	private int memberNo;
 
 }

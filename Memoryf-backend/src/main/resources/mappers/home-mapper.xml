@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="homeMapper">
+
+	<!-- 회원 번호로 홈 조회 (통계 포함) -->
+	<select id="selectHomeByMemberNo" parameterType="hashmap" resultMap="homeResultMap">
+		SELECT 
+			H.HOME_NO,
+			H.HOME_TITLE,
+			H.STATUS_MSG,
+			H.PROFILE_ORIGIN_NAME,
+			H.PROFILE_CHANGE_NAME,
+			H.IS_PRIVATE_PROFILE,
+			H.IS_PRIVATE_VISIT,
+			H.IS_PRIVATE_FOLLOW,
+			H.MEMBER_NO,
+			M.MEMBER_NICK,
+			M.MEMBER_NAME,
+			NVL(FEED_CNT.FEED_COUNT, 0) AS FEED_COUNT,
+			NVL(FOLLOWER_CNT.FOLLOWER_COUNT, 0) AS FOLLOWER_COUNT,
+			NVL(FOLLOWING_CNT.FOLLOWING_COUNT, 0) AS FOLLOWING_COUNT
+			<if test="currentMemberNo != null">
+				, CASE WHEN FLW.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_FOLLOWING
+			</if>
+		FROM TB_MEMBER_HOME H
+		LEFT JOIN TB_MEMBER M ON H.MEMBER_NO = M.MEMBER_NO
+		LEFT JOIN (
+			SELECT MEMBER_NO, COUNT(*) AS FEED_COUNT
+			FROM TB_FEED
+			WHERE IS_DEL = 'N'
+			GROUP BY MEMBER_NO
+		) FEED_CNT ON H.MEMBER_NO = FEED_CNT.MEMBER_NO
+		LEFT JOIN (
+			SELECT HOME_NO, COUNT(*) AS FOLLOWER_COUNT
+			FROM TB_FOLLOWS
+			GROUP BY HOME_NO
+		) FOLLOWER_CNT ON H.HOME_NO = FOLLOWER_CNT.HOME_NO
+		LEFT JOIN (
+			SELECT MEMBER_NO, COUNT(*) AS FOLLOWING_COUNT
+			FROM TB_FOLLOWS
+			GROUP BY MEMBER_NO
+		) FOLLOWING_CNT ON H.MEMBER_NO = FOLLOWING_CNT.MEMBER_NO
+		<if test="currentMemberNo != null">
+			LEFT JOIN TB_FOLLOWS FLW ON H.HOME_NO = FLW.HOME_NO AND FLW.MEMBER_NO = #{currentMemberNo}
+		</if>
+		WHERE H.MEMBER_NO = #{memberNo}
+	</select>
+
+	<!-- 방명록 목록 조회 -->
+	<select id="selectGuestbookList" parameterType="hashmap" resultMap="guestbookResultMap">
+		SELECT 
+			G.GUESTBOOK_NO,
+			G.GUESTBOOK_CONTENT,
+			G.CREATE_DATE,
+			G.IS_DEL,
+			G.MEMBER_NO,
+			G.HOME_NO,
+			M.MEMBER_NICK,
+			H.PROFILE_CHANGE_NAME,
+			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT
+			<if test="currentMemberNo != null">
+				, CASE WHEN GL.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
+			</if>
+		FROM TB_GUESTBOOK G
+		LEFT JOIN TB_MEMBER M ON G.MEMBER_NO = M.MEMBER_NO
+		LEFT JOIN TB_MEMBER_HOME H ON M.MEMBER_NO = H.MEMBER_NO
+		LEFT JOIN (
+			SELECT GUESTBOOK_NO, COUNT(*) AS LIKE_COUNT
+			FROM TB_GUESTBOOK_LIKE
+			GROUP BY GUESTBOOK_NO
+		) LIKE_CNT ON G.GUESTBOOK_NO = LIKE_CNT.GUESTBOOK_NO
+		<if test="currentMemberNo != null">
+			LEFT JOIN TB_GUESTBOOK_LIKE GL ON G.GUESTBOOK_NO = GL.GUESTBOOK_NO AND GL.MEMBER_NO = #{currentMemberNo}
+		</if>
+		WHERE G.HOME_NO = #{homeNo}
+		AND G.IS_DEL = 'N'
+		ORDER BY G.CREATE_DATE DESC
+	</select>
+
+	<!-- 방명록 생성 -->
+	<insert id="insertGuestbook" parameterType="guestbook">
+		INSERT INTO TB_GUESTBOOK (
+			GUESTBOOK_NO,
+			GUESTBOOK_CONTENT,
+			CREATE_DATE,
+			IS_DEL,
+			MEMBER_NO,
+			HOME_NO
+		) VALUES (
+			SEQ_GUESTBOOK_NO.NEXTVAL,
+			#{guestbookContent},
+			SYSDATE,
+			'N',
+			#{memberNo},
+			#{homeNo}
+		)
+	</insert>
+
+	<!-- 방명록 삭제 (IS_DEL = 'Y') -->
+	<update id="deleteGuestbook" parameterType="_int">
+		UPDATE TB_GUESTBOOK
+		SET IS_DEL = 'Y'
+		WHERE GUESTBOOK_NO = #{guestbookNo}
+	</update>
+
+	<!-- 방명록 좋아요 추가 -->
+	<insert id="insertGuestbookLike" parameterType="hashmap">
+		INSERT INTO TB_GUESTBOOK_LIKE (
+			MEMBER_NO,
+			GUESTBOOK_NO
+		) VALUES (
+			#{memberNo},
+			#{guestbookNo}
+		)
+	</insert>
+
+	<!-- 방명록 좋아요 삭제 -->
+	<delete id="deleteGuestbookLike" parameterType="hashmap">
+		DELETE FROM TB_GUESTBOOK_LIKE
+		WHERE MEMBER_NO = #{memberNo}
+		AND GUESTBOOK_NO = #{guestbookNo}
+	</delete>
+
+	<!-- 방명록 좋아요 여부 확인 -->
+	<select id="checkGuestbookLike" parameterType="hashmap" resultType="_int">
+		SELECT COUNT(*)
+		FROM TB_GUESTBOOK_LIKE
+		WHERE MEMBER_NO = #{memberNo}
+		AND GUESTBOOK_NO = #{guestbookNo}
+	</select>
+
+	<!-- 프로필 이미지 업데이트 -->
+	<update id="updateProfileImage" parameterType="home">
+		UPDATE TB_MEMBER_HOME
+		SET PROFILE_ORIGIN_NAME = #{profileOriginName},
+			PROFILE_CHANGE_NAME = #{profileChangeName}
+		WHERE MEMBER_NO = #{memberNo}
+	</update>
+
+	<!-- 상태 메시지 업데이트 -->
+	<update id="updateStatusMsg" parameterType="home">
+		UPDATE TB_MEMBER_HOME
+		SET STATUS_MSG = #{statusMsg}
+		WHERE MEMBER_NO = #{memberNo}
+	</update>
+
+	<!-- ResultMap: Home -->
+	<resultMap type="home" id="homeResultMap">
+		<id property="homeNo" column="HOME_NO"/>
+		<result property="homeTitle" column="HOME_TITLE"/>
+		<result property="statusMsg" column="STATUS_MSG"/>
+		<result property="profileOriginName" column="PROFILE_ORIGIN_NAME"/>
+		<result property="profileChangeName" column="PROFILE_CHANGE_NAME"/>
+		<result property="isPrivateProfile" column="IS_PRIVATE_PROFILE"/>
+		<result property="isPrivateVisit" column="IS_PRIVATE_VISIT"/>
+		<result property="isPrivateFollow" column="IS_PRIVATE_FOLLOW"/>
+		<result property="memberNo" column="MEMBER_NO"/>
+		<result property="memberNick" column="MEMBER_NICK"/>
+		<result property="memberName" column="MEMBER_NAME"/>
+		<result property="feedCount" column="FEED_COUNT"/>
+		<result property="followerCount" column="FOLLOWER_COUNT"/>
+		<result property="followingCount" column="FOLLOWING_COUNT"/>
+		<result property="isFollowing" column="IS_FOLLOWING"/>
+	</resultMap>
+
+	<!-- ResultMap: Guestbook -->
+	<resultMap type="guestbook" id="guestbookResultMap">
+		<id property="guestbookNo" column="GUESTBOOK_NO"/>
+		<result property="guestbookContent" column="GUESTBOOK_CONTENT"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="isDel" column="IS_DEL"/>
+		<result property="memberNo" column="MEMBER_NO"/>
+		<result property="homeNo" column="HOME_NO"/>
+		<result property="memberNick" column="MEMBER_NICK"/>
+		<result property="profileChangeName" column="PROFILE_CHANGE_NAME"/>
+		<result property="likeCount" column="LIKE_COUNT"/>
+		<result property="isLiked" column="IS_LIKED"/>
+	</resultMap>
+
+</mapper>

@@ -61,9 +61,9 @@ public class DmController {
 
     // dm 방 목록 조회
     @GetMapping("/dm/rooms")
-    // public ArrayList<DmRoom> selectMyDmRooms( ) {
-        
-    // }
+        public ArrayList<DmRoom> selectMyDmRooms() {
+		return new ArrayList<>();
+	}
 
     // dm 방 상세 조회
 

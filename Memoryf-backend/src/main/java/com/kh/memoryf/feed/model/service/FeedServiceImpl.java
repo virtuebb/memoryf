@@ -33,6 +33,10 @@ public class FeedServiceImpl implements FeedService {
 		if (memberNo != null && feed != null) {
 			int likeCount = feedDao.checkFeedLike(sqlSession, feedNo, memberNo);
 			feed.setLiked(likeCount > 0);
+			
+			// 현재 사용자가 북마크 했는지 확인
+			int bookmarkCount = feedDao.checkFeedBookmark(sqlSession, feedNo, memberNo);
+			feed.setBookmarked(bookmarkCount > 0);
 		}
 		
 		return feed;
@@ -75,5 +79,27 @@ public class FeedServiceImpl implements FeedService {
 	@Override
 	public int deleteFeed(int feedNo) {
 		return feedDao.deleteFeed(sqlSession, feedNo);
+	}
+	
+	@Override
+	public int updateFeed(Feed feed) {
+		return feedDao.updateFeed(sqlSession, feed);
+	}
+	
+	@Override
+	@Transactional
+	public boolean toggleFeedBookmark(int feedNo, int memberNo) {
+		// 이미 북마크 했는지 확인
+		int bookmarkCount = feedDao.checkFeedBookmark(sqlSession, feedNo, memberNo);
+		
+		if (bookmarkCount > 0) {
+			// 북마크 삭제
+			feedDao.deleteFeedBookmark(sqlSession, feedNo, memberNo);
+			return false;
+		} else {
+			// 북마크 추가
+			feedDao.insertFeedBookmark(sqlSession, feedNo, memberNo);
+			return true;
+		}
 	}
 }

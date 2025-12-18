@@ -5,7 +5,7 @@
   
 <mapper namespace="signupMapper">
 	
-	<insert id="insertMember" parameterType="signup">
+	<insert id="insertMember" parameterType="signup" useGeneratedKeys="true" keyProperty="memberNo" keyColumn="MEMBER_NO">
         INSERT INTO TB_MEMBER (
             MEMBER_ID,
             MEMBER_PWD,
@@ -25,6 +25,18 @@
             #{gender},
             #{birthday}
         )	
+	</insert>
+	
+	<insert id="insertHome" parameterType="signup">
+		INSERT INTO TB_MEMBER_HOME (
+			HOME_NO,
+			MEMBER_NO,
+			HOME_TITLE
+		) VALUES (
+			SEQ_HOME_NO.NEXTVAL,
+			#{memberNo},
+			#{memberNick} || '님의 미니홈피'
+		)
 	</insert>
 	
 	<select id="checkMemberId" parameterType="string" resultType="int">

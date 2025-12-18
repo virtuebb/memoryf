@@ -1,18 +1,51 @@
-import { useState, useRef } from 'react';
-import { createFeed } from '../api/feedApi';
+import { useState, useRef, useEffect } from 'react';
+import { createFeed, updateFeed } from '../api/feedApi';
+import { getMemberNoFromToken } from '../../../utils/jwt';
 import './FeedUploadModal.css';
 
-function FeedUploadModal({ isOpen, onClose, onSuccess }) {
-  const [step, setStep] = useState(1); // 1: 사진 선택, 2: 글 작성
+function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialFeed = null }) {
+  const isEditMode = mode === 'edit';
+  const [step, setStep] = useState(isEditMode ? 2 : 1); // 수정 모드면 바로 2단계로
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // 캐러셀 현재 이미지 인덱스
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [content, setContent] = useState('');
   const [tag, setTag] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+
+  // 수정 모드일 때 기존 피드 데이터 불러오기
+  useEffect(() => {
+    if (isOpen && isEditMode && initialFeed) {
+      setContent(initialFeed.content || '');
+      setTag(initialFeed.tag || '');
+      setLatitude(initialFeed.latitude || '');
+      setLongitude(initialFeed.longitude || '');
+      
+      // 기존 이미지들을 미리보기로 설정
+      if (initialFeed.feedFiles && initialFeed.feedFiles.length > 0) {
+        const imageUrls = initialFeed.feedFiles.map(file => {
+          if (file.filePath?.startsWith('http://') || file.filePath?.startsWith('https://')) {
+            return file.filePath;
+          }
+          return `http://localhost:8006/memoryf${file.filePath}`;
+        });
+        setPreviews(imageUrls);
+        setStep(2); // 수정 모드면 바로 2단계
+      }
+    } else if (isOpen && !isEditMode) {
+      // 새로 작성 모드일 때 초기화
+      setContent('');
+      setTag('');
+      setLatitude('');
+      setLongitude('');
+      setPreviews([]);
+      setSelectedFiles([]);
+      setStep(1);
+    }
+  }, [isOpen, isEditMode, initialFeed]);
 
   // 파일 선택 핸들러
   const handleFileSelect = (e) => {
@@ -84,9 +117,10 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
     return tags.join(' ');
   };
 
-  // 피드 업로드
+  // 피드 업로드/수정
   const handleSubmit = async () => {
-    if (selectedFiles.length === 0) {
+    // 수정 모드가 아닐 때만 이미지 파일 체크
+    if (!isEditMode && selectedFiles.length === 0) {
       alert('최소 1개 이상의 이미지를 선택해주세요.');
       return;
     }
@@ -94,39 +128,68 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
     setIsUploading(true);
 
     try {
-      const formData = new FormData();
-      
-      // 피드 정보 추가
-      formData.append('content', content || '');
-      formData.append('tag', extractTags(tag));
-      if (latitude) formData.append('latitude', latitude);
-      if (longitude) formData.append('longitude', longitude);
-      formData.append('memberNo', 1); // 임시로 1, 추후 세션에서 가져오기
-      
-      // 이미지 파일 추가
-      selectedFiles.forEach((file) => {
-        formData.append('files', file);
-      });
-
-      const response = await createFeed(formData);
-      
-      if (response && response.success) {
-        alert('피드가 성공적으로 업로드되었습니다.');
-        handleClose();
-        if (onSuccess) onSuccess();
+      if (isEditMode) {
+        // 수정 모드: 내용/태그만 업데이트
+        const response = await updateFeed(initialFeed.feedNo, {
+          content: content || '',
+          tag: extractTags(tag),
+          latitude: latitude || '',
+          longitude: longitude || '',
+        });
+        
+        if (response && response.success) {
+          alert('피드가 성공적으로 수정되었습니다.');
+          // 피드 목록 새로고침
+          window.dispatchEvent(new Event('feedChanged'));
+          handleClose();
+          if (onSuccess) onSuccess();
+        } else {
+          const errorMessage = response?.message || '피드 수정에 실패했습니다.';
+          alert(errorMessage);
+          console.error('피드 수정 실패:', response);
+        }
       } else {
-        const errorMessage = response?.message || '피드 업로드에 실패했습니다.';
-        alert(errorMessage);
-        console.error('피드 업로드 실패:', response);
+        // 생성 모드: FormData로 파일 포함 업로드
+        const formData = new FormData();
+        
+        // 🔐 JWT에서 현재 로그인한 회원 번호 가져오기
+        const memberNo = getMemberNoFromToken();
+        if (!memberNo) {
+          alert('로그인 정보가 올바르지 않습니다. 다시 로그인 해주세요.');
+          return;
+        }
+
+        // 피드 정보 추가
+        formData.append('content', content || '');
+        formData.append('tag', extractTags(tag));
+        if (latitude) formData.append('latitude', latitude);
+        if (longitude) formData.append('longitude', longitude);
+        formData.append('memberNo', memberNo);
+        
+        // 이미지 파일 추가
+        selectedFiles.forEach((file) => {
+          formData.append('files', file);
+        });
+
+        const response = await createFeed(formData);
+        
+        if (response && response.success) {
+          alert('피드가 성공적으로 업로드되었습니다.');
+          handleClose();
+          if (onSuccess) onSuccess();
+        } else {
+          const errorMessage = response?.message || '피드 업로드에 실패했습니다.';
+          alert(errorMessage);
+          console.error('피드 업로드 실패:', response);
+        }
       }
     } catch (error) {
-      console.error('피드 업로드 오류:', error);
-      // 서버 응답이 있는 경우 상세 메시지 표시
+      console.error(isEditMode ? '피드 수정 오류:' : '피드 업로드 오류:', error);
       const errorMessage = error?.response?.data?.message 
         || error?.response?.data?.error 
         || error?.message 
-        || '피드 업로드 중 오류가 발생했습니다.';
-      alert(`피드 업로드 실패: ${errorMessage}`);
+        || (isEditMode ? '피드 수정 중 오류가 발생했습니다.' : '피드 업로드 중 오류가 발생했습니다.');
+      alert(`피드 ${isEditMode ? '수정' : '업로드'} 실패: ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
@@ -134,9 +197,11 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
 
   // 모달 닫기
   const handleClose = () => {
-    setStep(1);
+    setStep(isEditMode ? 2 : 1);
     setSelectedFiles([]);
-    setPreviews([]);
+    if (!isEditMode) {
+      setPreviews([]);
+    }
     setCurrentImageIndex(0);
     setContent('');
     setTag('');
@@ -156,15 +221,17 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
         {/* 헤더 */}
         <div className="modal-header">
           {step === 1 ? (
-            <h2>새 게시물 만들기</h2>
+            <h2>{isEditMode ? '피드 수정' : '새 게시물 만들기'}</h2>
           ) : (
             <>
-              <button className="modal-back-btn" onClick={() => setStep(1)}>
-                ←
-              </button>
-              <h2>새 게시물 만들기</h2>
+              {!isEditMode && (
+                <button className="modal-back-btn" onClick={() => setStep(1)}>
+                  ←
+                </button>
+              )}
+              <h2>{isEditMode ? '피드 수정' : '새 게시물 만들기'}</h2>
               <button className="modal-share-btn" onClick={handleSubmit} disabled={isUploading}>
-                {isUploading ? '공유 중...' : '공유하기'}
+                {isUploading ? (isEditMode ? '수정 중...' : '공유 중...') : (isEditMode ? '수정하기' : '공유하기')}
               </button>
             </>
           )}
@@ -173,8 +240,8 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
 
         {/* 본문 */}
         <div className="modal-body">
-          {step === 1 ? (
-            // 1단계: 사진 선택
+          {step === 1 && !isEditMode ? (
+            // 1단계: 사진 선택 (수정 모드에서는 건너뛰기)
             <div className="upload-step-1">
               <div className="upload-icon">📷</div>
               <h3>사진을 여기에 끌어다 놓으세요</h3>
@@ -214,7 +281,8 @@ function FeedUploadModal({ isOpen, onClose, onSuccess }) {
                       alt={`미리보기 ${currentImageIndex + 1}`} 
                       className="carousel-image"
                     />
-                    {previews.length > 1 && (
+                    {/* 수정 모드에서는 이미지 삭제 불가 */}
+                    {previews.length > 1 && !isEditMode && (
                       <button
                         className="remove-image-btn"
                         onClick={() => handleRemoveFile(currentImageIndex)}
