@@ -11,10 +11,9 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class CorsConfig {
 
-    // ⚠️ SecurityConfig에서 CORS 설정하므로 이 빈은 비활성화
-    // (두 곳에서 CORS 설정하면 충돌 발생)
-    // @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterRegistration_disabled() {
+    // ✅ CORS 설정 활성화
+    @Bean
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
