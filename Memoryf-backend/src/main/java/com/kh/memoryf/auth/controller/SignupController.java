@@ -32,5 +32,11 @@ public class SignupController {
 		
 		return signupService.checkMemberId(memberId);
 	}
+	
+	@PostMapping("check-nick")
+	public int checkMemberNick(@RequestBody String memberNick) {
+		
+		return signupService.checkMemberNick(memberNick);
+	}
 
 }

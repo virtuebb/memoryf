@@ -4,6 +4,7 @@ import EmailVerify from "./EmailVerify";
 import { useState } from "react";
 import signupApi from "../api/signupApi";
 import checkIdApi from "../api/checkIdApi";
+import checkNickApi from "../api/checkNickApi";
 
 const SignupForm = () => {
 
@@ -27,6 +28,9 @@ const SignupForm = () => {
 
   // 아이디 중복확인 state
   const [idChecked, setIdChecked] = useState(null);
+
+  // 닉네임 중복확인 state
+  const [nickChecked, setNickChecked] = useState(null);
 
   // 비밀번호 확인여부 state
   const [pwdMatch, setPwdMatch] = useState(null);
@@ -63,7 +67,20 @@ const SignupForm = () => {
 
   }
 
-  // 중복확인 멘트(블러)
+  // 닉네임 중복확인
+  const checkDuplicatedNick = async() => {
+
+    const result = await checkNickApi(form.memberNick);
+
+    if(result === null) {
+
+      return;
+    }
+
+    setNickChecked(result === 0);
+  }
+
+  // 아이디 중복확인 멘트(블러)
   const idDupMsg = () => {
 
     if(idChecked === true)  return <p className="type-ok">사용 가능한 아이디입니다.</p>
@@ -71,6 +88,15 @@ const SignupForm = () => {
 
     return null;
   };
+
+  // 닉네임 중복확인 멘트(블러)
+  const nickDupMsg = () => {
+
+    if(nickChecked === true) return <p className="type-ok">사용 가능한 닉네임입니다.</p>
+    if(nickChecked === false) return <p className="type-fail">이미 사용 중인 닉네임입니다.</p>
+
+    return null;
+  }
 
   // 비밀번호 일치여부 확인
   const checkPassword = () => {
@@ -149,6 +175,11 @@ const SignupForm = () => {
 
       if(!nickRegex.test(form.memberNick)) {
         alert("닉네임 형식을 확인해주세요.");
+        return;
+      }
+
+      if(nickChecked !== true) {
+        alert("닉네임 중복확인을 해주세요.");
         return;
       }
 
@@ -272,8 +303,6 @@ const SignupForm = () => {
     <form className="signup-form" onSubmit={signup}>
       <div className="id-row" >
         <input type="text" name="memberId" value={form.memberId} onBlur={checkIdType} onChange={(e) => {handleChange(e); setIdChecked(null);}} placeholder="아이디(4 ~ 12자, 영문 소문자, 숫자만 사용 가능)" />
-      
-        {/* 아이디 중복확인 버튼 */}
         <button type="button" className="id-btn" onClick={checkDuplicatedId} disabled={idValid !== true}>중복확인</button>
       </div>
       
@@ -306,10 +335,16 @@ const SignupForm = () => {
       {/* ✅ 이메일 인증 공통 컴포넌트 */}
       <EmailVerify email={form.email} onChange={handleChange} />
 
-      <input type="text" name="memberNick" value={form.memberNick} onBlur={checkNickType} onChange={handleChange} placeholder="닉네임(2 ~ 10자, 한글, 영문, 숫자, 기호 _, . 사용 가능)" />
+      <div className="id-row">
+        <input type="text" name="memberNick" value={form.memberNick} onBlur={checkNickType} onChange={(e) => {handleChange(e); setNickChecked(null);}} placeholder="닉네임(2 ~ 10자, 한글, 영문, 숫자, 기호 _, . 가능)" />
+        <button type="button" className="id-btn" onClick={checkDuplicatedNick} disabled={nickValid !== true}>중복확인</button>
+      </div>
 
       {/* 닉네임 형식 일치 여부 멘트 */}
       {nickTypeMsg()}
+      
+      {/* 닉네임 중복 일치 여부 멘트 */}
+      {nickDupMsg()}
 
       {/* 약관 동의 */}
       <div className="signup-terms">

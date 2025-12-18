@@ -48,4 +48,10 @@
 		  FROM TB_MEMBER
 		 WHERE MEMBER_ID = #{memberId}
 	</select>
+	
+	<select id="checkMemberNick" parameterType="string" resultType="int">
+		SELECT COUNT(*)
+		  FROM TB_MEMBER
+		 WHERE MEMBER_NICK = #{memberNicj}
+	</select>
 </mapper>

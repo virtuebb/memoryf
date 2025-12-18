@@ -7,5 +7,7 @@ public interface SignupService {
 	int insertMember(Signup signup);
 	
 	int checkMemberId(String memberId);
+	
+	int checkMemberNick(String memberNick);
 
 }

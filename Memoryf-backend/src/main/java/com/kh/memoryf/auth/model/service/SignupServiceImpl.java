@@ -85,11 +85,24 @@ public class SignupServiceImpl implements SignupService {
 			return -1;
 		}
 		
-		
-		
 		return signupDao.checkMemberId(sqlSession, memberId);
 	}
-	
-	
 
+	// 닉네임 중복 체크
+	@Override
+	@Transactional
+	public int checkMemberNick(String memberNick) {
+		
+		if(memberNick == null || memberNick.trim().isEmpty()) {
+			
+			return -1;
+			
+		} else if(!memberNick.matches("^[A-Za-z0-9가-힣_.]{2,10}$")) {
+			
+			return -1;
+		}
+		
+		return signupDao.checkMemberNick(sqlSession, memberNick);
+	}
+	
 }

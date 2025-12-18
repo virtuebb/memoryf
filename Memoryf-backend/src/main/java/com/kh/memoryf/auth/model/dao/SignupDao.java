@@ -25,4 +25,9 @@ public class SignupDao {
 		return sqlSession.selectOne("signupMapper.checkMemberId", memberId);
 	}
 
+	public int checkMemberNick(SqlSessionTemplate sqlSession, String memberNick) {
+		
+		return sqlSession.selectOne("signupMapper.checkMemberNick", memberNick);
+	}
+
 }
