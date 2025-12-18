@@ -7,18 +7,26 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.memoryf.dm.model.service.DmService;
 import com.kh.memoryf.dm.model.vo.Dm;
 import com.kh.memoryf.dm.model.vo.DmRoom;
 
 // 이 클래스는 채팅 메시지를 처리하는 컨트롤러야.
 // 메시지가 오면, 어디로 보낼지 결정해.
-@RequestMapping("m") 
+// ❌ @CrossOrigin 제거 (CorsConfig.java에서 전역으로 설정됨)
+@RequestMapping("messages") 
 @RestController
 public class DmController {
+
+    @Autowired
+    private DmService dmService;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -60,10 +68,17 @@ public class DmController {
     }
 
     // dm 방 목록 조회
-    @GetMapping("/dm/rooms")
-    // public ArrayList<DmRoom> selectMyDmRooms( ) {
+    @GetMapping("/rooms/{userId}")
+    public ArrayList<DmRoom> selectDmRoomList(@PathVariable String userId) {
         
-    // }
+        System.out.println("📡 채팅방 조회 요청 - userId: " + userId);
+
+        ArrayList<DmRoom> list = dmService.selectDmRoomList(userId);
+
+        System.out.println("✅ 조회된 채팅방 목록: " + list);
+
+        return list;
+    }
 
     // dm 방 상세 조회
 
