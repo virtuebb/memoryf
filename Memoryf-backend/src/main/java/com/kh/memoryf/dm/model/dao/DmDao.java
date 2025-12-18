@@ -19,6 +19,12 @@ public class DmDao {
 
     }
 
+    public int insertRoom(SqlSessionTemplate sqlSession, String targetId) {
+
+        return 1;
+
+    }
+
     
 
 }

@@ -1,12 +1,17 @@
-// Footer 컴포넌트 정의
+// src/shared/components/Footer.jsx
+import '../css/Footer.css';
+
 function Footer() {
-  // ... 컴포넌트 내용
   return (
-    <footer>
-      Footer Content
+    <footer className="footer">
+      <div className="footer-inner">
+        <span className="footer-logo">Memoryf</span>
+        <span className="footer-text">
+          © 2025 Memoryf. All rights reserved.
+        </span>
+      </div>
     </footer>
   );
 }
 
-// ⭐️ 이렇게 default로 내보내야 합니다. ⭐️
 export default Footer;

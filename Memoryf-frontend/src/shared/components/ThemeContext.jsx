@@ -123,7 +123,7 @@ export const themes = [
         "--color-border-card": "rgba(181, 207, 224, 0.63)",
 
         "--color-label": "#38bdf8",
-        "--color-sidebar-link": "#e5e7eb",  // 🔥 Night 대비 개선
+        "--color-sidebar-link": "#020617",  // 🔥 Night 대비 개선
         "--color-sidebar-link-active-bg": "rgba(145, 203, 228, 1)",
         "--color-sidebar-link-active-text": "#020617",
 

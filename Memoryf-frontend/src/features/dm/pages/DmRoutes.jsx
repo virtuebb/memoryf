@@ -49,6 +49,8 @@ export default function DmRoutes() {
    * 👤 새로운 사용자와 채팅 시작하기
    */
   const onAddUser = async (user) => {
+
+    console.log(user);
     try {
       const newChat = await handleAddUser(user);
       closeSearchModal();

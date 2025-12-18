@@ -24,12 +24,11 @@
 
   border-radius: 18px; /* 🔥 26 → 18 (상업 감성) */
 
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: none;
 
-  box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.06); /* 🔥 하나로 정리 */
+  box-shadow: none;
 
-  backdrop-filter: blur(6px); /* 🔥 12 → 6 */
+  backdrop-filter: none;
 
   transition:
     transform 0.2s ease,

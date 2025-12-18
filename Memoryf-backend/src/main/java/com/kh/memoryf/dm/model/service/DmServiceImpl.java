@@ -26,4 +26,11 @@ public class DmServiceImpl implements DmService {
 
     }
 
+    @Override
+    public int insertRoom(String targetId) {
+
+        return dmDao.insertRoom(sqlSession, targetId);
+
+    }
+
 }

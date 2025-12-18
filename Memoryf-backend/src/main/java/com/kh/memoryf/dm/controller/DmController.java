@@ -10,9 +10,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.memoryf.dm.model.dao.DmRoomRequest;
 import com.kh.memoryf.dm.model.service.DmService;
 import com.kh.memoryf.dm.model.vo.Dm;
 import com.kh.memoryf.dm.model.vo.DmRoom;
@@ -80,13 +82,21 @@ public class DmController {
     }
 
     // dm 방 추가
-    @PostMapping("/insertRoom")
-    public void insertRoom(@PathVariable String userId, String targetUserId) {
+    // @RequestBody는 JSON을 자바 객체로 매핑해주는 것이지, JSON 내부 필드를 자동 추출해주는 게 아님
+    // 그래서 외부 클래스를 하나 만들어서 jackson 라이브러리가 자동으로 json을 파싱하고 DmRoomRequset 객체를 생성하고 JSON의 targetuserId 키의 값우루 객체의 targetUserId 필드에 매핑
+    @PostMapping("insertRoom")
+    public int insertRoom(@RequestBody DmRoomRequest request) {
 
-        System.out.println(userId);
-        System.out.println(targetUserId);
+        // System.out.println("targetUserId: " + request.getTargetUserId());
+        String targetId = request.getTargetUserId();
 
+        dmService.insertRoom(targetId);
+
+        return 1;
     }
+
+
+
 
     // dm 방 상세 조회
 
