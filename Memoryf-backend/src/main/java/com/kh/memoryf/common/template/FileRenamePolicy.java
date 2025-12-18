@@ -48,4 +48,23 @@ public class FileRenamePolicy {
 		return changeName;
 	}
 	
+	/**
+	 * 파일명 변경 (원본 파일명 → 시간기반 랜덤 파일명)
+	 * @param originName 원본 파일명
+	 * @return 변경된 파일명
+	 */
+	public static String rename(String originName) {
+		if (originName == null || originName.isEmpty()) {
+			throw new IllegalArgumentException("파일명이 없습니다.");
+		}
+		
+		// 현재 시간 + 랜덤값으로 변경 파일명 생성
+		String currentTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+		int randNum = (int)(Math.random() * 90000 + 10000);
+		int lastDotIndex = originName.lastIndexOf(".");
+		String ext = (lastDotIndex > 0) ? originName.substring(lastDotIndex) : ".jpg";
+		
+		return currentTime + randNum + ext;
+	}
+	
 }

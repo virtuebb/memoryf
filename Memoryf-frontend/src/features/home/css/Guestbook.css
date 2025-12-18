@@ -201,6 +201,60 @@
   margin: 0;
 }
 
+/* 방명록 아이템 헤더 */
+.guestbook-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* 방명록 액션 버튼들 */
+.guestbook-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.guestbook-actions .like-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.guestbook-actions .like-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.guestbook-actions .like-btn.liked {
+  color: #ed4956;
+}
+
+.guestbook-actions .delete-btn {
+  background: none;
+  border: none;
+  color: #8e8e8e;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.guestbook-actions .delete-btn:hover {
+  color: #262626;
+}
+
+/* 로딩 상태 */
+.guestbook-loading {
+  text-align: center;
+  padding: 40px;
+  color: #8e8e8e;
+  font-size: 14px;
+}
+
 /* =========================
    애니메이션
 ========================= */

@@ -30,12 +30,27 @@ public interface FeedService {
 	int insertFeed(Feed feed);
 	
 	/**
+	 * 피드 수정
+	 * @param feed 수정할 피드 정보 (feedNo 필수)
+	 * @return 수정 건수
+	 */
+	int updateFeed(Feed feed);
+	
+	/**
 	 * 피드 좋아요 토글 (좋아요 추가/삭제)
 	 * @param feedNo 피드 번호
 	 * @param memberNo 회원 번호
 	 * @return 좋아요 여부 (true: 좋아요 추가, false: 좋아요 삭제)
 	 */
 	boolean toggleFeedLike(int feedNo, int memberNo);
+	
+	/**
+	 * 피드 북마크 토글 (북마크 추가/삭제)
+	 * @param feedNo 피드 번호
+	 * @param memberNo 회원 번호
+	 * @return 북마크 여부 (true: 북마크 추가, false: 북마크 삭제)
+	 */
+	boolean toggleFeedBookmark(int feedNo, int memberNo);
 	
 	/**
 	 * 피드 삭제

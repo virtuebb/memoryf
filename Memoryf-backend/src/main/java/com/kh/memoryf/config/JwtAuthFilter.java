@@ -7,6 +7,7 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -32,8 +33,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     // 로그인, 정적리소스는 토큰 검사 제외
     private boolean isSkipPath(String path) {
 
-        // 로그인 요청은 인증 없이 허용이므로 필터 검사 제외
+        // 로그인/회원가입 요청은 인증 없이 허용이므로 필터 검사 제외
         if (path.startsWith("/login")) return true;
+        if (path.startsWith("/signup")) return true;
 
         // 정적 리소스 제외 (필요한 경우만)
         if (path.startsWith("/images")
@@ -46,11 +48,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         // 요청 경로 확인
-        String path = request.getRequestURI();
+        // String path = request.getRequestURI();
+    		String path = request.getServletPath();
 
         // OPTIONS(프리플라이트) 요청은 통과
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {

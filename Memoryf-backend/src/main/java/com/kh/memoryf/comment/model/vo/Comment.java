@@ -13,5 +13,16 @@ import lombok.ToString;
 @Getter
 @ToString
 public class Comment {
-
+	
+	private int commentNo;        // 댓글 번호
+	private String content;       // 댓글 내용
+	private java.util.Date createDate;     // 작성일
+	private String isDel;         // 삭제 여부
+	private int writer;           // 작성자 번호
+	private int feedNo;           // 피드 번호
+	
+	// 조인을 위한 필드
+	private String writerNick;    // 작성자 닉네임
+	private int likeCount;        // 댓글 좋아요 수
+	private boolean isLiked;      // 현재 사용자가 좋아요 했는지 여부
 }

@@ -57,6 +57,20 @@ function FeedListPage({ reloadKey = 0 }) {
     }
   }, [sortBy, location.pathname, reloadKey, fetchFeeds]);
 
+  // 다른 컴포넌트(상세/작성 등)에서 피드가 변경되었을 때 재조회
+  useEffect(() => {
+    const handleFeedChanged = () => {
+      if (location.pathname === '/feeds') {
+        fetchFeeds();
+      }
+    };
+
+    window.addEventListener('feedChanged', handleFeedChanged);
+    return () => {
+      window.removeEventListener('feedChanged', handleFeedChanged);
+    };
+  }, [location.pathname, fetchFeeds]);
+
   // 정렬 옵션 변경 핸들러
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy);

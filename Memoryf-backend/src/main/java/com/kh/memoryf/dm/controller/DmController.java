@@ -66,10 +66,10 @@ public class DmController {
         );
     }
 
-    // dm 방 목록 조회
+    // dm 방 목록 조회 (userId로 채팅방 목록 조회)
     @GetMapping("/rooms/{userId}")
     public ArrayList<DmRoom> selectDmRoomList(@PathVariable String userId) {
-        
+
         System.out.println("📡 채팅방 조회 요청 - userId: " + userId);
 
         ArrayList<DmRoom> list = dmService.selectDmRoomList(userId);

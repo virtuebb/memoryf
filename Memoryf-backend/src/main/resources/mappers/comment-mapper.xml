@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="commentMapper">
+
+	<!-- 댓글 목록 조회 -->
+	<select id="selectCommentList" parameterType="hashmap" resultMap="commentResultMap">
+		SELECT 
+			C.COMMENT_NO,
+			C.CONTENT,
+			C.CREATE_DATE,
+			C.IS_DEL,
+			C.WRITER,
+			C.FEED_NO,
+			M.MEMBER_NICK AS WRITER_NICK,
+			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT
+			<if test="memberNo != null">
+				, CASE WHEN CL.COMMENT_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
+			</if>
+		FROM TB_COMMENT C
+		LEFT JOIN TB_MEMBER M ON C.WRITER = M.MEMBER_NO
+		LEFT JOIN (
+			SELECT COMMENT_NO, COUNT(*) AS LIKE_COUNT
+			FROM TB_COMMENT_LIKE
+			GROUP BY COMMENT_NO
+		) LIKE_CNT ON C.COMMENT_NO = LIKE_CNT.COMMENT_NO
+		<if test="memberNo != null">
+			LEFT JOIN TB_COMMENT_LIKE CL ON C.COMMENT_NO = CL.COMMENT_NO AND CL.MEMBER_NO = #{memberNo}
+		</if>
+		WHERE C.FEED_NO = #{feedNo}
+		AND C.IS_DEL = 'N'
+		ORDER BY C.CREATE_DATE ASC
+	</select>
+
+	<!-- 댓글 생성 -->
+	<insert id="insertComment" parameterType="comment">
+		INSERT INTO TB_COMMENT (
+			COMMENT_NO,
+			CONTENT,
+			CREATE_DATE,
+			IS_DEL,
+			WRITER,
+			FEED_NO
+		) VALUES (
+			SEQ_COMMENT_NO.NEXTVAL,
+			#{content},
+			SYSDATE,
+			'N',
+			#{writer},
+			#{feedNo}
+		)
+	</insert>
+
+	<!-- 댓글 삭제 (IS_DEL = 'Y') -->
+	<update id="deleteComment" parameterType="_int">
+		UPDATE TB_COMMENT
+		SET IS_DEL = 'Y'
+		WHERE COMMENT_NO = #{commentNo}
+	</update>
+
+	<!-- 댓글 좋아요 추가 -->
+	<insert id="insertCommentLike" parameterType="hashmap">
+		INSERT INTO TB_COMMENT_LIKE (
+			COMMENT_LIKE_NO,
+			COMMENT_NO,
+			MEMBER_NO
+		) VALUES (
+			SEQ_COMMENT_LIKE_NO.NEXTVAL,
+			#{commentNo},
+			#{memberNo}
+		)
+	</insert>
+
+	<!-- 댓글 좋아요 삭제 -->
+	<delete id="deleteCommentLike" parameterType="hashmap">
+		DELETE FROM TB_COMMENT_LIKE
+		WHERE COMMENT_NO = #{commentNo}
+		AND MEMBER_NO = #{memberNo}
+	</delete>
+
+	<!-- 댓글 좋아요 여부 확인 -->
+	<select id="checkCommentLike" parameterType="hashmap" resultType="_int">
+		SELECT COUNT(*)
+		FROM TB_COMMENT_LIKE
+		WHERE COMMENT_NO = #{commentNo}
+		AND MEMBER_NO = #{memberNo}
+	</select>
+
+	<!-- ResultMap: Comment -->
+	<resultMap type="comment" id="commentResultMap">
+		<id property="commentNo" column="COMMENT_NO"/>
+		<result property="content" column="CONTENT"/>
+		<result property="createDate" column="CREATE_DATE"/>
+		<result property="isDel" column="IS_DEL"/>
+		<result property="writer" column="WRITER"/>
+		<result property="feedNo" column="FEED_NO"/>
+		<result property="writerNick" column="WRITER_NICK"/>
+		<result property="likeCount" column="LIKE_COUNT"/>
+		<result property="isLiked" column="IS_LIKED"/>
+	</resultMap>
+
+</mapper>

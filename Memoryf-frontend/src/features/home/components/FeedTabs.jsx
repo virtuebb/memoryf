@@ -1,39 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+// FeedTabs component
+import { useNavigate, useLocation } from "react-router-dom";
+import { getFeedList } from "../../feed/api/feedApi";
+import { getMemberNoFromToken } from "../../../utils/jwt";
 import "../css/FeedTabs.css";
 
-// 14개 더미 데이터
-const FEEDS = Array.from({ length: 14 }, (_, i) => ({
-  id: i + 1,
-  image: `https://picsum.photos/400/400?random=${i + 1}`,
-  text: `Pastel moment #${i + 1}`,
-}));
-
-const BOOKMARKS = Array.from({ length: 14 }, (_, i) => ({
-  id: i + 1,
-  image: `https://picsum.photos/400/400?random=${i + 20}`,
-  text: `Saved mood #${i + 1}`,
-}));
-
-const DIARIES = [
-  {
-    id: 1,
-    text: "Today felt soft and quiet. I liked the slow pace.",
-    private: true,
-  },
-  {
-    id: 2,
-    text: "I want to keep moments like this close to my heart.",
-    private: true,
-  },
-  {
-    id: 3,
-    text: "Creating warm things makes me feel alive.",
-    private: true,
-  },
-];
-
 function FeedTabs() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("feed");
+  const [myFeeds, setMyFeeds] = useState([]);
+  const [bookmarkedFeeds, setBookmarkedFeeds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const currentMemberNo = getMemberNoFromToken();
+
+  useEffect(() => {
+    fetchFeeds();
+  }, [currentMemberNo]);
+
+  const fetchFeeds = async () => {
+    if (!currentMemberNo) return;
+
+    try {
+      setLoading(true);
+      // 내 피드 목록 가져오기 (전체 피드에서 필터링)
+      const allFeeds = await getFeedList('recent');
+      const myFeedList = allFeeds.filter(feed => feed.memberNo === currentMemberNo);
+      const bookmarked = allFeeds.filter(feed => feed.isBookmarked);
+      
+      setMyFeeds(myFeedList);
+      setBookmarkedFeeds(bookmarked);
+    } catch (error) {
+      console.error('피드 조회 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFeedClick = (feedNo) => {
+    navigate(`/feeds/${feedNo}`, { state: { backgroundLocation: location } });
+  };
+
+  const getImageUrl = (feed) => {
+    if (feed.feedFiles && feed.feedFiles.length > 0) {
+      return `http://localhost:8006/memoryf${feed.feedFiles[0].filePath}`;
+    }
+    return 'https://via.placeholder.com/400x400?text=No+Image';
+  };
+
+  if (loading) {
+    return (
+      <section className="feed-tabs">
+        <div className="feed-tabs-loading">로딩 중...</div>
+      </section>
+    );
+  }
 
   return (
     <section className="feed-tabs">
@@ -43,19 +64,22 @@ function FeedTabs() {
           className={activeTab === "feed" ? "active" : ""}
           onClick={() => setActiveTab("feed")}
         >
-          Feed
-        </button>
-        <button
-          className={activeTab === "diary" ? "active" : ""}
-          onClick={() => setActiveTab("diary")}
-        >
-          Diary
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+          </svg>
+          <span>게시물</span>
         </button>
         <button
           className={activeTab === "bookmark" ? "active" : ""}
           onClick={() => setActiveTab("bookmark")}
         >
-          Bookmark
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>저장됨</span>
         </button>
       </div>
 
@@ -63,35 +87,55 @@ function FeedTabs() {
       <div className="tab-content">
         {activeTab === "feed" && (
           <div className="grid">
-            {FEEDS.map((item) => (
-              <div key={item.id} className="grid-card">
-                <img src={item.image} alt="" />
+            {myFeeds.length === 0 ? (
+              <div className="empty-state">
+                <p>아직 게시물이 없습니다</p>
+                <button onClick={() => navigate('/feed/create')}>
+                  첫 게시물 만들기
+                </button>
               </div>
-            ))}
+            ) : (
+              myFeeds.map((feed) => (
+                <div 
+                  key={feed.feedNo} 
+                  className="grid-card"
+                  onClick={() => handleFeedClick(feed.feedNo)}
+                >
+                  <img src={getImageUrl(feed)} alt={feed.content || ''} />
+                  <div className="grid-card-overlay">
+                    <span>❤️ {feed.likeCount || 0}</span>
+                    <span>💬 {feed.commentCount || 0}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
 
         {activeTab === "bookmark" && (
           <div className="grid">
-            {BOOKMARKS.map((item) => (
-              <div key={item.id} className="grid-card">
-                <img src={item.image} alt="" />
+            {bookmarkedFeeds.length === 0 ? (
+              <div className="empty-state">
+                <p>저장한 게시물이 없습니다</p>
               </div>
-            ))}
+            ) : (
+              bookmarkedFeeds.map((feed) => (
+                <div 
+                  key={feed.feedNo} 
+                  className="grid-card"
+                  onClick={() => handleFeedClick(feed.feedNo)}
+                >
+                  <img src={getImageUrl(feed)} alt={feed.content || ''} />
+                  <div className="grid-card-overlay">
+                    <span>❤️ {feed.likeCount || 0}</span>
+                    <span>💬 {feed.commentCount || 0}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
-
-        {activeTab === "diary" && (
-          <div className="diary-wrap">
-            {DIARIES.map((item) => (
-              <div key={item.id} className="diary-card">
-                <span className="lock">🔒 Private</span>
-                <p>{item.text}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div> {/* ✅ 이 div가 빠져 있었음 */}
+      </div>
     </section>
   );
 }

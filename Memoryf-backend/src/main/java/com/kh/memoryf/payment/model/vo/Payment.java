@@ -1,7 +1,5 @@
 package com.kh.memoryf.payment.model.vo;
 
-import java.sql.Date;
-
 import org.apache.ibatis.type.Alias;
 
 import lombok.Getter;

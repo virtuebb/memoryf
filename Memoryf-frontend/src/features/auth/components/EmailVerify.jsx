@@ -19,7 +19,7 @@ const EmailVerify = ({ placeholder = "이메일", email, onChange }) => {
   return (
     <>
       <div className="email-row">
-        <input type="email" name="email" value={email} placeholder={placeholder} />
+        <input type="email" name="email" value={email} onChange={onChange} placeholder={placeholder} />
         <button
           type="button"
           className="email-btn"

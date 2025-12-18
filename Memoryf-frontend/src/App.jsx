@@ -23,6 +23,7 @@ import FeedListPage from './features/feed/pages/FeedListPage';
 import FeedDetailPage from './features/feed/pages/FeedDetailPage';
 import FeedUploadModal from './features/feed/components/FeedUploadModal';
 import SettingsPage from './features/settings/pages/SettingsPage';
+import SettingsEdit from './features/settings/pages/SettingsEdit';
 import DmRoutes from './features/dm/pages/DmRoutes';
 import FloatingDm from './features/dm/components/FloatingDm';
 import Chat from './features/dm/components/Chat';
@@ -48,6 +49,7 @@ function App() {
   const isAdmin = false;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingFeed, setEditingFeed] = useState(null); // 수정할 피드 데이터
   const [feedReloadKey, setFeedReloadKey] = useState(0);
 
   const navigate = useNavigate();
@@ -95,9 +97,9 @@ function App() {
     <ThemeProvider>
       <DmProvider>
       <div className="app-root">
-        <div className="main-layout">
-          {/* ✅ Settings 아닐 때만 사이드바 */}
-          {!isSettings && (
+        <div className={`main-layout ${isSettings ? "settings-mode" : ""}`}>
+          {/* ✅ Settings 아닐 때만 사이드바 -> Settings일 때도 사이드바 표시 */}
+          {/* {!isSettings && ( */}
          <aside className="left-column">
             {/* 1. 로고 */}
             <Header />
@@ -120,10 +122,10 @@ function App() {
               <SkinButton />
             </div>
           </aside>
-          )}
+          {/* )} */}
 
           {/* 메인 콘텐츠 */}
-          <main className="main-content">
+          <main className={`main-content ${isSettings ? "settings-mode" : ""}`}>
             <Routes location={backgroundLocation || location}>
               <Route path="/home" element={<Home />} />
               <Route path="/search" element={<SearchPage />} />
@@ -131,13 +133,24 @@ function App() {
               <Route path="/messages/*" element={<DmRoutes />} />
               {/* 채팅 테스트 주소 */}
               <Route path="/chat-test" element={<Chat />} />
-              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/settings/*" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
 
             {backgroundLocation && (
               <Routes>
-                <Route path="/feeds/:feedNo" element={<FeedDetailPage isModal />} />
+                <Route 
+                  path="/feeds/:feedNo" 
+                  element={
+                    <FeedDetailPage 
+                      isModal 
+                      onEditFeed={(feed) => {
+                        setEditingFeed(feed);
+                        setIsModalOpen(true);
+                      }}
+                    /> 
+                  } 
+                />
               </Routes>
             )}
           </main>
@@ -147,11 +160,21 @@ function App() {
 
         <FeedUploadModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSuccess={() => {
+          mode={editingFeed ? 'edit' : 'create'}
+          initialFeed={editingFeed}
+          onClose={() => {
             setIsModalOpen(false);
+            setEditingFeed(null);
+          }}
+          onSuccess={() => {
+            const wasEditMode = !!editingFeed;
+            setIsModalOpen(false);
+            setEditingFeed(null);
             setFeedReloadKey(prev => prev + 1);
-            navigate('/feeds');
+            window.dispatchEvent(new Event('feedChanged'));
+            if (!wasEditMode) {
+              navigate('/feeds');
+            }
           }}
         />
 

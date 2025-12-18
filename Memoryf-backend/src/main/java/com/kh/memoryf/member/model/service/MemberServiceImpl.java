@@ -13,9 +13,11 @@ import com.kh.memoryf.member.model.vo.Member;
 public class MemberServiceImpl implements MemberService {
 	
 	@Autowired
+	@SuppressWarnings("unused")
 	private MemberDao memberDao;
 
 	@Autowired
+	@SuppressWarnings("unused")
 	private SqlSessionTemplate sqlSession;
 	
 	@Override
@@ -41,6 +43,11 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public int updatePwd(Member m) {
 		return 0;
+	}
+
+	@Override
+	public int updateMemberNick(Member m) {
+		return memberDao.updateMemberNick(sqlSession, m);
 	}
 
 }

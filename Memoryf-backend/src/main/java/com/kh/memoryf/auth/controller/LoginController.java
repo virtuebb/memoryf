@@ -1,7 +1,6 @@
 package com.kh.memoryf.auth.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +27,9 @@ public class LoginController {
 		
 		String jwt =  loginService.loginMember(login);
 		// Login loginUser =  loginService.loginMember(login);
+		
+		System.out.println("받은 memberId=" + login.getMemberId());
+		System.out.println("받은 memberPwd=" + login.getMemberPwd());
 		
 		// System.out.println("memberNo : " + loginUser.getMemberNo());
 		// System.out.println("memberId : " + loginUser.getMemberId());

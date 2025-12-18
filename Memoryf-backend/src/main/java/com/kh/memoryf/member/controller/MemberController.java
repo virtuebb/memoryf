@@ -13,6 +13,7 @@ import com.kh.memoryf.member.model.service.MemberService;
 public class MemberController {
 
 	@Autowired
+	@SuppressWarnings("unused")
 	private MemberService memberService;
 
 }

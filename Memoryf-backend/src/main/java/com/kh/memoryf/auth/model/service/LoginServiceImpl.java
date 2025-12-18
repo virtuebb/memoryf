@@ -72,6 +72,8 @@ public class LoginServiceImpl implements LoginService {
 				.setExpiration(new Date(System.currentTimeMillis() + expiration)) // 토큰 만료시간 설정
 				.signWith(key, SignatureAlgorithm.HS256) // 위에서 생성한 Key와 HS256 알고리즘으로 서명
 				.compact(); // JWT 문자열 생성
+		
+		
 
 		
 		// 로그인 성공

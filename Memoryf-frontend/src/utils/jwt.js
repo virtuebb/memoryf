@@ -33,10 +33,8 @@ export const getAccessToken = () => {
 };
 
 /**
- * 토큰에서 사용자 ID 추출
+ * 토큰에서 로그인 아이디(subject) 추출
  * @returns {string|null} 사용자 ID 또는 null
- * 
- * 📌 백엔드 JWT 생성 시 subject(sub) 또는 memberId에 사용자 ID를 넣어야 함
  */
 export const getUserIdFromToken = () => {
   const token = getAccessToken();
@@ -45,8 +43,21 @@ export const getUserIdFromToken = () => {
   if (!decoded) return null;
   
   // JWT payload에서 사용자 ID 추출
-  // 백엔드에서 어떤 키로 저장했는지에 따라 수정 필요
+  // 백엔드에서 subject(sub) 또는 별도 클레임을 사용
   return decoded.sub || decoded.memberId || decoded.userId || null;
+};
+
+/**
+ * 토큰에서 회원 번호(memberNo) 추출
+ * @returns {number|null} 회원 번호 또는 null
+ */
+export const getMemberNoFromToken = () => {
+  const token = getAccessToken();
+  const decoded = decodeToken(token);
+
+  if (!decoded) return null;
+
+  return decoded.memberNo ?? null;
 };
 
 /**
@@ -82,6 +93,5 @@ export const isTokenExpired = () => {
  */
 export const isAuthenticated = () => {
   const token = getAccessToken();
-  return token && !isTokenExpired();
+  return !!(token && !isTokenExpired());
 };
-

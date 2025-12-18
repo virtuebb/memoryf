@@ -177,6 +177,46 @@
 		SET IS_DEL = 'Y'
 		WHERE FEED_NO = #{feedNo}
 	</update>
+	
+	<!-- 피드 수정 (내용/태그/위치) -->
+	<update id="updateFeed" parameterType="feed">
+		UPDATE TB_FEED
+		SET
+			CONTENT   = #{content},
+			TAG       = #{tag},
+			LATITUDE  = #{latitude},
+			LONGITUDE = #{longitude}
+		WHERE FEED_NO = #{feedNo}
+		AND IS_DEL = 'N'
+	</update>
+
+	<!-- 피드 북마크 추가 -->
+	<insert id="insertFeedBookmark" parameterType="hashmap">
+		INSERT INTO TB_FEED_BOOKMARK (
+			BOOKMARK_NO,
+			FEED_NO,
+			MEMBER_NO
+		) VALUES (
+			SEQ_BOOKMARK_NO.NEXTVAL,
+			#{feedNo},
+			#{memberNo}
+		)
+	</insert>
+
+	<!-- 피드 북마크 삭제 -->
+	<delete id="deleteFeedBookmark" parameterType="hashmap">
+		DELETE FROM TB_FEED_BOOKMARK
+		WHERE FEED_NO = #{feedNo}
+		AND MEMBER_NO = #{memberNo}
+	</delete>
+
+	<!-- 피드 북마크 여부 확인 -->
+	<select id="checkFeedBookmark" parameterType="hashmap" resultType="_int">
+		SELECT COUNT(*)
+		FROM TB_FEED_BOOKMARK
+		WHERE FEED_NO = #{feedNo}
+		AND MEMBER_NO = #{memberNo}
+	</select>
 
 	<!-- ResultMap: Feed -->
 	<resultMap type="feed" id="feedResultMap">
