@@ -406,14 +406,21 @@ export function DmProvider({ children }) {
    * @returns {Object} 새로 생성된 채팅방 객체
    */
   const handleAddUser = useCallback(async (user) => {
+
+    // 선택한 유저 정보 출력
+    // console.log(user);
+    // 잘 출력되는거 확인
+
     // 서버에 새 채팅방 생성 요청
     try {
       const targetUserId = user.userId;
       const created = await createDmRoom(targetUserId);
 
+      console.log(created);
+
       const newChat = {
         // id: created.roomNo || created.roomNoString || Date.now(),
-        id: created.roomNo,
+        id: targetUserId,
         userId: created.roomName || created.targetUserId || targetUserId,
         userName: created.targetUserName || created.roomName || targetUserId,
         lastMessage: created.lastMessage || '대화 없음',
