@@ -5,5 +5,7 @@ import com.kh.memoryf.auth.model.vo.Signup;
 public interface SignupService {
 	
 	int insertMember(Signup signup);
+	
+	int checkMemberId(String memberId);
 
 }

@@ -2,7 +2,6 @@ package com.kh.memoryf.auth.model.service;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,5 +63,26 @@ public class SignupServiceImpl implements SignupService {
 		
 		return signupDao.insertMember(sqlSession, signup);
 	}
+
+	// 아이디 중복 체크
+	@Override
+	@Transactional
+	public int checkMemberId(String memberId) {
+		
+		if(memberId == null || memberId.trim().isEmpty()) {
+			
+			return -1;
+			
+		} else if(!memberId.matches("^[a-z0-9]{4,12}$")) {
+			
+			return -1;
+		}
+		
+		
+		
+		return signupDao.checkMemberId(sqlSession, memberId);
+	}
+	
+	
 
 }

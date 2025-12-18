@@ -29,6 +29,9 @@ public class LoginController {
 		String jwt =  loginService.loginMember(login);
 		// Login loginUser =  loginService.loginMember(login);
 		
+		System.out.println("받은 memberId=" + login.getMemberId());
+		System.out.println("받은 memberPwd=" + login.getMemberPwd());
+		
 		// System.out.println("memberNo : " + loginUser.getMemberNo());
 		// System.out.println("memberId : " + loginUser.getMemberId());
 		// System.out.println("memberPwd : " + loginUser.getMemberPwd());

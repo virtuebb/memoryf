@@ -51,7 +51,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         // 요청 경로 확인
-        String path = request.getRequestURI();
+        // String path = request.getRequestURI();
+    		String path = request.getServletPath();
 
         // OPTIONS(프리플라이트) 요청은 통과
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {

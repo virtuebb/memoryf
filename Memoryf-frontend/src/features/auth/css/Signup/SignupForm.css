@@ -234,3 +234,43 @@ input.success {
   from { opacity: 0; transform: translateY(-2px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* 아이디 input + 중복확인 버튼 한 줄 */
+.id-row{
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  /* margin-bottom: 14px;  <- signup-form gap 쓰고 있으니 굳이 X */
+}
+
+/* ✅ 공통 input과 동일 스펙으로 */
+.id-row input{
+  flex: 1;
+  height: 44px;          /* 공통과 동일 */
+  padding: 0 12px;       /* 공통과 동일 */
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;   /* 공통과 동일 */
+  outline: none;
+  font-size: 14px;       /* 공통과 동일 */
+  background: #fff;
+}
+
+/* ✅ 버튼도 input과 높이/라운드 맞춤 */
+.id-btn{
+  height: 44px;          /* 공통과 동일 */
+  padding: 0 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;   /* 공통과 동일 */
+  background: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.id-btn:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

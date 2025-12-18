@@ -25,5 +25,12 @@ public class SignupController {
 		return signupService.insertMember(signup);
 		
 	}
+	
+	// 아이디 중복 체크
+	@PostMapping("check-id")
+	public int checkMemberId(@RequestBody String memberId) {
+		
+		return signupService.checkMemberId(memberId);
+	}
 
 }

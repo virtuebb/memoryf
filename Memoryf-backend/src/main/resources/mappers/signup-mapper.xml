@@ -7,6 +7,7 @@
 	
 	<insert id="insertMember" parameterType="signup">
         INSERT INTO TB_MEMBER (
+        		MEMBER_NO,
             MEMBER_ID,
             MEMBER_PWD,
             MEMBER_NAME,
@@ -14,8 +15,10 @@
             EMAIL,
             PHONE,
             GENDER,
-            BIRTHDAY
+            BIRTHDAY,
+            STATUS
         ) VALUES (
+        		SEQ_MEMBER_NO.NEXTVAL,
             #{memberId},
             #{memberPwd},
             #{memberName},
@@ -23,7 +26,8 @@
             #{email},
             #{phone},
             #{gender},
-            #{birthday}
+            #{birthday},
+            'Y'
         )	
 	</insert>
 	

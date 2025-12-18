@@ -49,16 +49,6 @@ const SignupForm = () => {
     privacy : false
   });
 
-  // 가입버튼 막아두기 disabled 안에 넣을 변수 설정 - 필수 입력사항 입력 전
-  const canSubmit =
-    idValid === true &&
-    idChecked === true &&
-    pwdValid === true &&
-    pwdMatch === true &&
-    nickValid === true &&
-    agree.terms &&
-    agree.privacy;
-
   // 아이디 중복확인
   const checkDuplicatedId = async() => {
 
@@ -119,6 +109,7 @@ const SignupForm = () => {
 
     // 가입하기 버튼
     const signup = async (e) => {
+
       e.preventDefault();
 
       if(
@@ -188,7 +179,7 @@ const SignupForm = () => {
 
       } else {
 
-        alert("회원가입 실패")
+        alert("회원가입 실패");
       }
     };
 
@@ -279,11 +270,11 @@ const SignupForm = () => {
 
   return (
     <form className="signup-form" onSubmit={signup}>
-      <div >
-      <input type="text"  name="memberId" value={form.memberId} onBlur={checkIdType} onChange={(e) => {handleChange(e); setIdChecked(null);}} placeholder="아이디(4 ~ 12자, 영문 소문자, 숫자만 사용 가능)" />
+      <div className="id-row" >
+        <input type="text" name="memberId" value={form.memberId} onBlur={checkIdType} onChange={(e) => {handleChange(e); setIdChecked(null);}} placeholder="아이디(4 ~ 12자, 영문 소문자, 숫자만 사용 가능)" />
       
-      {/* 아이디 중복확인 버튼 */}
-      <button type="button" onClick={checkDuplicatedId} disabled={idValid !== true}>중복확인</button>
+        {/* 아이디 중복확인 버튼 */}
+        <button type="button" className="id-btn" onClick={checkDuplicatedId} disabled={idValid !== true}>중복확인</button>
       </div>
       
       {/* 아이디 형식 일치 여부 멘트 */}
@@ -364,7 +355,7 @@ const SignupForm = () => {
 
       {/* 가입, 뒤로가기 버튼 */}
       <div className="signup-buttons">
-        <button type="submit" disabled={!canSubmit}>가입하기</button>
+        <button type="submit" >가입하기</button>
         <button type="button" onClick={goBack}>뒤로가기</button>
       </div>
 

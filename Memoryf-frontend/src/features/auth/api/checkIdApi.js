@@ -4,7 +4,11 @@ const checkIdApi = async (memberId) => {
 
     try {
 
-        const response = await api.post("/signup/check-id", {memberId});
+        const response = await api.post(
+            "/signup/check-id",
+            memberId,
+            {headers : {"Content-Type" : "text/plain"}}
+        );
 
         return response.data;
 
