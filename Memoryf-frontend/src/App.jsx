@@ -22,7 +22,6 @@ import SearchPage from './features/search/pages/SearchPage';
 import FeedListPage from './features/feed/pages/FeedListPage';
 import FeedDetailPage from './features/feed/pages/FeedDetailPage';
 import FeedUploadModal from './features/feed/components/FeedUploadModal';
-import SettingsPage from './features/settings/pages/SettingsPage';
 import SettingsEdit from './features/settings/pages/SettingsEdit';
 import DmRoutes from './features/dm/pages/DmRoutes';
 import FloatingDm from './features/dm/components/FloatingDm';
@@ -45,8 +44,10 @@ import PaymentManagementPage from './features/admin/pages/PaymentManagementPage'
 import BgmManagementPage from './features/admin/pages/BgmManagementPage';
 
 function App() {
-  const isLoggedIn = !!localStorage.getItem("accessToken");
-  const isAdmin = false;
+  // const isLoggedIn = !!localStorage.getItem("accessToken");
+  const isLoggedIn = true;
+  localStorage.setItem("accessToken", "dev-token");
+  const isAdmin = false; 
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFeed, setEditingFeed] = useState(null); // 수정할 피드 데이터
@@ -58,7 +59,7 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/admin');
   
   // 설정 페이지 여부
-  const isSettings = location.pathname.startsWith("/settings");
+  const isSettings = location.pathname.startsWith('/settings');
 
   // 로그인 안 했을 때
   if (!isLoggedIn) {
@@ -133,7 +134,7 @@ function App() {
               <Route path="/messages/*" element={<DmRoutes />} />
               {/* 채팅 테스트 주소 */}
               <Route path="/chat-test" element={<Chat />} />
-              <Route path="/settings/*" element={<SettingsPage />} />
+              <Route path="/settings/*" element={<SettingsEdit />} />
               <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
 
