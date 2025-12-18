@@ -12,7 +12,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 // 이 클래스는 웹소켓 채팅을 설정하는 클래스야.
 // 웹소켓은 컴퓨터들이 실시간으로 메시지를 주고받는 방법이야.
 // STOMP라는 규칙을 사용해서 메시지를 보내고 받아.
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 

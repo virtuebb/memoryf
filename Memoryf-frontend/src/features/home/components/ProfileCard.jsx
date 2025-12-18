@@ -10,6 +10,7 @@ function ProfileCard() {
   const [home, setHome] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [imageTimestamp, setImageTimestamp] = useState(Date.now());
   const currentMemberNo = getMemberNoFromToken();
   const fileInputRef = useRef(null);
 
@@ -64,6 +65,7 @@ function ProfileCard() {
         // 프로필 이미지 업데이트 성공 - 홈 데이터 다시 조회
         const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
         setHome(homeData);
+        setImageTimestamp(Date.now()); // 캐시 무효화를 위한 타임스탬프 갱신
         alert('프로필 이미지가 변경되었습니다.');
       }
     } catch (error) {
@@ -95,8 +97,12 @@ function ProfileCard() {
   }
 
   const profileImageUrl = home.profileChangeName 
-    ? `http://localhost:8006/memoryf/profile_images/${home.profileChangeName}`
+    ? `http://localhost:8006/memoryf/profile_images/${home.profileChangeName}?t=${imageTimestamp}`
     : defaultProfileImg;
+
+  const handleImageError = (e) => {
+    e.target.src = defaultProfileImg;
+  };
 
   return (
     <section className="profile-card card">
@@ -108,6 +114,7 @@ function ProfileCard() {
             src={profileImageUrl} 
             alt="profile" 
             className={uploading ? 'uploading' : ''}
+            onError={handleImageError}
           />
           <span className="online-dot" />
           {uploading && <div className="upload-overlay">업로드 중...</div>}

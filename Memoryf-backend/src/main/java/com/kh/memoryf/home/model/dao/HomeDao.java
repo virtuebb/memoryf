@@ -37,7 +37,7 @@ public class HomeDao {
 		HashMap<String, Object> params = new HashMap<>();
 		params.put("homeNo", homeNo);
 		params.put("currentMemberNo", currentMemberNo);
-		return (ArrayList)sqlSession.selectList("homeMapper.selectGuestbookList", params);
+		return new ArrayList<>(sqlSession.selectList("homeMapper.selectGuestbookList", params));
 	}
 	
 	/**

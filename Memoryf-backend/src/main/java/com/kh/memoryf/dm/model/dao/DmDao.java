@@ -15,7 +15,7 @@ public class DmDao {
 
         // MyBatis 매퍼 id와 반환형에 맞게 selectList 사용
         // 매퍼에 정의된 id는 "selectDmRoomList" 입니다.
-        return (ArrayList)sqlSession.selectList("dmMapper.selectDmRoomList", userId);
+        return new ArrayList<>(sqlSession.selectList("dmMapper.selectDmRoomList", userId));
 
     }
 

@@ -14,6 +14,7 @@ function SettingsEdit() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [imageTimestamp, setImageTimestamp] = useState(Date.now());
   const [formData, setFormData] = useState({
     memberNick: "",
     statusMsg: "",
@@ -73,6 +74,7 @@ function SettingsEdit() {
         // 프로필 이미지 업데이트 성공 - 데이터 다시 조회
         const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
         setProfileData(homeData);
+        setImageTimestamp(Date.now()); // 캐시 무효화를 위한 타임스탬프 갱신
         alert('프로필 사진이 변경되었습니다.');
       }
     } catch (error) {
@@ -123,8 +125,12 @@ function SettingsEdit() {
   }
 
   const profileImageUrl = profileData?.profileChangeName 
-    ? `http://localhost:8006/memoryf/profile_images/${profileData.profileChangeName}`
+    ? `http://localhost:8006/memoryf/profile_images/${profileData.profileChangeName}?t=${imageTimestamp}`
     : defaultProfileImg;
+
+  const handleImageError = (e) => {
+    e.target.src = defaultProfileImg;
+  };
 
   return (
     <div className="settings-edit-container">
@@ -132,7 +138,11 @@ function SettingsEdit() {
       <div className="settings-edit-header">
         <div className="profile-image-section">
           <div className="profile-image-wrapper">
-            <img src={profileImageUrl} alt="프로필 사진" />
+            <img 
+              src={profileImageUrl} 
+              alt="프로필 사진" 
+              onError={handleImageError}
+            />
           </div>
           <div className="profile-info">
             <div className="profile-nickname">{profileData?.memberNick}</div>
