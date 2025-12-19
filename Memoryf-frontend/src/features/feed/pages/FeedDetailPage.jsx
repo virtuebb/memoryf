@@ -530,6 +530,17 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                   <div className="comment-time">
                     {feed?.createdDate ? formatTimeAgo(feed.createdDate) : ''}
                   </div>
+                  {/* ✅ 위치 표시 */}
+                  {(feed?.latitude && feed?.longitude) && (
+                    <div
+                      className="feed-location"
+                      onClick={() => window.open(`https://map.kakao.com/link/map/${feed.latitude},${feed.longitude}`, '_blank')}
+                      style={{ cursor: 'pointer' }}
+                      title="카카오맵으로 열기"
+                    >
+                      📍 {feed?.placeName || feed?.locationName || feed?.addressName || '위치'}
+                    </div>
+                  )}
                 </div>
               </div>
 

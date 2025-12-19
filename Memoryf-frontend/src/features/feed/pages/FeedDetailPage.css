@@ -738,3 +738,13 @@
     max-height: 50vh;
   }
 }
+
+/* 지도 */
+.feed-location{
+  margin-top: 6px;
+  font-size: 13px;
+  color: #666;
+}
+.feed-location:hover{
+  text-decoration: underline;
+}

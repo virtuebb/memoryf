@@ -22,6 +22,8 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
 
   // 지도
   const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [locationName, setLocationName] = useState('');
+
 
   const [isUploading, setIsUploading] = useState(false);
   const [userProfile, setUserProfile] = useState({ memberNick: '사용자', profileChangeName: null });
@@ -400,7 +402,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
                   style={{ cursor: "pointer" }}
                 >
                   <span className="option-label">
-                    {latitude && longitude ? "📍 위치 선택됨" : "위치 추가"}
+                    📍 {locationName || "위치 추가"}
                   </span>
                   <span className="option-icon">📍</span>
                 </div>
@@ -415,11 +417,14 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
               // loc: { latitude, longitude, placeName, kakaoPlaceId, addressName, roadAddress }
               setLatitude(loc.latitude);
               setLongitude(loc.longitude);
+              setLocationName(loc.placeName || loc.addressName); // ✅ 이 줄 추가
               setIsLocationOpen(false);
             }}
             onClose={() => setIsLocationOpen(false)}
           />
         )}
+
+        
 
       </div>
     </div>

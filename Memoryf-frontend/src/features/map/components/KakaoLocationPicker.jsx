@@ -10,8 +10,6 @@ const KakaoLocationPicker = ({ onSelect, onClose }) => {
   const [keyword, setKeyword] = useState("");
   const [resultList, setResultList] = useState([]);
 
-  const [locationName, setLocationName] = useState('');
-
 
   // ✅ SDK 로드 + 지도 생성
   useEffect(() => {
@@ -123,23 +121,28 @@ const KakaoLocationPicker = ({ onSelect, onClose }) => {
 
           <div className="kakao-loc-results">
             {resultList.length === 0 ? (
-              <div className="kakao-loc-empty">검색 결과가 없습니다.</div>
+                keyword.trim().length === 0 ? (
+                <div className="kakao-loc-empty">장소를 검색해보세요.</div>
+                ) : (
+                <div className="kakao-loc-empty">검색 결과가 없습니다.</div>
+                )
             ) : (
-              resultList.map((p) => (
+                resultList.map((p) => (
                 <button
-                  type="button"
-                  key={p.id}
-                  className="kakao-loc-item"
-                  onClick={() => handlePickPlace(p)}
+                    type="button"
+                    key={p.id}
+                    className="kakao-loc-item"
+                    onClick={() => handlePickPlace(p)}
                 >
-                  <div className="kakao-loc-name">{p.place_name}</div>
-                  <div className="kakao-loc-addr">
+                    <div className="kakao-loc-name">{p.place_name}</div>
+                    <div className="kakao-loc-addr">
                     {p.road_address_name ? p.road_address_name : p.address_name}
-                  </div>
+                    </div>
                 </button>
-              ))
+                ))
             )}
-          </div>
+            </div>
+
         </div>
 
         <div className="kakao-loc-footer">
