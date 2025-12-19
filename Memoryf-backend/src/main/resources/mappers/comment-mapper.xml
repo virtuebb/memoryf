@@ -12,12 +12,14 @@
 			C.WRITER,
 			C.FEED_NO,
 			M.MEMBER_NICK AS WRITER_NICK,
+			H.PROFILE_CHANGE_NAME AS WRITER_PROFILE_IMAGE,
 			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT
 			<if test="memberNo != null">
 				, CASE WHEN CL.COMMENT_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
 			</if>
 		FROM TB_COMMENT C
 		LEFT JOIN TB_MEMBER M ON C.WRITER = M.MEMBER_NO
+		LEFT JOIN TB_MEMBER_HOME H ON C.WRITER = H.MEMBER_NO
 		LEFT JOIN (
 			SELECT COMMENT_NO, COUNT(*) AS LIKE_COUNT
 			FROM TB_COMMENT_LIKE
@@ -94,6 +96,7 @@
 		<result property="writer" column="WRITER"/>
 		<result property="feedNo" column="FEED_NO"/>
 		<result property="writerNick" column="WRITER_NICK"/>
+		<result property="writerProfileImage" column="WRITER_PROFILE_IMAGE"/>
 		<result property="likeCount" column="LIKE_COUNT"/>
 		<result property="isLiked" column="IS_LIKED"/>
 	</resultMap>

@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { createFeed, updateFeed } from '../api/feedApi';
+import { getHomeByMemberNo } from '../../home/api/homeApi';
 import { getMemberNoFromToken } from '../../../utils/jwt';
+import defaultProfileImg from '../../../assets/images/profiles/default-profile.svg';
 import './FeedUploadModal.css';
 
 function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialFeed = null }) {
@@ -14,7 +16,30 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [userProfile, setUserProfile] = useState({ memberNick: '사용자', profileChangeName: null });
   const fileInputRef = useRef(null);
+  const currentMemberNo = getMemberNoFromToken();
+
+  // 사용자 프로필 정보 가져오기
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!currentMemberNo) return;
+      try {
+        const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
+        if (homeData) {
+          setUserProfile({
+            memberNick: homeData.memberNick || '사용자',
+            profileChangeName: homeData.profileChangeName
+          });
+        }
+      } catch (error) {
+        console.error('프로필 조회 실패:', error);
+      }
+    };
+    if (isOpen) {
+      fetchUserProfile();
+    }
+  }, [isOpen, currentMemberNo]);
 
   // 수정 모드일 때 기존 피드 데이터 불러오기
   useEffect(() => {
@@ -320,41 +345,36 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
                 </div>
               </div>
               <div className="upload-form-section">
-                <div className="form-group">
-                  <label>프로필</label>
-                  <div className="profile-info">
-                    <span className="profile-avatar">👤</span>
-                    <span className="profile-name">사용자</span>
+                {/* 프로필과 내용 입력을 하나의 영역으로 통합 */}
+                <div className="content-wrapper">
+                  <div className="profile-header">
+                    <img 
+                      className="profile-avatar" 
+                      src={userProfile.profileChangeName 
+                        ? `http://localhost:8006/memoryf/profile_images/${userProfile.profileChangeName}` 
+                        : defaultProfileImg}
+                      alt="프로필"
+                      onError={(e) => { e.target.src = defaultProfileImg; }}
+                    />
+                    <span className="profile-name">{userProfile.memberNick}</span>
                   </div>
-                </div>
-                <div className="form-group">
                   <textarea
                     className="content-input"
-                    placeholder="문구 입력..."
+                    placeholder="문구를 입력하세요..."
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    rows={8}
+                    maxLength={2200}
                   />
+                  <div className="content-footer">
+                    <span className="emoji-btn">😊</span>
+                    <span className="char-count">{content.length}/2200</span>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <input
-                    type="text"
-                    className="tag-input"
-                    placeholder="해시태그 입력 (예: #여행 #일상)"
-                    value={tag}
-                    onChange={(e) => setTag(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <input
-                    type="text"
-                    className="location-input"
-                    placeholder="위치 추가 (선택사항)"
-                    onChange={(e) => {
-                      // 위치 정보는 나중에 지도 API로 구현 가능
-                      // 현재는 텍스트로만 입력
-                    }}
-                  />
+                
+                {/* 위치 추가 옵션 */}
+                <div className="option-item">
+                  <span className="option-label">위치 추가</span>
+                  <span className="option-icon">📍</span>
                 </div>
               </div>
             </div>

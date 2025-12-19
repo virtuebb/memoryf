@@ -25,11 +25,33 @@ export const decodeToken = (token) => {
 };
 
 /**
+ * accessToken 저장값 정규화
+ * - 앞뒤 공백 제거
+ * - 따옴표로 감싸진 문자열 제거
+ * - 'Bearer ' 접두사 제거
+ */
+export const normalizeAccessToken = (rawToken) => {
+  if (!rawToken) return null;
+
+  let token = String(rawToken).trim();
+
+  if (token.startsWith('"') && token.endsWith('"') && token.length > 1) {
+    token = token.slice(1, -1).trim();
+  }
+
+  if (token.toLowerCase().startsWith('bearer ')) {
+    token = token.slice(7).trim();
+  }
+
+  return token || null;
+};
+
+/**
  * localStorage에서 토큰 가져오기
  * @returns {string|null} 토큰 또는 null
  */
 export const getAccessToken = () => {
-  return localStorage.getItem('accessToken');
+  return normalizeAccessToken(localStorage.getItem('accessToken'));
 };
 
 /**

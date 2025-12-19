@@ -66,6 +66,41 @@ public class HomeContoller {
 		
 		return response;
 	}
+
+	/**
+	 * 닉네임으로 홈 조회 (RESTful: GET /home/by-nick/{memberNick})
+	 * 닉네임이 변경 가능하므로, 과거 닉네임은 404 처리(요청대로 링크 깨짐 허용)
+	 * @param memberNick 조회할 회원 닉네임
+	 * @param currentMemberNo 현재 로그인한 회원 번호 (옵션)
+	 * @return 홈 정보
+	 */
+	@GetMapping("/by-nick/{memberNick}")
+	public HashMap<String, Object> getHomeByNick(
+			@PathVariable("memberNick") String memberNick,
+			@RequestParam(value = "currentMemberNo", required = false) Integer currentMemberNo) {
+		HashMap<String, Object> response = new HashMap<>();
+		try {
+			Integer memberNo = memberService.selectMemberNoByNick(memberNick);
+			if (memberNo == null) {
+				response.put("success", false);
+				response.put("message", "회원을 찾을 수 없습니다.");
+				return response;
+			}
+
+			Home home = homeService.getHomeByMemberNo(memberNo, currentMemberNo);
+			if (home != null) {
+				response.put("success", true);
+				response.put("data", home);
+			} else {
+				response.put("success", false);
+				response.put("message", "홈을 찾을 수 없습니다.");
+			}
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "홈 조회 실패: " + e.getMessage());
+		}
+		return response;
+	}
 	
 	/**
 	 * 홈 번호로 방명록 목록 조회 (RESTful: GET /home/{homeNo}/guestbook)

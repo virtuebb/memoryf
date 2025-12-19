@@ -30,10 +30,14 @@ public class FeedDao {
 	 * 피드 상세 조회
 	 * @param sqlSession
 	 * @param feedNo 피드 번호
+	 * @param memberNo 회원 번호 (좋아요/북마크 여부 확인용)
 	 * @return 피드 상세 정보
 	 */
-	public Feed selectFeed(SqlSession sqlSession, int feedNo) {
-		return sqlSession.selectOne("feedMapper.selectFeed", feedNo);
+	public Feed selectFeed(SqlSession sqlSession, int feedNo, Integer memberNo) {
+		HashMap<String, Object> params = new HashMap<>();
+		params.put("feedNo", feedNo);
+		params.put("memberNo", memberNo);
+		return sqlSession.selectOne("feedMapper.selectFeed", params);
 	}
 	
 	/**
@@ -158,5 +162,15 @@ public class FeedDao {
 		params.put("feedNo", feedNo);
 		params.put("memberNo", memberNo);
 		return sqlSession.selectOne("feedMapper.checkFeedBookmark", params);
+	}
+	
+	/**
+	 * 북마크한 피드 목록 조회
+	 * @param sqlSession
+	 * @param memberNo 회원 번호
+	 * @return 북마크한 피드 목록
+	 */
+	public ArrayList<Feed> selectBookmarkedFeedList(SqlSession sqlSession, int memberNo) {
+		return new ArrayList<>(sqlSession.selectList("feedMapper.selectBookmarkedFeedList", memberNo));
 	}
 }

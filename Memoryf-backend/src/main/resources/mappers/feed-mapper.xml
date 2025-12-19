@@ -16,6 +16,9 @@
 			M.MEMBER_NICK,
 			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
 			NVL(COMMENT_CNT.COMMENT_COUNT, 0) AS COMMENT_COUNT
+			<if test="memberNo != null">
+				, CASE WHEN FL.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
+			</if>
 		FROM TB_FEED F
 		LEFT JOIN TB_MEMBER M ON F.MEMBER_NO = M.MEMBER_NO
 		LEFT JOIN (
@@ -29,6 +32,9 @@
 			WHERE IS_DEL = 'N'
 			GROUP BY FEED_NO
 		) COMMENT_CNT ON F.FEED_NO = COMMENT_CNT.FEED_NO
+		<if test="memberNo != null">
+			LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{memberNo}
+		</if>
 		WHERE F.IS_DEL = 'N'
 		<if test="sortBy == 'following' and memberNo != null">
 			AND F.MEMBER_NO IN (
@@ -52,7 +58,7 @@
 	</select>
 
 	<!-- 피드 상세 조회 -->
-	<select id="selectFeed" parameterType="_int" resultMap="feedResultMap">
+	<select id="selectFeed" parameterType="hashmap" resultMap="feedResultMap">
 		SELECT 
 			F.FEED_NO,
 			F.CONTENT,
@@ -63,10 +69,16 @@
 			F.IS_DEL,
 			F.MEMBER_NO,
 			M.MEMBER_NICK,
+			H.PROFILE_CHANGE_NAME AS PROFILE_IMAGE,
 			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
 			NVL(COMMENT_CNT.COMMENT_COUNT, 0) AS COMMENT_COUNT
+			<if test="memberNo != null">
+				, CASE WHEN FL.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
+				, CASE WHEN FB.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_BOOKMARKED
+			</if>
 		FROM TB_FEED F
 		LEFT JOIN TB_MEMBER M ON F.MEMBER_NO = M.MEMBER_NO
+		LEFT JOIN TB_MEMBER_HOME H ON F.MEMBER_NO = H.MEMBER_NO
 		LEFT JOIN (
 			SELECT FEED_NO, COUNT(*) AS LIKE_COUNT
 			FROM TB_FEED_LIKE
@@ -78,6 +90,10 @@
 			WHERE IS_DEL = 'N'
 			GROUP BY FEED_NO
 		) COMMENT_CNT ON F.FEED_NO = COMMENT_CNT.FEED_NO
+		<if test="memberNo != null">
+			LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{memberNo}
+			LEFT JOIN TB_FEED_BOOKMARK FB ON F.FEED_NO = FB.FEED_NO AND FB.MEMBER_NO = #{memberNo}
+		</if>
 		WHERE F.FEED_NO = #{feedNo}
 		AND F.IS_DEL = 'N'
 	</select>
@@ -218,6 +234,42 @@
 		AND MEMBER_NO = #{memberNo}
 	</select>
 
+	<!-- 북마크한 피드 목록 조회 -->
+	<select id="selectBookmarkedFeedList" parameterType="_int" resultMap="feedResultMap">
+		SELECT 
+			F.FEED_NO,
+			F.CONTENT,
+			F.TAG,
+			F.LATITUDE,
+			F.LONGITUDE,
+			F.CREATED_DATE,
+			F.IS_DEL,
+			F.MEMBER_NO,
+			M.MEMBER_NICK,
+			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
+			NVL(COMMENT_CNT.COMMENT_COUNT, 0) AS COMMENT_COUNT,
+			CASE WHEN FL.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED,
+			1 AS IS_BOOKMARKED
+		FROM TB_FEED F
+		INNER JOIN TB_FEED_BOOKMARK B ON F.FEED_NO = B.FEED_NO
+		LEFT JOIN TB_MEMBER M ON F.MEMBER_NO = M.MEMBER_NO
+		LEFT JOIN (
+			SELECT FEED_NO, COUNT(*) AS LIKE_COUNT
+			FROM TB_FEED_LIKE
+			GROUP BY FEED_NO
+		) LIKE_CNT ON F.FEED_NO = LIKE_CNT.FEED_NO
+		LEFT JOIN (
+			SELECT FEED_NO, COUNT(*) AS COMMENT_COUNT
+			FROM TB_COMMENT
+			WHERE IS_DEL = 'N'
+			GROUP BY FEED_NO
+		) COMMENT_CNT ON F.FEED_NO = COMMENT_CNT.FEED_NO
+		LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{value}
+		WHERE B.MEMBER_NO = #{value}
+		AND F.IS_DEL = 'N'
+		ORDER BY B.BOOKMARK_NO DESC
+	</select>
+
 	<!-- ResultMap: Feed -->
 	<resultMap type="feed" id="feedResultMap">
 		<id property="feedNo" column="FEED_NO"/>
@@ -229,8 +281,11 @@
 		<result property="isDel" column="IS_DEL"/>
 		<result property="memberNo" column="MEMBER_NO"/>
 		<result property="memberNick" column="MEMBER_NICK"/>
+		<result property="profileImage" column="PROFILE_IMAGE"/>
 		<result property="likeCount" column="LIKE_COUNT"/>
 		<result property="commentCount" column="COMMENT_COUNT"/>
+		<result property="isLiked" column="IS_LIKED"/>
+		<result property="isBookmarked" column="IS_BOOKMARKED"/>
 		<!-- 피드 파일은 즉시 로딩하여 직렬화 시 프록시 문제 방지 -->
 		<collection property="feedFiles" ofType="feedFile" select="selectFeedFileList" column="FEED_NO" fetchType="eager"/>
 	</resultMap>

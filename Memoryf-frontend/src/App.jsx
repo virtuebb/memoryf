@@ -1,7 +1,8 @@
 import './App.css';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { isAuthenticated } from './utils/jwt';
 
 // 공통
 import BgmPlayer from './shared/components/BgmPlayer.jsx';
@@ -44,8 +45,9 @@ import PaymentManagementPage from './features/admin/pages/PaymentManagementPage'
 import BgmManagementPage from './features/admin/pages/BgmManagementPage';
 
 function App() {
-  const isLoggedIn = !!localStorage.getItem("accessToken");
-  const isAdmin = false; 
+  const isLoggedIn = isAuthenticated();
+  const isAdmin = false;
+
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFeed, setEditingFeed] = useState(null); // 수정할 피드 데이터
@@ -58,6 +60,19 @@ function App() {
   
   // 설정 페이지 여부
   const isSettings = location.pathname.startsWith('/settings');
+
+  // openFeedModal 이벤트 리스너 등록
+  useEffect(() => {
+    const handleOpenFeedModal = () => {
+      setIsModalOpen(true);
+    };
+    
+    window.addEventListener('openFeedModal', handleOpenFeedModal);
+    
+    return () => {
+      window.removeEventListener('openFeedModal', handleOpenFeedModal);
+    };
+  }, []);
 
   // 로그인 안 했을 때
   if (!isLoggedIn) {
@@ -127,6 +142,7 @@ function App() {
           <main className={`main-content ${isSettings ? "settings-mode" : ""}`}>
             <Routes location={backgroundLocation || location}>
               <Route path="/home" element={<Home />} />
+              <Route path="/:memberNick" element={<Home />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
               <Route path="/messages/*" element={<DmRoutes />} />

@@ -5,7 +5,7 @@ import { getMemberNoFromToken } from "../../../utils/jwt";
 import defaultProfileImg from "../../../assets/images/profiles/default-profile.svg";
 import "../css/ProfileCard.css";
 
-function ProfileCard() {
+function ProfileCard({ memberNo, isOwner }) {
   const navigate = useNavigate();
   const [home, setHome] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,9 +21,11 @@ function ProfileCard() {
         return;
       }
 
+      if (!memberNo) return;
+
       try {
         setLoading(true);
-        const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
+        const homeData = await getHomeByMemberNo(memberNo, currentMemberNo);
         setHome(homeData);
       } catch (error) {
         console.error('홈 데이터 조회 실패:', error);
@@ -33,7 +35,7 @@ function ProfileCard() {
     };
 
     fetchHomeData();
-  }, [currentMemberNo, navigate]);
+  }, [currentMemberNo, memberNo, navigate]);
 
   const handleEditProfile = () => {
     navigate('/settings/edit');
@@ -44,10 +46,12 @@ function ProfileCard() {
   };
 
   const handleProfileImageClick = () => {
+    if (!isOwner) return;
     fileInputRef.current?.click();
   };
 
   const handleFileChange = async (e) => {
+    if (!isOwner) return;
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -63,7 +67,7 @@ function ProfileCard() {
       
       if (result.success) {
         // 프로필 이미지 업데이트 성공 - 홈 데이터 다시 조회
-        const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
+        const homeData = await getHomeByMemberNo(memberNo, currentMemberNo);
         setHome(homeData);
         setImageTimestamp(Date.now()); // 캐시 무효화를 위한 타임스탬프 갱신
         alert('프로필 이미지가 변경되었습니다.');
@@ -117,14 +121,16 @@ function ProfileCard() {
             onError={handleImageError}
           />
           <span className="online-dot" />
-          {uploading && <div className="upload-overlay">업로드 중...</div>}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
+          {isOwner && uploading && <div className="upload-overlay">업로드 중...</div>}
+          {isOwner && (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          )}
         </div>
 
         {/* 오른쪽 : 정보 */}
@@ -153,9 +159,11 @@ function ProfileCard() {
           </div>
 
           <div className="actions">
-            <button className="btn primary" onClick={handleEditProfile}>
-              프로필 편집
-            </button>
+            {isOwner && (
+              <button className="btn primary" onClick={handleEditProfile}>
+                프로필 편집
+              </button>
+            )}
             <button className="btn" onClick={handleMessage}>
               메시지
             </button>
