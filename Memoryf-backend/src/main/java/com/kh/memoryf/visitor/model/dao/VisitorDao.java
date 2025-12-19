@@ -1,4 +1,4 @@
-package com.kh.memoryf.visitor.dao;
+package com.kh.memoryf.visitor.model.dao;
 
 import java.util.Map;
 

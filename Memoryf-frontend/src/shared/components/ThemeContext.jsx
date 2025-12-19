@@ -15,6 +15,10 @@ export const themes = [
     color: "#F5D2D2",
     bg: "linear-gradient(180deg, #fff7f6 0%, #fdecec 100%)",
         vars: {
+
+      "--color-accent": "#f798b7",
+      "--color-accent-strong": "#e89aa6",
+      "--color-pulse": "#f798b7",
       "--color-left-bg": "#fff6f4",
       "--color-main-bg": "#F5D2D2",
       "--color-card-bg": "rgba(255, 255, 255, 0.96)",
@@ -46,6 +50,10 @@ export const themes = [
     color: "#f3dfb9ff",
     bg: "linear-gradient(180deg, #fffaf0 0%, #fff2d8 100%)",
     vars: {
+
+      "--color-accent": "#f2d8b3",
+      "--color-accent-strong": "#e8cfa0",
+      "--color-pulse": "#c56b1f",
       "--color-left-bg": "#fffaf0",
       "--color-main-bg": "#f3dfb9ff",
       "--color-card-bg": "rgba(255, 255, 255, 0.98)",
@@ -77,6 +85,10 @@ export const themes = [
     color: "#BDE3C3",
     bg: "linear-gradient(180deg, #eef7f2 0%, #e4f3ec 100%)",
       vars: {
+
+        "--color-accent": "#9fe0c3",
+        "--color-accent-strong": "#7fcfae",
+        "--color-pulse": "#0f766e",
         "--color-left-bg": "#ecf8f3",
         "--color-main-bg": "#BDE3C3",
         "--color-card-bg": "rgba(255, 255, 255, 0.98)",
@@ -108,6 +120,10 @@ export const themes = [
     color: "#A3CCDA",
     bg: "radial-gradient(1200px at 50% -20%, #0f172a 0%, #020617 65%)",
       vars: {
+        "--color-accent": "#0ea5e9",
+        "--color-accent-strong": "#0ea5e9",
+        "--color-pulse": "#020617",
+        
         "--color-left-bg": "#020617",
         "--color-main-bg": "#A3CCDA",
         "--color-card-bg": "rgba(181, 207, 224, 0.63)",

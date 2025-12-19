@@ -1,4 +1,4 @@
-package com.kh.memoryf.visitor.service;
+package com.kh.memoryf.visitor.model.service;
 
 import java.util.Map;
 

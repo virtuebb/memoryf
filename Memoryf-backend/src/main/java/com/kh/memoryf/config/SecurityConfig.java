@@ -3,6 +3,7 @@ package com.kh.memoryf.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -63,6 +64,18 @@ public class SecurityConfig {
 					.requestMatchers("/messages/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers("/visitor/**").permitAll()
 					
+				    // ✅ Guestbook
+				    .requestMatchers(HttpMethod.GET, "/guestbook/**").permitAll()
+				    .requestMatchers(HttpMethod.POST, "/guestbook").authenticated()
+
+				    // ✅ Home (조회는 공개)
+				    .requestMatchers(HttpMethod.GET, "/memoryf/guestbook/**").permitAll()
+				    .requestMatchers(HttpMethod.POST, "/memoryf/guestbook").authenticated()
+
+				    // ✅ Feed (조회는 공개)
+				    .requestMatchers(HttpMethod.GET, "/feeds/**").permitAll()
+				    .requestMatchers(HttpMethod.POST, "/feeds/**").authenticated()
+	
 					.anyRequest().authenticated() // 나머지는 JWT 인증 필요함
 				)
 				.formLogin(form -> form.disable()) // 스프링 방식의 로그인 막기

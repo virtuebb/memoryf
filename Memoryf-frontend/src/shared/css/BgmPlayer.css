@@ -9,14 +9,14 @@
   gap: 16px;
 }
 
-/* LP 외곽 (레이아웃 고정용) */
+/* LP 외곽 */
 .lp {
   width: 160px;
   height: 160px;
   position: relative;
 }
 
-/* 펄스 전용 레이어 */
+/* 펄스 레이어 */
 .lp-pulse {
   position: absolute;
   inset: 0;
@@ -24,15 +24,20 @@
   pointer-events: none;
 }
 
-/* 실제 회전 디스크 */
+/* 실제 디스크 */
 .lp-disc {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(circle at center, #ff9bb7 0 12%, #111 14%);
   cursor: pointer;
   position: relative;
   z-index: 2;
+
+  background: radial-gradient(
+    circle at center,
+    var(--color-accent) 0 12%,
+    var(--color-lp-dark, #111) 14%
+  );
 }
 
 /* 가운데 구멍 */
@@ -42,7 +47,7 @@
   left: 50%;
   width: 10px;
   height: 10px;
-  background: #fff;
+  background: var(--color-card-bg);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -71,27 +76,34 @@
 /* 펄스 */
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 155, 183, 0.45);
+    box-shadow: 0 0 0 0
+      color-mix(
+        in srgb,
+        var(--color-pulse) 45%,
+        transparent
+      );
   }
   70% {
-    box-shadow: 0 0 0 26px rgba(255, 155, 183, 0);
+    box-shadow: 0 0 0 26px transparent;
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 155, 183, 0);
+    box-shadow: 0 0 0 0 transparent;
   }
 }
 
 /* 상태 텍스트 */
 .bgm-info {
+  margin-top: 20px;
   text-align: center;
 }
 
 .status {
   font-size: 11px;
-  color: #999;
+  color: var(--color-text-muted, #999);
 }
 
 .title {
   font-size: 13px;
   font-weight: 600;
+  color: var(--color-sidebar-link);
 }

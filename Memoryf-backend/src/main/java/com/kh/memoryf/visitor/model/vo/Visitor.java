@@ -1,4 +1,4 @@
-package com.kh.memoryf.visitor.vo;
+package com.kh.memoryf.visitor.model.vo;
 
 import java.sql.Date;
 
