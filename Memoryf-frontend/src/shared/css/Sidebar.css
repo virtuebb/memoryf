@@ -172,36 +172,39 @@
    CREATE BUTTON (조금 더 주인공)
 ========================= */
 .create {
-  margin-top: 18px;
+  margin-top: 12px;
 }
 
 .create button {
   width: 100%;
-  height: 46px;
+  height: 38px; /* ↓ 줄임 */
 
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 12px; /* ↓ 메뉴랑 통일 */
+  border: 1px solid rgba(0, 0, 0, 0.05);
 
-  background: var(--color-create-bg);
+  background: color-mix(
+    in srgb,
+    var(--color-create-bg) 70%,
+    white
+  );
   color: var(--color-create-text);
 
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 13px; /* ↓ */
+  font-weight: 600; /* ↓ */
 
   cursor: pointer;
 
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06); /* ↓↓↓ */
 
   transition:
-    filter 0.15s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color 0.15s ease,
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 .create button:hover {
-  filter: brightness(0.98);
   transform: translateY(-1px);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
 .create button:active {

@@ -23,12 +23,13 @@ import SearchPage from './features/search/pages/SearchPage';
 import FeedListPage from './features/feed/pages/FeedListPage';
 import FeedDetailPage from './features/feed/pages/FeedDetailPage';
 import FeedUploadModal from './features/feed/components/FeedUploadModal';
-import SettingsEdit from './features/settings/pages/SettingsEdit';
+import SettingsEdit from './features/settings/pages/SettingsEdit'; 
 import SettingsPage from './features/settings/pages/SettingsPage';
 import DmRoutes from './features/dm/pages/DmRoutes';
 import FloatingDm from './features/dm/components/FloatingDm';
 import Chat from './features/dm/components/Chat';
 import { DmProvider } from './features/dm/context/DmContext';
+import DiaryPage from "./features/diary/pages/DiaryPage";
 
 // 로그인, 회원가입
 import LoginPage from './features/auth/pages/LoginPage';
@@ -140,53 +141,43 @@ function App() {
           {/* )} */}
 
           {/* 메인 콘텐츠 */}
-          <main className={`main-content ${isSettings ? "settings-mode" : ""}`}>
-            <Routes location={backgroundLocation || location}>
+            <main className={`main-content ${isSettings ? "settings-mode" : ""}`}>
+              <Routes location={backgroundLocation || location}>
+                {/* 🔥 내 홈 */}
+                <Route path="/" element={<Home />} /> 
+                <Route path="/home" element={<Home />} />
 
-            {/* 🔥 내 홈 */}
-            <Route path="/home" element={<Home />} />
+                {/* 🔥 타인 홈 */}
+                <Route path="/home/:memberNo" element={<Home />} />
 
-            {/* 🔥 타인 홈 */}
-            <Route path="/home/:memberNo" element={<Home />} />
-
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
-            <Route path="/messages/*" element={<DmRoutes />} />
-            <Route path="/chat-test" element={<Chat />} />
-            <Route path="/settings/*" element={<SettingsPage />} />
-
-            {/* fallback */}
-            <Route path="*" element={<Navigate to="/home" replace />} />
-          </Routes>
-              <Route path="/home" element={<Home />} />
-              <Route path="/:memberNick" element={<Home />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
-              <Route path="/messages/*" element={<DmRoutes />} />
-              {/* 채팅 테스트 주소 */}
-              <Route path="/chat-test" element={<Chat />} />
-              <Route path="/settings/*" element={<SettingsEdit />} />
-              <Route path="*" element={<Navigate to="/home" replace />} />
-            </Routes>
-
-
-            {backgroundLocation && (
-              <Routes>
-                <Route 
-                  path="/feeds/:feedNo" 
-                  element={
-                    <FeedDetailPage 
-                      isModal 
-                      onEditFeed={(feed) => {
-                        setEditingFeed(feed);
-                        setIsModalOpen(true);
-                      }}
-                    /> 
-                  } 
-                />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
+                <Route path="/messages/*" element={<DmRoutes />} />
+                <Route path="/chat-test" element={<Chat />} />
+                <Route path="/settings/*" element={<SettingsPage />} />
+                <Route path="/diary" element={<DiaryPage />} />
+                {/* fallback */}
+                <Route path="*" element={<Navigate to="/home" replace />} />
               </Routes>
-            )}
-          </main>
+
+              {/* 🔥 피드 상세 모달 라우트 */}
+              {backgroundLocation && (
+                <Routes>
+                  <Route
+                    path="/feeds/:feedNo"
+                    element={
+                      <FeedDetailPage
+                        isModal
+                        onEditFeed={(feed) => {
+                          setEditingFeed(feed);
+                          setIsModalOpen(true);
+                        }}
+                      />
+                    }
+                  />
+                </Routes>
+              )}
+            </main>
         </div>
 
         <Footer />

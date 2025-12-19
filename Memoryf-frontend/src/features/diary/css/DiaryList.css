@@ -1,0 +1,58 @@
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.diary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 28px;
+}
+
+.pagination button {
+  min-width: 32px;
+  height: 32px;
+
+  border-radius: 999px;
+  border: none;
+
+  font-size: 13px;
+  cursor: pointer;
+
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.pagination button.active {
+  background: rgba(111, 191, 154, 0.35);
+  color: #2f6f55;
+  font-weight: 700;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

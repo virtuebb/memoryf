@@ -12,6 +12,7 @@ import FeedTabs from "../components/FeedTabs";
 import "../css/Home.css";
 
 function Home() {
+  const targetMemberNo = null;
   const { theme } = useTheme();
   const [homeNo, setHomeNo] = useState(null);
   const currentMemberNo = getMemberNoFromToken();

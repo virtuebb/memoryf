@@ -20,8 +20,8 @@ function Sidebar({ onCreateClick }) {
         {/* CONTENT */}
         <li className="menu-label">CONTENT</li>
 
-        <li className={isActive('/diaries') ? 'active' : ''}>
-          <Link to="/diaries">
+        <li className={isActive('/diary') ? 'active' : ''}>
+          <Link to="/diary">
             <span className="icon">📔</span>
             Diary
           </Link>
