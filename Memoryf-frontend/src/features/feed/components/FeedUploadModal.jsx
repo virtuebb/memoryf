@@ -3,6 +3,10 @@ import { createFeed, updateFeed } from '../api/feedApi';
 import { getHomeByMemberNo } from '../../home/api/homeApi';
 import { getMemberNoFromToken } from '../../../utils/jwt';
 import defaultProfileImg from '../../../assets/images/profiles/default-profile.svg';
+
+// 지도
+import KakaoLocationPicker from "../../map/components/KakaoLocationPicker";
+
 import './FeedUploadModal.css';
 
 function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialFeed = null }) {
@@ -15,6 +19,10 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
   const [tag, setTag] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+
+  // 지도
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+
   const [isUploading, setIsUploading] = useState(false);
   const [userProfile, setUserProfile] = useState({ memberNick: '사용자', profileChangeName: null });
   const fileInputRef = useRef(null);
@@ -372,14 +380,33 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
                 </div>
                 
                 {/* 위치 추가 옵션 */}
-                <div className="option-item">
-                  <span className="option-label">위치 추가</span>
+                <div
+                  className="option-item"
+                  onClick={() => setIsLocationOpen(true)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <span className="option-label">
+                    {latitude && longitude ? "📍 위치 선택됨" : "위치 추가"}
+                  </span>
                   <span className="option-icon">📍</span>
                 </div>
               </div>
             </div>
           )}
         </div>
+        {/* ✅ 지도 위치 선택 모달 */}
+        {isLocationOpen && (
+          <KakaoLocationPicker
+            onSelect={(loc) => {
+              // loc: { latitude, longitude, placeName, kakaoPlaceId, addressName, roadAddress }
+              setLatitude(loc.latitude);
+              setLongitude(loc.longitude);
+              setIsLocationOpen(false);
+            }}
+            onClose={() => setIsLocationOpen(false)}
+          />
+        )}
+
       </div>
     </div>
   );

@@ -46,6 +46,9 @@ import ReportManagementPage from './features/admin/pages/ReportManagementPage';
 import PaymentManagementPage from './features/admin/pages/PaymentManagementPage';
 import BgmManagementPage from './features/admin/pages/BgmManagementPage';
 
+// 지도
+import MapTestPage from './features/map/pages/MapTestPage';
+
 function App() {
   const isLoggedIn = isAuthenticated();
   const isAdmin = false;
@@ -146,6 +149,9 @@ function App() {
                 {/* 🔥 내 홈 */}
                 <Route path="/" element={<Home />} /> 
                 <Route path="/home" element={<Home />} />
+
+                {/* 🔥 지도 테스트 */}
+                <Route path="/map-test" element={<MapTestPage />} />
 
                 {/* 🔥 타인 홈 */}
                 <Route path="/home/:memberNo" element={<Home />} />
