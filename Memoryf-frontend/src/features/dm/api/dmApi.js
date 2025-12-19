@@ -33,51 +33,18 @@ const selectDmRoomList = async () => {
     }
 };
 
-/**
- * 새 DM 방 생성
- * 
- * 
- */
-// export const createDmRoom = async (targetUserId) => {
 
-//     // console.log(targetUserId);
-//     const targetId = targetUserId;
-
-//     console.log(targetId);
-
-//     try {
-//         const token = getAccessToken();
-//         const url = `${API_BASE}/messages/insertRoom`;
-
-//         const response = await axios({
-//             url,
-//             method: 'POST',
-//             data: { targetUserId: targetUserId },
-//             headers: {
-//                 'Authorization': `Bearer ${token}`
-//             }
-            
-//         });
-
-//         console.log(targetUserId);
-
-//         console.log('✅ DM 방 생성 성공:', response.data);
-        
-//         return response.data;
-    
-//     } catch (error) {
-//         console.error('❌ DM 방 생성 실패:', error);
-//         throw error;
-//     }
-// };
 export const createDmRoom = async (targetUserId) => {
     console.log("보내는 targetUserId:", targetUserId);
     console.log("타입:", typeof targetUserId);
     
     const token = getAccessToken();
     const url = `${API_BASE}/messages/insertRoom`;
+    const userId = getUserIdFromToken();
 
-    const requestData = { targetUserId: targetUserId };
+    console.log("보내는 유저 : " + userId);
+
+    const requestData = { targetUserId: targetUserId, userId: userId };
     console.log("보내는 data:", JSON.stringify(requestData));
 
     const response = await axios({
@@ -91,7 +58,69 @@ export const createDmRoom = async (targetUserId) => {
     });
 
     console.log('응답:', response.data);
+
+    alert(response.data);
+
     return response.data;
 };
 
-export default selectDmRoomList;
+/**
+ * 채팅방의 메시지 목록 조회
+ * GET /messages/rooms/{roomId}/messages
+ */
+const selectDmMessages = async (roomId) => {
+    try {
+        const token = getAccessToken();
+        const url = `${API_BASE}/messages/${roomId}/select`;
+        const userId = getUserIdFromToken();
+
+
+        const response = await axios({
+            url,
+            method: 'POST',
+            data: {roomId: Number(roomId), senderId: userId},
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('✅ 메시지 목록 조회 성공:', response.data);
+        return response.data; // 메시지 배열
+    } catch (error) {
+        console.error('❌ 메시지 목록 조회 실패:', error);
+        throw error;
+    }
+};
+
+/**
+ * 채팅 메시지 저장
+ * POST /messages/rooms/{roomId}/messages
+ */
+const insertDmMessage = async (roomId, senderId, content) => {
+    try {
+        const token = getAccessToken();
+        const url = `${API_BASE}/messages/${roomId}/insert`;
+
+        const response = await axios({
+            url,
+            method: 'POST',
+            data: { roomId: Number(roomId), senderId: senderId, content },
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+
+
+        console.log('✅ 메시지 저장 성공:', response.data);
+        return response.data;
+
+    } catch (error) {
+        console.error('❌ 메시지 저장 실패:', error);
+        throw error;
+    }
+};
+
+export { selectDmRoomList, insertDmMessage, selectDmMessages };

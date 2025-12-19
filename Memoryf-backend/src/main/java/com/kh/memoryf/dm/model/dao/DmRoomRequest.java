@@ -11,6 +11,13 @@ import lombok.ToString;
 @ToString
 public class DmRoomRequest {
 
+    // 채팅 조회
     private String targetUserId;
+    private String userId;
+
+    // 메세지 저장
+    private int roomId;
+    private String senderId;
+    private String content;
 
 }
