@@ -148,18 +148,11 @@ function App() {
               {/* 기본 진입 */}
               <Route path="/" element={<Navigate to="/home" replace />} />
 
-<<<<<<< HEAD
                 {/* 🔥 지도 테스트 */}
                 <Route path="/map-test" element={<MapTestPage />} />
 
                 {/* 🔥 타인 홈 */}
                 <Route path="/home/:memberNo" element={<Home />} />
-=======
-              {/* 홈 */}
-              <Route path="/home" element={<Home />} />
-              <Route path="/home/:memberNo" element={<Home />} />
-              <Route path="/:memberNick" element={<Home />} />
->>>>>>> d4f137a4dc4601f7e5fb55d6724706e1f61d0e8a
 
               {/* 기타 */}
               <Route path="/search" element={<SearchPage />} />
