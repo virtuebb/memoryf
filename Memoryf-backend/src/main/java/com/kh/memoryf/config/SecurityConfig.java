@@ -32,7 +32,7 @@ public class SecurityConfig {
 
 		CorsConfiguration config = new CorsConfiguration();
 
-		// ✅ 명시적 Origin 지정 (패턴보다 정확함)
+		// 명시적 Origin 지정
 		config.addAllowedOrigin("http://localhost:5173");
 		config.addAllowedOrigin("http://192.168.150.10:5173");
 
@@ -58,7 +58,7 @@ public class SecurityConfig {
 					org.springframework.security.config.http.SessionCreationPolicy.STATELESS)) // JWT 인증방식임 - 세션 아님
 			.authorizeHttpRequests(auth -> auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // 프리플라이트(OPTIONS) 요청 모두 허용
 					.requestMatchers("/images/**", "/resources/**", "/css/**", "/js/**", "/feed_upfiles/**", "/profile_images/**").permitAll() // 정적 리소스 및 업로드 이미지 모두 허용
-					.requestMatchers("/login/**", "/signup/**").permitAll() // 로그인 요청 허용 - @RequestMapping("login") 관련
+					.requestMatchers("/login/**", "/signup/**").permitAll() // 로그인, 회원가입 요청 허용 - @RequestMapping
 					.requestMatchers("/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers("/messages/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers("/visitor/**").permitAll()
