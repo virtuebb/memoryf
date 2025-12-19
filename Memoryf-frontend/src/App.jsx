@@ -47,8 +47,9 @@ import PaymentManagementPage from './features/admin/pages/PaymentManagementPage'
 import BgmManagementPage from './features/admin/pages/BgmManagementPage';
 
 function App() {
-  const isLoggedIn = isAuthenticated();
+  // const isLoggedIn = isAuthenticated();
   const isAdmin = false;
+  const isLoggedIn = true; // 🔥 디버그용 (무조건 선언)
 
 
   const [isModalOpen, setIsModalOpen] = useState(false);

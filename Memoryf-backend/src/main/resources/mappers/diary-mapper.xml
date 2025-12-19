@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="DiaryMapper">
+
+    <insert id="insertDiary" parameterType="Diary">
+        INSERT INTO TB_DIARY (
+            DIARY_NO,
+            TITLE,
+            CONTENT,
+            CREATE_DATE,
+            IS_DEL,
+            MEMBER_NO
+        ) VALUES (
+            SEQ_DIARY_NO.NEXTVAL,
+            #{title},
+            #{content},
+            SYSDATE,
+            'N',
+            #{memberNo}
+        )
+    </insert>
+
+    <select id="selectDiaryList" parameterType="map" resultType="Diary">
+        SELECT *
+        FROM (
+            SELECT A.*, ROWNUM RNUM
+            FROM (
+                SELECT *
+                FROM TB_DIARY
+                WHERE
+                    MEMBER_NO = #{memberNo}
+                    AND IS_DEL = 'N'
+                ORDER BY CREATE_DATE DESC
+            ) A
+            WHERE ROWNUM <![CDATA[<=]]> #{end}
+        )
+        WHERE RNUM <![CDATA[>=]]> #{start}
+    </select>
+
+    <update id="deleteDiary" parameterType="int">
+        UPDATE TB_DIARY
+        SET IS_DEL = 'Y'
+        WHERE DIARY_NO = #{diaryNo}
+    </update>
+
+    <select id="selectDiaryCount" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_DIARY
+        WHERE
+            MEMBER_NO = #{memberNo}
+            AND IS_DEL = 'N'
+    </select>
+
+</mapper>

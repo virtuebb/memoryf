@@ -9,6 +9,7 @@ const loginMemberApi = async (memberId, memberPwd) => {
 
     
     return response.data; // JWT
+    
   } catch (error) {
     console.log("로그인 ajax 통신 실패", error);
     return null;
