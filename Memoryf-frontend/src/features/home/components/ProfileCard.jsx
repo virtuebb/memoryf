@@ -5,7 +5,7 @@ import { getMemberNoFromToken } from "../../../utils/jwt";
 import defaultProfileImg from "../../../assets/images/profiles/default-profile.svg";
 import "../css/ProfileCard.css";
 
-function ProfileCard() {
+function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
   const navigate = useNavigate();
 
   /* =========================
@@ -19,16 +19,11 @@ function ProfileCard() {
   const currentMemberNo = getMemberNoFromToken();
   const fileInputRef = useRef(null);
 
-  /* =========================
-     🔒 임시 안전장치 (팔로우 기능 비활성)
-     👉 에러 방지용
-  ========================= */
-  const memberNo = currentMemberNo;
-  const isOwner = true;
-
-  const [isFollowModalOpen] = useState(false);
-  const [followModalType] = useState(null);
-  const [followKeyword] = useState("");
+  const resolvedMemberNo = memberNo ?? currentMemberNo;
+  const isOwner =
+    typeof isOwnerProp === "boolean"
+      ? isOwnerProp
+      : resolvedMemberNo != null && currentMemberNo != null && resolvedMemberNo === currentMemberNo;
 
   /* =========================
      홈 정보 조회
@@ -39,10 +34,16 @@ function ProfileCard() {
       return;
     }
 
+    if (!resolvedMemberNo) {
+      setHome(null);
+      setLoading(false);
+      return;
+    }
+
     const fetchHomeData = async () => {
       try {
         setLoading(true);
-        const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
+        const homeData = await getHomeByMemberNo(resolvedMemberNo, currentMemberNo);
         setHome(homeData);
       } catch (error) {
         console.error("프로필 조회 실패:", error);
@@ -53,7 +54,7 @@ function ProfileCard() {
     };
 
     fetchHomeData();
-  }, [currentMemberNo, navigate]);
+  }, [currentMemberNo, navigate, resolvedMemberNo]);
 
   /* =========================
      핸들러
@@ -63,7 +64,7 @@ function ProfileCard() {
   };
 
   const handleMessage = () => {
-    navigate("/dm");
+    navigate("/messages");
   };
 
   const handleProfileImageClick = () => {
@@ -77,10 +78,10 @@ function ProfileCard() {
 
     try {
       setUploading(true);
-      const result = await uploadProfileImage(currentMemberNo, file);
+      const result = await uploadProfileImage(resolvedMemberNo, file);
 
       if (result?.success) {
-        const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
+        const homeData = await getHomeByMemberNo(resolvedMemberNo, currentMemberNo);
         setHome(homeData);
         setImageTimestamp(Date.now());
         alert("프로필 이미지가 변경되었습니다.");
@@ -159,10 +160,12 @@ function ProfileCard() {
             </div>
           </div>
 
-          <div className="actions owner">
-            <button className="btn primary" onClick={handleEditProfile}>
-              프로필 편집
-            </button>
+          <div className={`actions ${isOwner ? "owner" : ""}`}>
+            {isOwner && (
+              <button className="btn primary" onClick={handleEditProfile}>
+                프로필 편집
+              </button>
+            )}
             <button className="btn secondary message-btn" onClick={handleMessage}>
               메시지 보내기
             </button>

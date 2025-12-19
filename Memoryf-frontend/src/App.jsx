@@ -145,24 +145,23 @@ function App() {
           {/* 메인 콘텐츠 */}
           <main className={`main-content ${isSettings ? "settings-mode" : ""}`}>
             <Routes location={backgroundLocation || location}>
-              {/* 기본 진입 */}
               <Route path="/" element={<Navigate to="/home" replace />} />
+              {/* 🔥 지도 테스트 */}
+              <Route path="/map-test" element={<MapTestPage />} />
 
-                {/* 🔥 지도 테스트 */}
-                <Route path="/map-test" element={<MapTestPage />} />
-
-                {/* 🔥 타인 홈 */}
-                <Route path="/home/:memberNo" element={<Home />} />
+              {/* 홈 */}
+              <Route path="/home" element={<Home />} />
+              <Route path="/home/:memberNo" element={<Home />} />
+              <Route path="/:memberNick" element={<Home />} />
 
               {/* 기타 */}
               <Route path="/search" element={<SearchPage />} />
               <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
               <Route path="/messages/*" element={<DmRoutes />} />
+              {/* 채팅 테스트 주소 */}
               <Route path="/chat-test" element={<Chat />} />
               <Route path="/settings/*" element={<SettingsPage />} />
               <Route path="/diary" element={<DiaryPage />} />
-
-              {/* fallback */}
               <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
 

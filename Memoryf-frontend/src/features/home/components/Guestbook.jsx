@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import {
+  getGuestbookList,
   createGuestbook,
   deleteGuestbook,
-  getGuestbookList,
   toggleGuestbookLike,
 } from "../api/homeApi";
 import { getMemberNoFromToken } from "../../../utils/jwt";
@@ -12,19 +12,22 @@ import "../css/Guestbook.css";
 
 function Guestbook({ homeNo, homeOwnerMemberNo }) {
   const navigate = useNavigate();
-
-  const currentMemberNo = getMemberNoFromToken();
-  const isMyHome = !!homeOwnerMemberNo && currentMemberNo === homeOwnerMemberNo;
-
-  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [guestbook, setGuestbook] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const currentMemberNo = getMemberNoFromToken();
+  const isMyHome =
+    currentMemberNo != null &&
+    homeOwnerMemberNo != null &&
+    currentMemberNo === homeOwnerMemberNo;
 
   const fetchGuestbookList = async () => {
+    if (!homeNo) return;
     try {
       setLoading(true);
-      const data = await getGuestbookList(homeNo);
-      setGuestbook(data || []);
+      const data = await getGuestbookList(homeNo, currentMemberNo);
+      setGuestbook(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("방명록 조회 실패:", error);
       setGuestbook([]);
@@ -34,27 +37,26 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
   };
 
   useEffect(() => {
-    if (homeNo) fetchGuestbookList();
+    fetchGuestbookList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [homeNo]);
 
   const handleSubmit = async () => {
+    const trimmed = message.trim();
+    if (!trimmed) return;
+
     if (!currentMemberNo) {
       alert("로그인이 필요합니다.");
       return;
     }
 
-    if (!message.trim()) {
-      alert("내용을 입력해주세요.");
-      return;
-    }
-
     try {
-      const result = await createGuestbook(homeNo, message.trim(), currentMemberNo);
-      if (result.success) {
+      const result = await createGuestbook(homeNo, trimmed, currentMemberNo);
+      if (result?.success) {
         setMessage("");
         fetchGuestbookList();
       } else {
-        alert(result.message || "방명록 등록에 실패했습니다.");
+        alert(result?.message || "방명록 등록에 실패했습니다.");
       }
     } catch (error) {
       console.error("방명록 등록 실패:", error);
@@ -64,13 +66,12 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
 
   const handleDelete = async (guestbookNo) => {
     if (!window.confirm("방명록을 삭제하시겠습니까?")) return;
-
     try {
       const result = await deleteGuestbook(homeNo, guestbookNo);
-      if (result.success) {
+      if (result?.success) {
         fetchGuestbookList();
       } else {
-        alert(result.message || "방명록 삭제에 실패했습니다.");
+        alert(result?.message || "방명록 삭제에 실패했습니다.");
       }
     } catch (error) {
       console.error("방명록 삭제 실패:", error);
@@ -83,10 +84,9 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
       alert("로그인이 필요합니다.");
       return;
     }
-
     try {
       const result = await toggleGuestbookLike(homeNo, guestbookNo, currentMemberNo);
-      if (result.success) {
+      if (result?.success) {
         fetchGuestbookList();
       }
     } catch (error) {
@@ -118,7 +118,6 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
         if (diffHours < 24) return `${diffHours}시간`;
         return "오늘";
       }
-
       if (diffDays < 7) return `${diffDays}일`;
       if (diffDays === 7) return "1주";
 
@@ -157,7 +156,7 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
 
       <div className="guestbook-form">
         <textarea
-          placeholder={isMyHome ? "따뜻한 한마디를 남겨주세요…" : "따뜻한 한마디를 남겨주세요…"}
+          placeholder="따뜻한 한마디를 남겨주세요…"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           maxLength={120}
@@ -167,7 +166,8 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
 
       <ul className="guestbook-list">
         {guestbook.map((item) => (
-          <li key={item.guestbookNo}>
+          <li key={item.guestbookNo ?? `${item.memberNo}-${item.createDate}`}
+          >
             <div className="guestbook-item-header">
               <div className="guestbook-author">
                 <div className="guestbook-author-profile">
@@ -178,7 +178,6 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
                       className="guestbook-avatar-img"
                       onError={(e) => {
                         e.target.style.display = "none";
-                        // fallback avatar는 같은 래퍼 내부의 다음 요소
                         if (e.target.nextSibling) {
                           e.target.nextSibling.style.display = "flex";
                         }
@@ -212,10 +211,10 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
                   className={`like-btn ${item.isLiked ? "liked" : ""}`}
                   onClick={() => handleLike(item.guestbookNo)}
                 >
-                  ❤️ {item.likeCount > 0 && item.likeCount}
+                  ❤️ {item.likeCount > 0 ? item.likeCount : ""}
                 </button>
 
-                {currentMemberNo === item.memberNo && (
+                {(currentMemberNo === item.memberNo || isMyHome) && (
                   <button
                     className="delete-btn"
                     onClick={() => handleDelete(item.guestbookNo)}

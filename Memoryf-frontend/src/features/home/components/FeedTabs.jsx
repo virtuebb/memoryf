@@ -29,7 +29,12 @@ function FeedTabs({ memberNo, isOwner, onCreateClick }) {
   }, [currentMemberNo, memberNo]);
 
   const fetchFeeds = async () => {
-    if (!currentMemberNo || !memberNo) return;
+    if (!currentMemberNo || !memberNo) {
+      setMyFeeds([]);
+      setBookmarkedFeeds([]);
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -44,6 +49,8 @@ function FeedTabs({ memberNo, isOwner, onCreateClick }) {
       setBookmarkedFeeds(bookmarked);
     } catch (error) {
       console.error('피드 조회 실패:', error);
+      setMyFeeds([]);
+      setBookmarkedFeeds([]);
     } finally {
       setLoading(false);
     }
