@@ -1,18 +1,18 @@
 .diary-item {
-  padding: 18px 20px;
-  border-radius: 18px;
-
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+  background: var(--color-card-bg);
+  border-radius: 20px;
+  padding: 16px 20px;
 
   display: flex;
   flex-direction: column;
   gap: 6px;
+
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
 }
 
 .diary-item .date {
   font-size: 11px;
-  color: #7f8f87;
+  color: var(--color-text-muted);
 }
 
 .diary-item p {
@@ -20,3 +20,11 @@
   line-height: 1.6;
   margin: 0;
 }
+
+.diary-content {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--color-sidebar-link);
+  white-space: pre-wrap;
+}
+
