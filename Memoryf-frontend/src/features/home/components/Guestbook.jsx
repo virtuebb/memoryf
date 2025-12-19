@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { getGuestbookList, createGuestbook } from "../api/guestbookApi";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { 
@@ -9,51 +11,43 @@ import {
 import { getMemberNoFromToken } from "../../../utils/jwt";
 import "../css/Guestbook.css";
 
-function Guestbook({ homeNo }) {
-  const [message, setMessage] = useState("");
-  const [guestbook, setGuestbook] = useState([]);
+function Guestbook({ homeNo, homeOwnerMemberNo }) {
+  const [list, setList] = useState([]);
+  const [guestbookContent, setGuestbookContent] = useState("");
   const [loading, setLoading] = useState(true);
-  const currentMemberNo = getMemberNoFromToken();
 
-  useEffect(() => {
-    if (homeNo) {
-      fetchGuestbookList();
-    }
-  }, [homeNo]);
+  const loginMemberNo = getMemberNoFromToken();
+  const isMyHome = loginMemberNo === homeOwnerMemberNo;
 
-  const fetchGuestbookList = async () => {
+  const fetchGuestbook = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const data = await getGuestbookList(homeNo, currentMemberNo);
-      setGuestbook(data || []);
-    } catch (error) {
-      console.error('방명록 조회 실패:', error);
+      const data = await getGuestbookList(homeNo);
+      setList(data || []);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async () => {
-    if (!message.trim()) return;
-    
-    if (!currentMemberNo) {
-      alert('로그인이 필요합니다.');
-      return;
-    }
+  useEffect(() => {
+    if (homeNo) fetchGuestbook();
+  }, [homeNo]);
 
-    try {
-      const result = await createGuestbook(homeNo, message.trim(), currentMemberNo);
-      if (result.success) {
-        setMessage("");
-        fetchGuestbookList(); // 새로고침
-      } else {
-        alert(result.message || '방명록 등록에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('방명록 등록 실패:', error);
-      alert('방명록 등록에 실패했습니다.');
-    }
+  const handleSubmit = async () => {
+    if (!guestbookContent.trim()) return;
+
+    await createGuestbook({
+      homeNo,
+      guestbookContent,
+      memberNo: loginMemberNo,
+    });
+
+    setGuestbookContent("");
+    fetchGuestbook();
   };
+
+
+  if (loading) return <div>방명록 불러오는 중...</div>;
 
   const handleDelete = async (guestbookNo) => {
     if (!window.confirm('방명록을 삭제하시겠습니까?')) return;
@@ -137,24 +131,32 @@ function Guestbook({ homeNo }) {
     );
   }
 
-  return (
-    <section className="guestbook card">
-      {/* 헤더 */}
-      <div className="guestbook-header">
-        <h3>💌 Guestbook</h3>
-        <span className="count">{guestbook.length}</span>
-      </div>
 
-      {/* 입력 */}
-      <div className="guestbook-form">
-        <textarea
-          placeholder="따뜻한 한마디를 남겨주세요…"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          maxLength={120}
-        />
-        <button onClick={handleSubmit}>등록</button>
-      </div>
+  return (
+    <section className="guestbook">
+      <h3>방명록 ({list.length})</h3>
+
+      {!isMyHome && (
+        <div>
+          <textarea
+            value={guestbookContent}
+            onChange={(e) => setGuestbookContent(e.target.value)}
+          />
+          <button onClick={handleSubmit}>남기기</button>
+        </div>
+      )}
+
+
+      {list.length === 0 ? (
+        <p>아직 방명록이 없어요</p>
+      ) : (
+        list.map((g) => (
+          <div key={g.guestbookNo}>
+            <strong>{g.memberNick}</strong>
+            <p>{g.guestbookContent}</p>
+          </div>
+        ))
+      )}
 
       {/* 리스트 */}
       <ul className="guestbook-list">
@@ -204,6 +206,7 @@ function Guestbook({ homeNo }) {
           </li>
         ))}
       </ul>
+
     </section>
   );
 }

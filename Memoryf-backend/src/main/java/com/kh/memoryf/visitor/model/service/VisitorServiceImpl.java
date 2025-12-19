@@ -1,4 +1,4 @@
-package com.kh.memoryf.visitor.service;
+package com.kh.memoryf.visitor.model.service;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.kh.memoryf.visitor.dao.VisitorDao;
+import com.kh.memoryf.visitor.model.dao.VisitorDao;
 
 @Service
 public class VisitorServiceImpl implements VisitorService {

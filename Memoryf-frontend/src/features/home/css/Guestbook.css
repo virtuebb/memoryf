@@ -50,12 +50,12 @@
 
 .guestbook-form textarea {
   flex: 1;
-  resize: none;
-  height: 80px;
+  height: 40px;              /* ✅ 버튼과 동일 */
+  padding: 10px 12px;
 
-  border-radius: 18px;
+  resize: none;
+  border-radius: 14px;
   border: 1px solid var(--color-border-soft);
-  padding: 16px 18px;
 
   background: color-mix(
     in srgb,
@@ -63,8 +63,8 @@
     transparent
   );
 
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 14px;           /* ✅ 버튼 텍스트와 동일 체급 */
+  line-height: 20px;
   outline: none;
 
   color: var(--color-sidebar-link);
@@ -87,15 +87,32 @@
 .guestbook-form textarea::placeholder {
   color: color-mix(
     in srgb,
-    var(--color-sidebar-link) 45%,
+    var(--color-accent) 50%,
+    transparent
+  );
+  transition: color 0.2s ease;
+}
+
+.guestbook-form textarea:focus::placeholder {
+  color: color-mix(
+    in srgb,
+    var(--color-accent) 35%,
     transparent
   );
 }
 
-/* 등록 버튼 */
 .guestbook-form button {
-  width: 72px;
-  border-radius: 18px;
+  display: flex;                 /* 👈 핵심 */
+  align-items: center;           /* 수직 중앙 */
+  justify-content: center;       /* 수평 중앙 */
+
+  height: 40px;
+  min-width: 44px;
+  max-width: 56px;
+  margin-top: 9px;
+  padding: 0 30px;
+
+  border-radius: 14px;
   border: none;
 
   background: linear-gradient(
@@ -105,21 +122,11 @@
   );
 
   color: var(--color-create-text);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
 
+  white-space: nowrap;
   cursor: pointer;
-
-  box-shadow: 0 8px 18px
-    color-mix(
-      in srgb,
-      var(--color-action-primary) 40%,
-      transparent
-    );
-
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
 .guestbook-form button:hover {

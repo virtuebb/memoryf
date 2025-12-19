@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import { useTheme } from "../../../shared/components/ThemeContext";
 import { getHomeByMemberNo, getHomeByMemberNick } from "../api/homeApi";
 import { getMemberNoFromToken } from "../../../utils/jwt";
+import { recordVisit } from "../../../shared/api/visitorApi";
 
 import Storybar from "../../story/components/Storybar";
 import ProfileCard from "../components/ProfileCard";
@@ -13,24 +13,18 @@ import "../css/Home.css";
 
 function Home() {
   const { theme } = useTheme();
-  const { memberNick } = useParams();
   const [homeNo, setHomeNo] = useState(null);
-  const [targetMemberNo, setTargetMemberNo] = useState(null);
   const currentMemberNo = getMemberNoFromToken();
 
-  const isOwner = !!currentMemberNo && !!targetMemberNo && currentMemberNo === targetMemberNo;
-
+  /* 홈 정보 조회 */
   useEffect(() => {
-    const fetchHomeNo = async () => {
-      if (!currentMemberNo) return;
-      
+    if (!targetMemberNo) return;
+
+    const fetchHome = async () => {
       try {
-        const homeData = memberNick
-          ? await getHomeByMemberNick(memberNick, currentMemberNo)
-          : await getHomeByMemberNo(currentMemberNo, currentMemberNo);
+        const homeData = await getHomeByMemberNo(currentMemberNo);
         if (homeData) {
           setHomeNo(homeData.homeNo);
-          setTargetMemberNo(homeData.memberNo);
         }
       } catch (error) {
         console.error('홈 번호 조회 실패:', error);
@@ -38,12 +32,7 @@ function Home() {
     };
 
     fetchHomeNo();
-  }, [currentMemberNo, memberNick]);
-
-  // 피드 생성 모달 열기 (App.jsx에서 이벤트 수신)
-  const handleCreateClick = () => {
-    window.dispatchEvent(new Event('openFeedModal'));
-  };
+  }, [currentMemberNo]);
 
   return (
     <div className="home-wrapper" style={{ background: theme.color }}>
@@ -54,19 +43,23 @@ function Home() {
           </div>
 
           <div className="card card-profile">
-            <ProfileCard memberNo={targetMemberNo} isOwner={isOwner} />
+            <ProfileCard />
           </div>
 
+          {/* 🔥 핵심: homeNo + 홈 주인 번호 전달 */}
           {homeNo && (
             <div className="card card-guestbook">
-              <Guestbook homeNo={homeNo} />
+              <Guestbook
+                homeNo={homeNo}
+                homeOwnerMemberNo={targetMemberNo}
+              />
             </div>
           )}
 
           <div className="feed-section">
-            <FeedTabs memberNo={targetMemberNo} isOwner={isOwner} onCreateClick={handleCreateClick} />
+            <FeedTabs />
           </div>
-        </main> 
+        </main>
       </div>
     </div>
   );

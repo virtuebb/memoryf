@@ -67,6 +67,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        
+        // 🔓 방명록 조회(GET)는 JWT 검사 안 함 (⭐ 여기!)
+        if (path.startsWith("/memoryf/guestbook")
+            && "GET".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 로그인/정적 리소스는 토큰 검사 제외
         if (isSkipPath(path)) {

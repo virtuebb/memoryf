@@ -39,13 +39,13 @@ export const getFeedList = async (sortBy = 'recent', page = 0, size = 18) => {
       timeout: 10000, // 10초 타임아웃
     });
     
-    console.log('API 전체 응답:', response); // 디버깅용
-    console.log('response.data:', response.data); // 디버깅용
+    // console.log('API 전체 응답:', response); // 디버깅용
+    // console.log('response.data:', response.data); // 디버깅용
     
     // 백엔드 응답 구조에 맞게 수정
     if (response.data && response.data.success) {
       const data = response.data.data;
-      console.log('응답 데이터:', data); // 디버깅용
+      // console.log('응답 데이터:', data); // 디버깅용
       if (Array.isArray(data)) {
         return data;
       }

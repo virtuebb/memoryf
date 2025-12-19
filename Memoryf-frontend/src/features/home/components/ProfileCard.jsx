@@ -3,66 +3,49 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { getHomeByMemberNo, uploadProfileImage } from "../api/homeApi";
 import { getMemberNoFromToken } from "../../../utils/jwt";
-import {
-  followMember,
-  getFollowersList,
-  getFollowingList,
-  unfollowMember,
-} from "../../follow/api/followApi";
 import defaultProfileImg from "../../../assets/images/profiles/default-profile.svg";
 import "../css/ProfileCard.css";
 
-function ProfileCard({ memberNo, isOwner }) {
+function ProfileCard() {
   const navigate = useNavigate();
   const [home, setHome] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [imageTimestamp, setImageTimestamp] = useState(Date.now());
-
-  const [isFollowModalOpen, setIsFollowModalOpen] = useState(false);
-  const [followModalType, setFollowModalType] = useState(null); // 'followers' | 'following'
-  const [followListLoading, setFollowListLoading] = useState(false);
-  const [followList, setFollowList] = useState([]);
-  const [followKeyword, setFollowKeyword] = useState('');
-  const [followPage, setFollowPage] = useState(0);
-  const [followHasMore, setFollowHasMore] = useState(true);
-  const [followLoadingMore, setFollowLoadingMore] = useState(false);
-  const loadMoreRef = useRef(null);
-  const followBodyRef = useRef(null);
-  const followFetchSeqRef = useRef(0);
-
   const currentMemberNo = getMemberNoFromToken();
   const fileInputRef = useRef(null);
 
+  /* 홈 정보 조회 */
   useEffect(() => {
+    if (!memberNo) return;
+
     const fetchHomeData = async () => {
       if (!currentMemberNo) {
         navigate('/login');
         return;
       }
 
-      if (!memberNo) return;
-
       try {
         setLoading(true);
-        const homeData = await getHomeByMemberNo(memberNo, currentMemberNo);
+        const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
         setHome(homeData);
       } catch (error) {
-        console.error('홈 데이터 조회 실패:', error);
+        console.error("프로필 조회 실패:", error);
+        setHome(null);
       } finally {
         setLoading(false);
       }
     };
 
     fetchHomeData();
-  }, [currentMemberNo, memberNo, navigate]);
+  }, [currentMemberNo, navigate]);
 
   const handleEditProfile = () => {
-    navigate('/settings/edit');
+    navigate("/settings/edit");
   };
 
   const handleMessage = () => {
-    navigate('/dm');
+    navigate("/dm");
   };
 
   const openFollowModal = async (type) => {
@@ -288,13 +271,7 @@ function ProfileCard({ memberNo, isOwner }) {
   const handleFileChange = async (e) => {
     if (!isOwner) return;
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    // 이미지 파일 확인
-    if (!file.type.startsWith('image/')) {
-      alert('이미지 파일만 업로드 가능합니다.');
-      return;
-    }
+    if (!file || !file.type.startsWith("image/")) return;
 
     try {
       setUploading(true);
@@ -302,7 +279,7 @@ function ProfileCard({ memberNo, isOwner }) {
       
       if (result.success) {
         // 프로필 이미지 업데이트 성공 - 홈 데이터 다시 조회
-        const homeData = await getHomeByMemberNo(memberNo, currentMemberNo);
+        const homeData = await getHomeByMemberNo(currentMemberNo, currentMemberNo);
         setHome(homeData);
         setImageTimestamp(Date.now()); // 캐시 무효화를 위한 타임스탬프 갱신
         alert('프로필 이미지가 변경되었습니다.');
@@ -312,10 +289,7 @@ function ProfileCard({ memberNo, isOwner }) {
       alert('프로필 이미지 업로드에 실패했습니다.');
     } finally {
       setUploading(false);
-      // 파일 input 초기화
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -327,15 +301,15 @@ function ProfileCard({ memberNo, isOwner }) {
     );
   }
 
-  if (!home) {
+  if (!home || !home.memberNick) {
     return (
       <section className="profile-card card">
-        <div className="profile-error">프로필을 불러올 수 없습니다.</div>
+        <div className="profile-empty">아직 프로필 정보가 없어요 🌱</div>
       </section>
     );
   }
 
-  const profileImageUrl = home.profileChangeName 
+  const profileImageUrl = home.profileChangeName
     ? `http://localhost:8006/memoryf/profile_images/${home.profileChangeName}?t=${imageTimestamp}`
     : defaultProfileImg;
 
@@ -343,151 +317,40 @@ function ProfileCard({ memberNo, isOwner }) {
     e.target.src = defaultProfileImg;
   };
 
-  const followModal = isFollowModalOpen ? (
-    <div className="follow-modal-overlay" onClick={closeFollowModal}>
-      <div className="follow-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="follow-modal-header">
-          <div className="follow-modal-title">
-            {followModalType === 'followers' ? '팔로워' : '팔로잉'}
-          </div>
-          <button
-            type="button"
-            className="follow-modal-close"
-            onClick={closeFollowModal}
-            aria-label="닫기"
-          >
-            ×
-          </button>
-        </div>
-
-        <div className="follow-modal-search">
-          <input
-            value={followKeyword}
-            onChange={(e) => setFollowKeyword(e.target.value)}
-            placeholder="검색"
-            className="follow-modal-search-input"
-            aria-label="팔로워/팔로잉 검색"
-          />
-        </div>
-
-        <div className="follow-modal-body" ref={followBodyRef}>
-          {followListLoading ? (
-            <div className="follow-modal-loading">로딩 중...</div>
-          ) : followList.length === 0 ? (
-            <div className="follow-modal-empty">목록이 없습니다.</div>
-          ) : (
-            <ul className="follow-modal-list">
-              {followList.map((u) => {
-                const isMe = u.memberNo === currentMemberNo;
-                const memberNick = u.memberNick || '익명';
-                const avatarUrl = u.profileChangeName
-                  ? `http://localhost:8006/memoryf/profile_images/${u.profileChangeName}`
-                  : defaultProfileImg;
-
-                return (
-                  <li key={u.memberNo ?? memberNick} className="follow-modal-item">
-                    <div className="follow-modal-left">
-                      <div className="follow-modal-avatar">
-                        <img
-                          src={avatarUrl}
-                          alt="프로필"
-                          onError={(e) => {
-                            e.target.src = defaultProfileImg;
-                          }}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        className="follow-modal-nick"
-                        onClick={() => handleClickMemberNick(memberNick)}
-                      >
-                        {memberNick}
-                      </button>
-                    </div>
-
-                    {!isMe && (
-                      <button
-                        type="button"
-                        className={`follow-modal-follow-btn ${u.isFollowing ? 'following' : ''}`}
-                        onClick={() => handleToggleFollowInList(u.memberNo)}
-                      >
-                        {u.isFollowing ? '팔로잉' : '팔로우'}
-                      </button>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-
-          {/* 무한 스크롤 sentinel */}
-          {followHasMore && !followListLoading ? (
-            <div className="follow-modal-sentinel" ref={loadMoreRef}>
-              {followLoadingMore ? '불러오는 중...' : ''}
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  ) : null;
-
   return (
     <section className="profile-card card">
       <div className="profile-row">
-        
-        {/* 왼쪽 : 아바타 */}
+        {/* 아바타 */}
         <div className="profile-avatar" onClick={handleProfileImageClick}>
-          <img 
-            src={profileImageUrl} 
-            alt="profile" 
-            className={uploading ? 'uploading' : ''}
-            onError={handleImageError}
-          />
+          <img src={profileImageUrl} alt="profile" />
           <span className="online-dot" />
-          {isOwner && uploading && <div className="upload-overlay">업로드 중...</div>}
-          {isOwner && (
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-            />
-          )}
+          {uploading && <div className="upload-overlay">업로드 중...</div>}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
         </div>
 
-        {/* 오른쪽 : 정보 */}
+        {/* 정보 */}
         <div className="profile-content">
           <h2 className="name">{home.memberNick}</h2>
           <span className="username">@{home.memberNick}</span>
 
-          {home.statusMsg && (
-            <p className="bio">{home.statusMsg}</p>
-          )}
+          {home.statusMsg && <p className="bio">{home.statusMsg}</p>}
 
-          {/* 통계 */}
           <div className="stats inline">
             <div>
-              <strong>{home.feedCount || 0}</strong>
+              <strong>{home.feedCount ?? 0}</strong>
               <span>게시물</span>
             </div>
-            <div
-              className="stat-clickable"
-              role="button"
-              tabIndex={0}
-              onClick={() => openFollowModal('followers')}
-              onKeyDown={(e) => e.key === 'Enter' && openFollowModal('followers')}
-            >
+            <div>
               <strong>{home.followerCount || 0}</strong>
               <span>팔로워</span>
             </div>
-            <div
-              className="stat-clickable"
-              role="button"
-              tabIndex={0}
-              onClick={() => openFollowModal('following')}
-              onKeyDown={(e) => e.key === 'Enter' && openFollowModal('following')}
-            >
+            <div>
               <strong>{home.followingCount || 0}</strong>
               <span>팔로잉</span>
             </div>
@@ -515,7 +378,6 @@ function ProfileCard({ memberNo, isOwner }) {
             )}
           </div>
         </div>
-
       </div>
 
       {isFollowModalOpen && typeof document !== 'undefined'
