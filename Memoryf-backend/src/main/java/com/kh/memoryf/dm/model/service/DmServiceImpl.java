@@ -1,12 +1,14 @@
 package com.kh.memoryf.dm.model.service;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kh.memoryf.dm.model.dao.DmDao;
+import com.kh.memoryf.dm.model.vo.DmMessage;
 import com.kh.memoryf.dm.model.vo.DmRoom;
 
 @Service
@@ -27,9 +29,22 @@ public class DmServiceImpl implements DmService {
     }
 
     @Override
-    public int insertRoom(String targetId) {
+    public int insertRoom(String targetUserId, String userId) {
 
-        return dmDao.insertRoom(sqlSession, targetId);
+        return dmDao.insertRoom(sqlSession, targetUserId, userId);
+
+    }
+
+    @Override
+    public int insertMessage(Map<String, Object> map) {
+
+        return dmDao.insertMessage(sqlSession, map);
+    }
+
+    @Override
+    public ArrayList<DmMessage> selectMessage(Map<String, Object> map) {
+
+        return dmDao.selectMessage(sqlSession, map);
 
     }
 

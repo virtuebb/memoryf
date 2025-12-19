@@ -1,6 +1,8 @@
 package com.kh.memoryf.dm.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kh.memoryf.dm.model.dao.DmRoomRequest;
 import com.kh.memoryf.dm.model.service.DmService;
 import com.kh.memoryf.dm.model.vo.Dm;
+import com.kh.memoryf.dm.model.vo.DmMessage;
 import com.kh.memoryf.dm.model.vo.DmRoom;
 
 // 이 클래스는 채팅 메시지를 처리하는 컨트롤러야.
@@ -68,7 +71,7 @@ public class DmController {
         );
     }
 
-    // dm 방 목록 조회 (userId로 채팅방 목록 조회)
+    // DM 방 목록 조회 (userId로 채팅방 목록 조회)
     @GetMapping("/rooms/{userId}")
     public ArrayList<DmRoom> selectDmRoomList(@PathVariable String userId) {
 
@@ -81,19 +84,68 @@ public class DmController {
         return list;
     }
 
-    // dm 방 추가
+    // DM 방 추가
     // @RequestBody는 JSON을 자바 객체로 매핑해주는 것이지, JSON 내부 필드를 자동 추출해주는 게 아님
     // 그래서 외부 클래스를 하나 만들어서 jackson 라이브러리가 자동으로 json을 파싱하고 DmRoomRequset 객체를 생성하고 JSON의 targetuserId 키의 값우루 객체의 targetUserId 필드에 매핑
     @PostMapping("insertRoom")
-    public int insertRoom(@RequestBody DmRoomRequest request) {
+    public String insertRoom(@RequestBody DmRoomRequest request) {
+
+        String targetUserId = request.getTargetUserId();
+        String userId = request.getUserId();
 
         // System.out.println("targetUserId: " + request.getTargetUserId());
-        String targetId = request.getTargetUserId();
+        // System.out.println("userId: " + request.getUserId());
 
-        dmService.insertRoom(targetId);
 
-        return 1;
+        return (dmService.insertRoom(targetUserId, userId) > 0) ? "채팅방 추가 성공" : "체팅방 추가 실패";
+
     }
+
+    // DM 메세지 조회
+    // 같은 방을 기준으로 내가 보낸거랑 상대가 보낸거를 전부 조회해야됨
+    @PostMapping("{roomId}/select")
+    public ArrayList<DmMessage> selectMessage(@RequestBody DmRoomRequest request) {
+        
+        int roomId = request.getRoomId();
+        String senderId = request.getSenderId();
+
+        Map<String, Object> map = new HashMap<String,Object>();
+
+        map.put("roomId", roomId);
+        map.put("senderId", senderId);
+
+        ArrayList<DmMessage> list = dmService.selectMessage(map);
+
+        System.out.println("📥 조회된 메시지 목록: " + list);
+
+        return list;
+
+    }
+    
+    // DM 메세지 저장
+    @PostMapping("{roomId}/insert")
+    public int insertMessage(@RequestBody DmRoomRequest request) {
+
+        int roomId = request.getRoomId();
+        String senderId = request.getSenderId();
+        String content = request.getContent();
+
+        Map<String, Object> map = new HashMap<String,Object>();
+
+        map.put("roomId", roomId);
+        map.put("senderId", senderId);
+        map.put("content", content);
+
+        return dmService.insertMessage(map);
+
+
+        // System.out.println("roomId : " + roomId);
+        // System.out.println("senderId : " + senderId);
+        // System.out.println("content : " + content);
+
+
+    }
+    
 
 
 

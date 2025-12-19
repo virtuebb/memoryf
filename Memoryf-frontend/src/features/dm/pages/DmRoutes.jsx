@@ -145,7 +145,7 @@ function DmRoomListPage({ allChats, themeClass, openSearch, navigateToChat }) {
  * 💬 개별 채팅방 페이지 컴포넌트
  * 
  * 🔌 백엔드 연동 시:
- *    GET /api/dm/rooms/{chatId}/messages
+ *    GET /dm/rooms/{chatId}/messages
  *    → 이 채팅방의 메시지 목록 가져오기
  */
 function DmChatPage({ allChats, onBack, onSendMessage, onMarkAsRead, themeClass }) {

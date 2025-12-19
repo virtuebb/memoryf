@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDm } from '../context/DmContext';
 import '../css/DmRoom.css';
+import { selectDmMessages } from '../api/dmApi.js';
 
 function ArrowLeftIcon() {
   return (
@@ -26,7 +27,7 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
   const navigate = useNavigate();
   
   // 🔌 WebSocket 연결 상태 가져오기
-  const { isConnected, myUserId, handleLeaveChatRoom } = useDm();
+  const { isConnected, myUserId, handleLeaveChatRoom, fetchMessages } = useDm();
   
   // ✏️ 입력창에 쓴 메시지 저장
   const [messageInput, setMessageInput] = useState('');
@@ -57,6 +58,23 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
       }
     };
   }, [chat?.id]); // onMarkAsRead를 dependency에서 제거!
+
+  // ============================================
+  // 🔌 백엔드 연동: 채팅방의 메시지 목록 불러오기
+  // ============================================
+  useEffect(() => {
+    // pending(대기) 상태이거나 id가 서버의 roomNo가 아닌 경우 메시지 조회를 건너뜁니다.
+    if (!chat) return;
+    if (chat.isPending) return;
+    const numericId = Number(chat.id);
+    if (Number.isNaN(numericId)) return;
+
+    if (fetchMessages) {
+      fetchMessages(numericId).catch((err) => {
+        console.error('메시지 불러오기 실패:', err);
+      });
+    }
+  }, [chat?.id, fetchMessages]);
 
   // ============================================
   // 🔌 백엔드 연동: 메시지 목록 가져오기

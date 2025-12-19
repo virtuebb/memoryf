@@ -20,7 +20,7 @@ import { createContext, useContext, useState, useCallback, useRef, useEffect } f
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { getUserIdFromToken, getAccessToken } from '../../../utils/jwt.js';
-import selectDmRoomList, { createDmRoom } from '../api/dmApi.js';
+import { selectDmRoomList,  createDmRoom, selectDmMessages, insertDmMessage } from '../api/dmApi.js';
 
 // 🌐 WebSocket 서버 URL (동적 설정)
 // - localhost 접속 시: http://localhost:8006/memoryf/ws
@@ -372,6 +372,13 @@ export function DmProvider({ children }) {
           content: ''             // 읽음 이벤트는 내용 없음
         })
       });
+
+      try {
+        insertDmMessage(chat.id, myUserId, messageText);
+      } catch(e) {
+        console.log("메세지 저장 실패 : " + e);
+      }
+
       
       console.log(`👀 읽음 이벤트 전송: ${myUserId} → ${targetUserId}`);
     }
@@ -477,7 +484,7 @@ export function DmProvider({ children }) {
           content: messageText
         })
       });
-      
+
       console.log(`📤 메시지 전송: ${myUserId} → ${targetUserId}: ${messageText}`);
     } else {
       console.warn('⚠️ WebSocket이 연결되지 않았습니다. 로컬에서만 메시지가 추가됩니다.');
@@ -510,6 +517,13 @@ export function DmProvider({ children }) {
       setPendingChats((prev) => prev.filter((c) => String(c.id) !== String(chatId)));
       setChatRooms((prev) => [activatedChat, ...prev]);
       
+      // 활성화된 채팅(서버에 생성된 방)이면 서버에 메시지 저장 시도
+      if (!String(activatedChat.id).startsWith('pending-')) {
+        insertDmMessage(activatedChat.id, myUserId, messageText).catch(err => {
+          console.error('메시지 DB 저장 실패 (활성화 후):', err);
+        });
+      }
+
       return activatedChat; // 새 ID 반환 (라우팅용)
     } else {
       // 기존 채팅방에 메시지 추가
@@ -526,9 +540,56 @@ export function DmProvider({ children }) {
         )
       );
       
+      // 서버에 비동기 저장 시도 (로컬 UI 우선 표시)
+      if (!String(chat.id).startsWith('pending-')) {
+        insertDmMessage(chat.id, myUserId, messageText).catch(err => {
+          console.error('메시지 DB 저장 실패:', err);
+        });
+      }
+
       return null;
     }
   }, [chatRooms, pendingChats, isConnected, myUserId]);
+
+  /**
+   * 특정 채팅방의 메시지 목록을 서버에서 불러와 해당 방에 세팅합니다.
+   */
+  const fetchMessages = useCallback(async (roomId) => {
+    try {
+      const msgs = await selectDmMessages(roomId);
+      if (!Array.isArray(msgs)) return msgs;
+
+      const mapped = msgs.map((m) => {
+        const rawTime = m.createDate || m.CREATE_DATE || m.create_date || m.createAt || m.createAt || '';
+        let timeStr = '';
+        try {
+          if (rawTime) {
+            timeStr = new Date(rawTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true });
+          }
+        } catch (e) {
+          timeStr = String(rawTime || '');
+        }
+
+        const sender = m.senderId || m.senderNo || m.SENDER_NO || m.sender || m.SENDER_ID || m.senderIdString;
+
+        return {
+          id: m.messageNo || m.MESSAGE_NO || m.id || Date.now(),
+          text: m.content || m.CONTENT || m.text || '',
+          time: timeStr,
+          isMine: String(sender) === String(myUserId),
+          isRead: false,
+        };
+      });
+
+      setChatRooms((prev) => prev.map(room => String(room.id) === String(roomId) ? { ...room, messages: mapped } : room));
+      setPendingChats((prev) => prev.map(room => String(room.id) === String(roomId) ? { ...room, messages: mapped } : room));
+
+      return mapped;
+    } catch (err) {
+      console.error('메시지 로드 실패:', err);
+      throw err;
+    }
+  }, [myUserId]);
 
   /**
    * 🔍 검색 모달 열기/닫기
@@ -554,6 +615,7 @@ export function DmProvider({ children }) {
     handleLeaveChatRoom,
     handleAddUser,
     handleSendMessage,
+    fetchMessages,
     openSearchModal,
     closeSearchModal,
     

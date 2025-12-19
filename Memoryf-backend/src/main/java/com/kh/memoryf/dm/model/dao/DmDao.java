@@ -1,10 +1,13 @@
 package com.kh.memoryf.dm.model.dao;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.kh.memoryf.dm.model.vo.DmMessage;
 import com.kh.memoryf.dm.model.vo.DmRoom;
 
 @Repository
@@ -19,10 +22,27 @@ public class DmDao {
 
     }
 
-    public int insertRoom(SqlSessionTemplate sqlSession, String targetId) {
+    public int insertRoom(SqlSessionTemplate sqlSession, String targetUserId, String userId) {
 
-        return 1;
+        Map<String, String> map = new HashMap<String,String>();
 
+        map.put("targetUserId", targetUserId);
+        map.put("userId", userId);
+
+        return sqlSession.insert("dmMapper.insertRoom", map);
+
+    }
+
+    public int insertMessage(SqlSessionTemplate sqlSession, Map<String,Object> map) {
+    
+        return sqlSession.insert("dmMapper.insertMessage", map);
+
+    }
+
+    public ArrayList<DmMessage> selectMessage(SqlSessionTemplate sqlSession, Map<String,Object> map) {
+    
+        return (ArrayList)sqlSession.selectList("dmMapper.selectMessage", map);
+    
     }
 
     
