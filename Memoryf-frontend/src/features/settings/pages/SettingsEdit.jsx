@@ -146,7 +146,7 @@ function SettingsEdit() {
           </div>
           <div className="profile-info">
             <div className="profile-nickname">{profileData?.memberNick}</div>
-            <div className="profile-id">{profileData?.memberId}</div>
+            <div className="profile-id">{profileData?.statusMsg || profileData?.memberId}</div>
           </div>
         </div>
         <button 
@@ -176,7 +176,7 @@ function SettingsEdit() {
               name="memberNick"
               value={formData.memberNick}
               onChange={handleChange}
-              placeholder="닉네임"
+              placeholder="닉네임 영역"
             />
           </div>
         </div>
@@ -189,7 +189,7 @@ function SettingsEdit() {
               name="statusMsg"
               value={formData.statusMsg}
               onChange={handleChange}
-              placeholder="소개"
+              placeholder="소개작성영역"
               rows="3"
             />
             <div className="helper-text">{formData.statusMsg.length} / 150</div>

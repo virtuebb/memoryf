@@ -23,7 +23,6 @@ import SearchPage from './features/search/pages/SearchPage';
 import FeedListPage from './features/feed/pages/FeedListPage';
 import FeedDetailPage from './features/feed/pages/FeedDetailPage';
 import FeedUploadModal from './features/feed/components/FeedUploadModal';
-import SettingsEdit from './features/settings/pages/SettingsEdit'; 
 import SettingsPage from './features/settings/pages/SettingsPage';
 import DmRoutes from './features/dm/pages/DmRoutes';
 import FloatingDm from './features/dm/components/FloatingDm';
@@ -141,24 +140,27 @@ function App() {
           {/* )} */}
 
           {/* 메인 콘텐츠 */}
-            <main className={`main-content ${isSettings ? "settings-mode" : ""}`}>
-              <Routes location={backgroundLocation || location}>
-                {/* 🔥 내 홈 */}
-                <Route path="/" element={<Home />} /> 
-                <Route path="/home" element={<Home />} />
+          <main className={`main-content ${isSettings ? "settings-mode" : ""}`}>
+            <Routes location={backgroundLocation || location}>
+              {/* 기본 진입 */}
+              <Route path="/" element={<Navigate to="/home" replace />} />
 
-                {/* 🔥 타인 홈 */}
-                <Route path="/home/:memberNo" element={<Home />} />
+              {/* 홈 */}
+              <Route path="/home" element={<Home />} />
+              <Route path="/home/:memberNo" element={<Home />} />
+              <Route path="/:memberNick" element={<Home />} />
 
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
-                <Route path="/messages/*" element={<DmRoutes />} />
-                <Route path="/chat-test" element={<Chat />} />
-                <Route path="/settings/*" element={<SettingsPage />} />
-                <Route path="/diary" element={<DiaryPage />} />
-                {/* fallback */}
-                <Route path="*" element={<Navigate to="/home" replace />} />
-              </Routes>
+              {/* 기타 */}
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
+              <Route path="/messages/*" element={<DmRoutes />} />
+              <Route path="/chat-test" element={<Chat />} />
+              <Route path="/settings/*" element={<SettingsPage />} />
+              <Route path="/diary" element={<DiaryPage />} />
+
+              {/* fallback */}
+              <Route path="*" element={<Navigate to="/home" replace />} />
+            </Routes>
 
               {/* 🔥 피드 상세 모달 라우트 */}
               {backgroundLocation && (
