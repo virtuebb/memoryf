@@ -36,6 +36,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // 로그인/회원가입 요청은 인증 없이 허용이므로 필터 검사 제외
         if (path.startsWith("/login")) return true;
         if (path.startsWith("/signup")) return true;
+        
+        // 🔥 Visitor 추가
+        if (path.startsWith("/visitor")) return true;
 
         // 정적 리소스 제외 (필요한 경우만)
         if (path.startsWith("/images")

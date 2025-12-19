@@ -61,6 +61,8 @@ public class SecurityConfig {
 					.requestMatchers("/login/**", "/signup/**").permitAll() // 로그인 요청 허용 - @RequestMapping("login") 관련
 					.requestMatchers("/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers("/messages/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
+					.requestMatchers("/visitor/**").permitAll()
+					
 					.anyRequest().authenticated() // 나머지는 JWT 인증 필요함
 				)
 				.formLogin(form -> form.disable()) // 스프링 방식의 로그인 막기
