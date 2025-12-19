@@ -41,6 +41,30 @@ public class FeedDao {
 
 		return new ArrayList<>(sqlSession.selectList("feedMapper.selectFeedList", params));
 	}
+
+	/**
+	 * 특정 회원(작성자)의 피드 목록 조회 (프로필용)
+	 * @param targetMemberNo 프로필 주인 회원 번호(작성자)
+	 * @param viewerMemberNo 현재 로그인한 회원 번호 (좋아요 여부 확인용, optional)
+	 */
+	public ArrayList<Feed> selectFeedListByTargetMember(
+			SqlSession sqlSession,
+			int targetMemberNo,
+			Integer viewerMemberNo,
+			int page,
+			int size) {
+		HashMap<String, Object> params = new HashMap<>();
+		params.put("sortBy", "recent");
+		params.put("memberNo", viewerMemberNo);
+		params.put("targetMemberNo", targetMemberNo);
+
+		int startRow = (page * size) + 1;
+		int endRow = (page + 1) * size;
+		params.put("startRow", startRow);
+		params.put("endRow", endRow);
+
+		return new ArrayList<>(sqlSession.selectList("feedMapper.selectFeedList", params));
+	}
 	
 	/**
 	 * 피드 상세 조회

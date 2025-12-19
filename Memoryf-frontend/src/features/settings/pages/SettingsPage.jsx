@@ -58,6 +58,7 @@ function SettingsPage() {
             <button className={activeTab === "edit" ? "active" : ""} onClick={() => handleTabClick("edit")}>
               프로필 편집
             </button>
+
             <button className={activeTab === "security" ? "active" : ""} onClick={() => handleTabClick("security")}>
               보안
             </button>

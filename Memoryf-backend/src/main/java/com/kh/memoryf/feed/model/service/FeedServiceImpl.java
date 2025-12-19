@@ -108,4 +108,15 @@ public class FeedServiceImpl implements FeedService {
 	public ArrayList<Feed> selectBookmarkedFeedList(int memberNo) {
 		return feedDao.selectBookmarkedFeedList(sqlSession, memberNo);
 	}
+
+	@Override
+	public ArrayList<Feed> selectProfileFeedList(int targetMemberNo, Integer viewerMemberNo, int page, int size) {
+		if (page < 0) {
+			page = 0;
+		}
+		if (size <= 0) {
+			size = 18;
+		}
+		return feedDao.selectFeedListByTargetMember(sqlSession, targetMemberNo, viewerMemberNo, page, size);
+	}
 }
