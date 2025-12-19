@@ -53,6 +53,13 @@ public interface FeedService {
 	boolean toggleFeedBookmark(int feedNo, int memberNo);
 	
 	/**
+	 * 북마크한 피드 목록 조회
+	 * @param memberNo 회원 번호
+	 * @return 북마크한 피드 목록
+	 */
+	ArrayList<Feed> selectBookmarkedFeedList(int memberNo);
+	
+	/**
 	 * 피드 삭제
 	 * @param feedNo 피드 번호
 	 * @return 성공 여부

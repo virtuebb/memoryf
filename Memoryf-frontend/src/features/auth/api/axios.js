@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getAccessToken } from "../../../utils/jwt";
 
 // 🌐 동적 baseURL 설정
 // - localhost 접속 시: http://localhost:8006/memoryf
@@ -13,7 +14,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = getAccessToken();
 
   // API는 토큰 안 붙이기
   const url = config.url || "";

@@ -76,6 +76,30 @@ public class FeedController {
 	}
 	
 	/**
+	 * 북마크한 피드 목록 조회 (RESTful: GET /feeds/bookmarked)
+	 * @param memberNo 현재 로그인한 회원 번호
+	 * @return 북마크한 피드 목록
+	 */
+	@GetMapping("/bookmarked")
+	public HashMap<String, Object> selectBookmarkedFeedList(
+			@RequestParam("memberNo") int memberNo) {
+		
+		HashMap<String, Object> response = new HashMap<>();
+		
+		try {
+			ArrayList<Feed> feedList = feedService.selectBookmarkedFeedList(memberNo);
+			response.put("success", true);
+			response.put("data", feedList != null ? feedList : new ArrayList<>());
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.put("success", false);
+			response.put("message", "북마크 피드 목록 조회 실패: " + e.getMessage());
+		}
+		
+		return response;
+	}
+	
+	/**
 	 * 피드 상세 조회 (RESTful: GET /feed/{feedNo})
 	 * @param feedNo 피드 번호
 	 * @param memberNo 현재 로그인한 회원 번호

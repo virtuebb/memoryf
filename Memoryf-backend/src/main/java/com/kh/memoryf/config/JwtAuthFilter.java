@@ -55,9 +55,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 요청 경로 확인
-        // String path = request.getRequestURI();
-    		String path = request.getServletPath();
+        // 요청 경로 확인 (context-path=/memoryf 포함 여부를 제거해 일관되게 처리)
+        String path = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        if (contextPath != null && !contextPath.isEmpty() && path.startsWith(contextPath)) {
+            path = path.substring(contextPath.length());
+        }
 
         // OPTIONS(프리플라이트) 요청은 통과
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {

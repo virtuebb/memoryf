@@ -23,6 +23,7 @@ public class Comment {
 	
 	// 조인을 위한 필드
 	private String writerNick;    // 작성자 닉네임
+	private String writerProfileImage; // 작성자 프로필 이미지
 	private int likeCount;        // 댓글 좋아요 수
 	private boolean isLiked;      // 현재 사용자가 좋아요 했는지 여부
 }
