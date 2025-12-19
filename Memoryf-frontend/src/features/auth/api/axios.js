@@ -19,7 +19,7 @@ api.interceptors.request.use((config) => {
   // API는 토큰 안 붙이기
   const url = config.url || "";
 
-  const isPublic = url.startsWith("/login") || url.startsWith("/signup");
+  const isPublic = url.startsWith("/login") || url.startsWith("/signup") || url.startsWith("/find");
 
   if (token && !isPublic) {
     config.headers.Authorization = `Bearer ${token}`;

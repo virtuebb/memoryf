@@ -70,7 +70,7 @@ public class SecurityConfig {
 							"/feed_upfiles/**", "/memoryf/feed_upfiles/**",
 							"/profile_images/**", "/memoryf/profile_images/**"
 					).permitAll() // 정적 리소스 및 업로드 이미지 모두 허용
-					.requestMatchers("/login/**", "/memoryf/login/**", "/signup/**", "/memoryf/signup/**").permitAll() // 로그인/회원가입 요청 허용
+					.requestMatchers("/login/**", "/memoryf/login/**", "/signup/**", "/memoryf/signup/**", "/find/**", "/memoryf/find/**").permitAll() // 로그인/회원가입 요청 허용
 					.requestMatchers("/ws/**", "/memoryf/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers("/visitor/**", "/memoryf/visitor/**").permitAll()
 					.anyRequest().authenticated() // 나머지는 JWT 인증 필요함
