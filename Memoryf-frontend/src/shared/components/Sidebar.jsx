@@ -52,7 +52,7 @@ function Sidebar({ onCreateClick }) {
         <li className="menu-label">SYSTEM</li>
 
         <li className={location.pathname.startsWith('/settings') ? 'active' : ''}>
-          <Link to="/settings">
+            <Link to="/settings/edit">
             <span className="icon">⚙️</span>
             Settings
           </Link>

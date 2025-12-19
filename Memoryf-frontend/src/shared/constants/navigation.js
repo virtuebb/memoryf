@@ -7,5 +7,5 @@ export const NAVIGATION_ITEMS = [
   { label: '방명록', path: '/guestbook' },
   { label: '메시지', path: '/messages' },
   { label: '만들기(피드작성)', path: '/feeds/new' },
-  { label: '설정', path: '/settings' },
+  { label: '설정', path: '/settings/edit' },
 ];
