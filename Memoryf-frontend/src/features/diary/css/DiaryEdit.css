@@ -1,6 +1,10 @@
-/* 📓 다이어리 카드 */
+/* 📓 다이어리 작성 카드 */
 .diary-edit {
-  background: #f6fff8;
+  background: color-mix(
+    in srgb,
+    var(--color-card-bg) 94%,
+    white
+  );
   border-radius: 22px;
   padding: 22px 24px 18px;
 
@@ -8,19 +12,24 @@
   flex-direction: column;
   gap: 14px;
 
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-soft),
+    0 8px 18px rgba(0,0,0,0.04);
 }
 
+/* 제목 */
 .diary-edit h3 {
   font-size: 15px;
   font-weight: 700;
   margin: 0;
+
+  color: var(--color-sidebar-link);
 }
 
-/* ✏️ 종이 같은 입력 영역 */
+/* ✏️ 입력 영역 */
 .diary-edit textarea {
   width: 100%;
-  min-height: 130px;
+  min-height: 120px;
   resize: none;
 
   border: none;
@@ -28,27 +37,30 @@
   background: transparent;
 
   font-size: 15px;
-  line-height: 1.8;
-  padding: 4px 2px;
+  line-height: 1.9;
+
+  color: var(--color-sidebar-link);
 }
 
+/* placeholder */
 .diary-edit textarea::placeholder {
-  color: #9fb9ab;
+  color: var(--color-text-muted);
 }
 
-/* ⬇️ 하단 */
+/* 하단 */
 .edit-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+/* 힌트 */
 .edit-footer .hint {
   font-size: 11px;
-  color: #9fb9ab;
+  color: var(--color-text-muted);
 }
 
-/* 🌱 저장 버튼 (존재감 최소) */
+/* 🌱 저장 버튼 */
 .save-btn {
   padding: 6px 14px;
   border-radius: 999px;
@@ -57,8 +69,21 @@
   font-size: 12px;
   font-weight: 600;
 
-  background: rgba(111, 191, 154, 0.18);
-  color: #4e8f71;
+  background: color-mix(
+    in srgb,
+    var(--color-accent) 30%,
+    transparent
+  );
+  color: var(--color-accent-strong);
 
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.save-btn:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-accent) 45%,
+    transparent
+  );
 }

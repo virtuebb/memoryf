@@ -42,13 +42,38 @@
   font-size: 13px;
   cursor: pointer;
 
-  background: rgba(255, 255, 255, 0.7);
+  background: color-mix(
+    in srgb,
+    var(--color-card-bg) 75%,
+    transparent
+  );
+
+  color: var(--color-sidebar-link);
+
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: color-mix(
+    in srgb,
+    var(--color-accent) 35%,
+    transparent
+  );
 }
 
 .pagination button.active {
-  background: rgba(111, 191, 154, 0.35);
-  color: #2f6f55;
+  background: color-mix(
+    in srgb,
+    var(--color-accent) 55%,
+    transparent
+  );
+
+  color: var(--color-accent-strong);
   font-weight: 700;
 }
 

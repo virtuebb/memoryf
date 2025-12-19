@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -69,10 +71,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         
         // 🔓 방명록 조회(GET)는 JWT 검사 안 함 (⭐ 여기!)
-        if (path.startsWith("/memoryf/guestbook")
-            && "GET".equalsIgnoreCase(request.getMethod())) {
-            filterChain.doFilter(request, response);
-            return;
+        if (path.startsWith("/guestbook")
+        	    && "GET".equalsIgnoreCase(request.getMethod())) {
+        	    filterChain.doFilter(request, response);
+        	    return;
         }
 
         // 로그인/정적 리소스는 토큰 검사 제외
@@ -102,7 +104,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
+            
+            Number memberNoNum = claims.get("memberNo", Number.class);
+            Integer memberNo = (memberNoNum == null) ? null : memberNoNum.intValue();
 
+            request.setAttribute("memberNo", memberNo);
+            
             // 만료 시간 추가 안전 체크
             Date exp = claims.getExpiration();
             if (exp != null && exp.before(new Date())) {
@@ -117,19 +124,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(memberId) && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 // 권한(roles) 아직 없으니 빈 권한으로 인증 객체 생성
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(memberId, null, java.util.Collections.emptyList());
+            	UsernamePasswordAuthenticationToken authentication =
+            		    new UsernamePasswordAuthenticationToken(
+            		        memberId,
+            		        null,
+            		        List.of(new SimpleGrantedAuthority("ROLE_USER"))
+            		    );
 
                 // 요청 정보 세팅(선택)
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 // SecurityContext에 인증 등록 (=> authenticated 통과)
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                
+                System.out.println("JWT claim keys = " + claims.keySet());
             }
 
         } catch (Exception e) {
             // 토큰 위조/만료/파싱 실패 등 -> 인증 세팅 안 하고 통과
             // (SecurityConfig의 authenticated에서 최종 차단됨)
+        	e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

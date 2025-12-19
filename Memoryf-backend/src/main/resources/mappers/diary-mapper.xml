@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="DiaryMapper">
+
+    <!-- ✅ 컬럼 ↔ 필드 정확 매핑 -->
+    <resultMap id="DiaryMap" type="Diary">
+        <id property="diaryNo" column="DIARY_NO"/>
+        <result property="title" column="TITLE"/>
+        <result property="content" column="CONTENT"/>
+        <result property="memberNo" column="MEMBER_NO"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="isDel" column="IS_DEL"/>
+    </resultMap>
+
+    <!-- ✍️ 작성 -->
+    <insert id="insertDiary" parameterType="Diary">
+        INSERT INTO TB_DIARY (
+            DIARY_NO,
+            TITLE,
+            CONTENT,
+            CREATE_DATE,
+            IS_DEL,
+            MEMBER_NO
+        ) VALUES (
+            SEQ_DIARY_NO.NEXTVAL,
+            #{title},
+            #{content},
+            SYSDATE,
+            'N',
+            #{memberNo}
+        )
+    </insert>
+
+    <!-- 📄 목록 (페이징) -->
+    <select id="selectDiaryList" parameterType="map" resultMap="DiaryMap">
+        SELECT *
+        FROM (
+            SELECT A.*, ROWNUM RNUM
+            FROM (
+                SELECT *
+                FROM TB_DIARY
+                WHERE
+                    MEMBER_NO = #{memberNo}
+                    AND IS_DEL = 'N'
+                ORDER BY CREATE_DATE DESC
+            ) A
+            WHERE ROWNUM <![CDATA[<=]]> #{end}
+        )
+        WHERE RNUM <![CDATA[>=]]> #{start}
+    </select>
+
+    <!-- 🗑 삭제 -->
+    <update id="deleteDiary" parameterType="int">
+        UPDATE TB_DIARY
+        SET IS_DEL = 'Y'
+        WHERE DIARY_NO = #{diaryNo}
+    </update>
+
+    <!-- 🔢 총 개수 -->
+    <select id="selectDiaryCount" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_DIARY
+        WHERE
+            MEMBER_NO = #{memberNo}
+            AND IS_DEL = 'N'
+    </select>
+
+</mapper>
