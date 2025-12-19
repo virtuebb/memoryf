@@ -26,6 +26,7 @@
 							F.TAG,
 							F.LATITUDE,
 							F.LONGITUDE,
+							F.LOCATION_NAME,
 							F.CREATED_DATE,
 							F.IS_DEL,
 							F.MEMBER_NO,
@@ -75,6 +76,7 @@
 					F.TAG,
 					F.LATITUDE,
 					F.LONGITUDE,
+					F.LOCATION_NAME,
 					F.CREATED_DATE,
 					F.IS_DEL,
 					F.MEMBER_NO,
@@ -135,6 +137,7 @@
 			F.TAG,
 			F.LATITUDE,
 			F.LONGITUDE,
+			F.LOCATION_NAME,
 			F.CREATED_DATE,
 			F.IS_DEL,
 			F.MEMBER_NO,
@@ -195,6 +198,7 @@
 			TAG,
 			LATITUDE,
 			LONGITUDE,
+			LOCATION_NAME,
 			CREATED_DATE,
 			IS_DEL,
 			MEMBER_NO
@@ -204,6 +208,7 @@
 			#{tag},
 			#{latitude},
 			#{longitude},
+			#{locationName},
 			SYSDATE,
 			'N',
 			#{memberNo}
@@ -271,7 +276,8 @@
 			CONTENT   = #{content},
 			TAG       = #{tag},
 			LATITUDE  = #{latitude},
-			LONGITUDE = #{longitude}
+			LONGITUDE = #{longitude},
+			LOCATION_NAME = #{locationName}
 		WHERE FEED_NO = #{feedNo}
 		AND IS_DEL = 'N'
 	</update>
@@ -312,6 +318,7 @@
 			F.TAG,
 			F.LATITUDE,
 			F.LONGITUDE,
+			F.LOCATION_NAME,
 			F.CREATED_DATE,
 			F.IS_DEL,
 			F.MEMBER_NO,
@@ -356,6 +363,10 @@
 		<result property="commentCount" column="COMMENT_COUNT"/>
 		<result property="isLiked" column="IS_LIKED"/>
 		<result property="isBookmarked" column="IS_BOOKMARKED"/>
+		
+		<!-- 지도(위치) 하나 추가 -->
+		<result property="locationName" column="LOCATION_NAME"/>
+		
 		<!-- 피드 파일은 즉시 로딩하여 직렬화 시 프록시 문제 방지 -->
 		<collection property="feedFiles" ofType="feedFile" select="selectFeedFileList" column="FEED_NO" fetchType="eager"/>
 	</resultMap>

@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
@@ -18,6 +18,8 @@ import { getMemberNoFromToken } from '../../../utils/jwt';
 import { getHomeByMemberNo } from '../../home/api/homeApi';
 import { followMember, unfollowMember } from '../../follow/api/followApi';
 import './FeedDetailPage.css';
+
+
 
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -57,6 +59,12 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
   const [likeCount, setLikeCount] = useState(0); // 좋아요 수
   const [isBookmarked, setIsBookmarked] = useState(false); // 북마크 상태
   const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
+
+  // 미니 지도 미리보기 state
+  const [showMap, setShowMap] = useState(false);
+  const mapElRef = useRef(null);
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -124,6 +132,45 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
       window.removeEventListener('feedChanged', handleFeedChanged);
     };
   }, [feedNo]);
+
+  // 지도열기
+  useEffect(() => {
+    if (!showMap || !feed) return;
+
+    const lat = Number(feed.latitude);
+    const lng = Number(feed.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    if (!window.kakao || !window.kakao.maps) return;
+    if (!mapElRef.current) return;
+
+    const pos = new window.kakao.maps.LatLng(lat, lng);
+
+    if (!mapRef.current) {
+      mapRef.current = new window.kakao.maps.Map(mapElRef.current, {
+        center: pos,
+        level: 4,
+      });
+      markerRef.current = new window.kakao.maps.Marker({ position: pos });
+      markerRef.current.setMap(mapRef.current);
+    }
+
+    mapRef.current.setCenter(pos);
+    markerRef.current.setPosition(pos);
+
+    setTimeout(() => {
+      mapRef.current.relayout();
+      mapRef.current.setCenter(pos);
+    }, 0);
+  }, [showMap, feed]);
+
+  // 지도 갱신
+  useEffect(() => {
+    if (!showMap) {
+      mapRef.current = null;
+      markerRef.current = null;
+    }
+  }, [showMap]);
+
 
   const isOwner = (() => {
     const me = getMemberNoFromToken();
@@ -530,16 +577,54 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                   <div className="comment-time">
                     {feed?.createdDate ? formatTimeAgo(feed.createdDate) : ''}
                   </div>
-                  {/* ✅ 위치 표시 */}
+
+                  {/*  지도 위치 표시 */}
                   {(feed?.latitude && feed?.longitude) && (
-                    <div
-                      className="feed-location"
-                      onClick={() => window.open(`https://map.kakao.com/link/map/${feed.latitude},${feed.longitude}`, '_blank')}
-                      style={{ cursor: 'pointer' }}
-                      title="카카오맵으로 열기"
-                    >
-                      📍 {feed?.placeName || feed?.locationName || feed?.addressName || '위치'}
-                    </div>
+                    <>
+                      <div
+                        className="feed-location"
+                        style={{ cursor: 'pointer', userSelect: 'none' }}
+                        onClick={() => setShowMap(prev => !prev)}
+                      >
+                        📍 {feed?.locationName || '위치'} {showMap ? '▲' : '▼'}
+                      </div>
+
+                      {showMap && (
+                        <>
+                          <div
+                            ref={mapElRef}
+                            style={{
+                              width: '100%',
+                              height: '220px',
+                              borderRadius: '12px',
+                              overflow: 'hidden',
+                              marginTop: '8px'
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            style={{
+                              marginTop: '6px',
+                              background: 'none',
+                              border: 'none',
+                              color: '#3897f0',
+                              cursor: 'pointer',
+                              padding: 0
+                            }}
+                            onClick={() => {
+                              const name = encodeURIComponent(feed?.locationName || '위치');
+                              window.open(
+                                `https://map.kakao.com/link/to/${name},${feed.latitude},${feed.longitude}`,
+                                '_blank'
+                              );
+                            }}
+                          >
+                            카카오맵으로 열기
+                          </button>
+                        </>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

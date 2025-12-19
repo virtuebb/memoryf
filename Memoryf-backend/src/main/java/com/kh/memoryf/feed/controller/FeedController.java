@@ -178,6 +178,7 @@ public class FeedController {
 			@RequestParam(value = "tag", required = false) String tag,
 			@RequestParam(value = "latitude", required = false) String latitude,
 			@RequestParam(value = "longitude", required = false) String longitude,
+			@RequestParam(value = "locationName", required = false) String locationName,
 			@RequestParam("memberNo") int memberNo,
 			@RequestParam("files") List<MultipartFile> files,
 			HttpServletRequest request) {
@@ -198,6 +199,7 @@ public class FeedController {
 			feed.setTag(tag);
 			feed.setLatitude(latitude);
 			feed.setLongitude(longitude);
+			feed.setLocationName(locationName); // 지도위치 추가
 			feed.setMemberNo(memberNo);
 			
 			// FeedFile 리스트 생성

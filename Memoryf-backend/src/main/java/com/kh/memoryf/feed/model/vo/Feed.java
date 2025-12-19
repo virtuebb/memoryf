@@ -22,6 +22,7 @@ public class Feed {
 	private String tag;              // 태그
 	private String latitude;          // 위도
 	private String longitude;         // 경도
+	private String locationName;		 // 위치명 
 	private Date createdDate;         // 생성일 (시간 포함)
 	private String isDel;             // 삭제 여부
 	private int memberNo;             // 회원 번호

@@ -23,6 +23,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
   // 지도
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [locationName, setLocationName] = useState('');
+  
 
 
   const [isUploading, setIsUploading] = useState(false);
@@ -184,6 +185,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
           tag: buildTagsForSave(),
           latitude: latitude || '',
           longitude: longitude || '',
+          locationName: locationName || '',
         });
         
         if (response && response.success) {
@@ -213,6 +215,8 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
         formData.append('tag', buildTagsForSave());
         if (latitude) formData.append('latitude', latitude);
         if (longitude) formData.append('longitude', longitude);
+        // 지도
+        if (locationName) formData.append('locationName', locationName);
         formData.append('memberNo', memberNo);
         
         // 이미지 파일 추가
