@@ -7,7 +7,7 @@ import ActivitySection from "../components/ActivitySection";
 import PaymentSection from "../components/PaymentSection";
 import PreferenceSection from "../components/PreferenceSection";
 
-import "../css/SettingsPage.css";
+import "../css/settingsPage.css";
 
 function SettingsPage() {
   const navigate = useNavigate();
@@ -62,7 +62,6 @@ function SettingsPage() {
             <button className={activeTab === "security" ? "active" : ""} onClick={() => handleTabClick("security")}>
               보안
             </button>
-
             <button className={activeTab === "activity" ? "active" : ""} onClick={() => handleTabClick("activity")}>
               활동 내역
             </button>

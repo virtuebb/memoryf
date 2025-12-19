@@ -3,6 +3,10 @@ import { createFeed, updateFeed } from '../api/feedApi';
 import { getHomeByMemberNo } from '../../home/api/homeApi';
 import { getMemberNoFromToken } from '../../../utils/jwt';
 import defaultProfileImg from '../../../assets/images/profiles/default-profile.svg';
+
+// 지도
+import KakaoLocationPicker from "../../map/components/KakaoLocationPicker";
+
 import './FeedUploadModal.css';
 
 function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialFeed = null }) {
@@ -15,6 +19,12 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
   const [tag, setTag] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+
+  // 지도
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [locationName, setLocationName] = useState('');
+
+
   const [isUploading, setIsUploading] = useState(false);
   const [userProfile, setUserProfile] = useState({ memberNick: '사용자', profileChangeName: null });
   const fileInputRef = useRef(null);
@@ -136,10 +146,24 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
     setCurrentImageIndex((prev) => (prev < previews.length - 1 ? prev + 1 : 0));
   };
 
-  // 해시태그 추출 (공백으로 구분)
+  // 해시태그 추출
+  // - 본문(content)이나 태그 입력(tag)에 있는 #태그를 모두 추출
+  // - [#맛집](#맛집), [#맛집] (#맛집)처럼 괄호/대괄호 안에 있어도 #문자열이면 인식
+  // - 중복 제거, '#' 제거 후 '맛집,영화관' 형태로 저장
   const extractTags = (text) => {
-    const tags = text.split(/\s+/).filter(tag => tag.startsWith('#') && tag.length > 1);
-    return tags.join(' ');
+    if (!text) return '';
+    const matches = String(text).match(/#[\p{L}\p{N}_]+/gu) || [];
+    const normalized = matches
+      .map((m) => m.slice(1).trim())
+      .filter(Boolean);
+    const unique = Array.from(new Set(normalized));
+    return unique.join(',');
+  };
+
+  const buildTagsForSave = () => {
+    // 본문(content) + 별도 태그 입력(tag) 모두에서 추출
+    const merged = `${content || ''} ${tag || ''}`;
+    return extractTags(merged);
   };
 
   // 피드 업로드/수정
@@ -157,7 +181,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
         // 수정 모드: 내용/태그만 업데이트
         const response = await updateFeed(initialFeed.feedNo, {
           content: content || '',
-          tag: extractTags(tag),
+          tag: buildTagsForSave(),
           latitude: latitude || '',
           longitude: longitude || '',
         });
@@ -186,7 +210,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
 
         // 피드 정보 추가
         formData.append('content', content || '');
-        formData.append('tag', extractTags(tag));
+        formData.append('tag', buildTagsForSave());
         if (latitude) formData.append('latitude', latitude);
         if (longitude) formData.append('longitude', longitude);
         formData.append('memberNo', memberNo);
@@ -372,14 +396,36 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
                 </div>
                 
                 {/* 위치 추가 옵션 */}
-                <div className="option-item">
-                  <span className="option-label">위치 추가</span>
+                <div
+                  className="option-item"
+                  onClick={() => setIsLocationOpen(true)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <span className="option-label">
+                    📍 {locationName || "위치 추가"}
+                  </span>
                   <span className="option-icon">📍</span>
                 </div>
               </div>
             </div>
           )}
         </div>
+        {/* ✅ 지도 위치 선택 모달 */}
+        {isLocationOpen && (
+          <KakaoLocationPicker
+            onSelect={(loc) => {
+              // loc: { latitude, longitude, placeName, kakaoPlaceId, addressName, roadAddress }
+              setLatitude(loc.latitude);
+              setLongitude(loc.longitude);
+              setLocationName(loc.placeName || loc.addressName); // ✅ 이 줄 추가
+              setIsLocationOpen(false);
+            }}
+            onClose={() => setIsLocationOpen(false)}
+          />
+        )}
+
+        
+
       </div>
     </div>
   );

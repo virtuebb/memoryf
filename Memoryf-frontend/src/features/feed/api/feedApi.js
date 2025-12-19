@@ -73,6 +73,36 @@ export const getFeedList = async (sortBy = 'recent', page = 0, size = 18) => {
 };
 
 /**
+ * 특정 회원(작성자)의 피드 목록 조회 (프로필용)
+ * (RESTful: GET /feeds/by-member/{targetMemberNo})
+ * @param {number} targetMemberNo 프로필 주인 회원 번호(작성자)
+ * @param {number|null} viewerMemberNo 현재 로그인한 회원 번호(좋아요 여부 확인용)
+ * @param {number} page
+ * @param {number} size
+ * @returns {Promise<Array>} 피드 목록
+ */
+export const getFeedListByMember = async (
+  targetMemberNo,
+  viewerMemberNo = null,
+  page = 0,
+  size = 60
+) => {
+  try {
+    const params = { page, size };
+    if (viewerMemberNo) params.viewerMemberNo = viewerMemberNo;
+
+    const response = await feedApi.get(`/by-member/${targetMemberNo}`, { params });
+    if (response.data && response.data.success) {
+      return Array.isArray(response.data.data) ? response.data.data : [];
+    }
+    return [];
+  } catch (error) {
+    console.error('프로필 피드 목록 조회 실패:', error);
+    throw error;
+  }
+};
+
+/**
  * 피드 상세 조회 (RESTful: GET /feeds/:id)
  * @param {number} feedNo - 피드 번호
  * @returns {Promise} 피드 상세 데이터

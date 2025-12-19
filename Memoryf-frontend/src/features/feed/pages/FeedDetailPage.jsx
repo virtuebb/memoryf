@@ -214,6 +214,7 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
     return filePath;
   };
 
+
   // 캐러셀 이전 이미지
   const handlePrevImage = () => {
     if (!feed?.feedFiles || feed.feedFiles.length === 0) return;
@@ -526,22 +527,20 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                       {feed?.content ? renderTextWithTags(feed.content) : ''}
                     </span>
                   </div>
-                  {/* 태그 영역 - 인스타그램처럼 내용 아래 노출 */}
-                  {feed?.tag && (
-                    <div className="feed-detail-tags">
-                      {feed.tag
-                        .split(/[ ,#]+/)
-                        .filter(Boolean)
-                        .map((tag, idx) => (
-                          <span key={idx} className="feed-tag-item">
-                            #{tag}
-                          </span>
-                        ))}
-                    </div>
-                  )}
                   <div className="comment-time">
                     {feed?.createdDate ? formatTimeAgo(feed.createdDate) : ''}
                   </div>
+                  {/* ✅ 위치 표시 */}
+                  {(feed?.latitude && feed?.longitude) && (
+                    <div
+                      className="feed-location"
+                      onClick={() => window.open(`https://map.kakao.com/link/map/${feed.latitude},${feed.longitude}`, '_blank')}
+                      style={{ cursor: 'pointer' }}
+                      title="카카오맵으로 열기"
+                    >
+                      📍 {feed?.placeName || feed?.locationName || feed?.addressName || '위치'}
+                    </div>
+                  )}
                 </div>
               </div>
 

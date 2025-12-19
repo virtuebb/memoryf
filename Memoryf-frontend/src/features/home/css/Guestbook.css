@@ -262,6 +262,15 @@
   color: var(--color-sidebar-link);
   font-size: 13px;
   line-height: 1.2;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.guestbook-author-name:hover {
+  text-decoration: underline;
 }
 
 .guestbook-author-time {
