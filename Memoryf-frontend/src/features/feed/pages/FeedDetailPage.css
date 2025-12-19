@@ -215,6 +215,26 @@
   gap: 12px;
 }
 
+.feed-detail-author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.follow-text-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: #0095f6;
+  font-weight: 600;
+}
+
+.follow-text-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* 인스타 상단 점점점 메뉴 버튼 */
 .feed-header-menu-btn {
   background: none;
@@ -228,6 +248,13 @@
 
 .feed-header-menu-btn:hover {
   opacity: 0.6;
+}
+
+.author-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .author-avatar {
@@ -259,6 +286,55 @@
 
 .feed-detail-content-item {
   margin-bottom: 8px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.feed-detail-content-item.comment-item {
+  align-items: flex-start;
+}
+
+.feed-detail-content-item.comment-item > .comment-like-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+  margin-top: 0;
+  align-self: flex-start;
+}
+
+.comment-author-profile {
+  flex-shrink: 0;
+}
+
+.comment-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.comment-content-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  opacity: 0.8;
 }
 
 .comment-author {
@@ -440,10 +516,21 @@
 }
 
 .comments-placeholder {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.no-comments-bold {
+  color: #262626;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.no-comments-sub {
   color: #8e8e8e;
   font-size: 14px;
-  text-align: center;
-  padding: 20px;
+  margin: 0;
 }
 
 /* 하단 액션 영역 */
@@ -452,8 +539,13 @@
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  position: relative;
+  gap: 8px;
+}
+
+.feed-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .feed-actions-icons {
@@ -498,9 +590,7 @@
 
 /* 북마크 버튼 */
 .bookmark-btn {
-  position: absolute;
-  right: 16px;
-  top: 12px;
+  padding: 8px;
 }
 
 .bookmark-btn.bookmarked svg {
@@ -508,13 +598,29 @@
 }
 
 .feed-stats {
+  display: flex;         /* Flexbox 활성화 */
+  flex-direction: column; /* 자식 요소들을 세로로 배치 */
+  align-items: flex-start; /* 왼쪽 정렬 보장 */
   font-size: 14px;
   font-weight: 600;
   color: #262626;
+  text-align: left;
+  width: 100%;
+  padding: 2px 0;        /* 상하 간격 살짝 추가 */
 }
 
 .feed-like-count {
   display: block;
+  margin-bottom: -10px;
+}
+
+.first-like-text {
+  font-size: 12px;
+  font-weight: 400;
+  color: #8e8e8e;
+  margin: 0;             /* 기존 마진 초기화 */
+  text-align: left;
+  display: block;        /* 한 줄을 꽉 차지하게 함 */
 }
 
 /* 댓글 관련 스타일 */
@@ -525,9 +631,10 @@
   margin-top: 4px;
 }
 
-.comment-time {
+.comment-actions .comment-time {
   font-size: 12px;
   color: #8e8e8e;
+  margin-bottom: 0;
 }
 
 .comment-likes {
@@ -543,15 +650,21 @@
   padding: 0;
   display: flex;
   align-items: center;
-  color: #262626;
+  color: #8e8e8e;
   transition: all 0.2s;
+}
+
+.comment-like-btn svg {
+  stroke: #8e8e8e;
+  fill: none;
 }
 
 .comment-like-btn:hover {
   opacity: 0.6;
 }
 
-.comment-like-btn.liked svg {
+.comment-like-btn.liked svg,
+.comment-like-btn.liked svg path {
   fill: #ed4956;
   stroke: #ed4956;
 }

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAccessToken, getMemberNoFromToken } from '../../../utils/jwt';
 
 // API Base URL (SOLID: Single Responsibility - API 호출만 담당)
 const API_BASE_URL = 'http://localhost:8006/memoryf';
@@ -14,7 +15,7 @@ const feedApi = axios.create({
 
 // 요청 인터셉터에서 항상 최신 accessToken을 Authorization 헤더에 추가
 feedApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token = getAccessToken();
   if (token) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
@@ -27,12 +28,14 @@ feedApi.interceptors.request.use((config) => {
  * @param {string} sortBy - 정렬 기준 ('popular' | 'following' | 'recent')
  * @returns {Promise} 피드 목록 데이터
  */
-export const getFeedList = async (sortBy = 'recent') => {
+export const getFeedList = async (sortBy = 'recent', page = 0, size = 18) => {
   try {
+    const memberNo = getMemberNoFromToken();
+    const params = { sortBy, page, size };
+    if (memberNo) params.memberNo = memberNo;
+
     const response = await feedApi.get('', {
-      params: {
-        sortBy, // RESTful: 쿼리 파라미터로 필터링
-      },
+      params,
       timeout: 10000, // 10초 타임아웃
     });
     
@@ -58,7 +61,7 @@ export const getFeedList = async (sortBy = 'recent') => {
     // 네트워크 오류 상세 정보 로깅
     if (error.code === 'ERR_NETWORK') {
       console.error('네트워크 오류: 백엔드 서버가 실행 중인지 확인하세요.');
-      console.error('요청 URL:', `${feedApi.defaults.baseURL}?sortBy=${sortBy}`);
+      console.error('요청 URL:', `${feedApi.defaults.baseURL}?sortBy=${sortBy}&page=${page}&size=${size}`);
     } else if (error.response) {
       // 서버 응답이 있는 경우
       console.error('서버 응답 오류:', error.response.status, error.response.data);
@@ -76,7 +79,13 @@ export const getFeedList = async (sortBy = 'recent') => {
  */
 export const getFeedDetail = async (feedNo) => {
   try {
-    const response = await feedApi.get(`/${feedNo}`);
+    const memberNo = getMemberNoFromToken();
+    const params = {};
+    if (memberNo) params.memberNo = memberNo;
+
+    const response = await feedApi.get(`/${feedNo}`, {
+      params
+    });
     // 백엔드 응답 구조에 맞게 수정
     if (response.data && response.data.success && response.data.data) {
       return response.data.data;
@@ -189,7 +198,13 @@ export const toggleFeedBookmark = async (feedNo, memberNo) => {
  */
 export const getComments = async (feedNo) => {
   try {
-    const response = await feedApi.get(`/${feedNo}/comments`);
+    const memberNo = getMemberNoFromToken();
+    const params = {};
+    if (memberNo) params.memberNo = memberNo;
+
+    const response = await feedApi.get(`/${feedNo}/comments`, {
+      params
+    });
     if (response.data && response.data.success) {
       return response.data.data;
     }
@@ -251,6 +266,27 @@ export const toggleCommentLike = async (feedNo, commentNo, memberNo) => {
     return response.data;
   } catch (error) {
     console.error('댓글 좋아요 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 북마크한 피드 목록 조회 (RESTful: GET /feeds/bookmarked)
+ * @param {number} memberNo - 회원 번호
+ * @returns {Promise} 북마크한 피드 목록
+ */
+export const getBookmarkedFeedList = async (memberNo) => {
+  try {
+    const response = await feedApi.get('/bookmarked', {
+      params: { memberNo },
+    });
+    
+    if (response.data && response.data.success) {
+      return response.data.data;
+    }
+    return [];
+  } catch (error) {
+    console.error('북마크 피드 조회 실패:', error);
     throw error;
   }
 };

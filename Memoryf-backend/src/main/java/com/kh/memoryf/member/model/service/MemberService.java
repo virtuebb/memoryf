@@ -31,5 +31,8 @@ public interface MemberService {
 	
 	// 회원 닉네임 수정 서비스
 	int updateMemberNick(Member m);
+
+	// 닉네임으로 회원번호 조회 서비스
+	Integer selectMemberNoByNick(String memberNick);
 	
 }

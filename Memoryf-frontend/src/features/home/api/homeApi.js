@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAccessToken } from '../../../utils/jwt';
 
 // API Base URL
 const API_BASE_URL = 'http://localhost:8006/memoryf';
@@ -12,13 +13,25 @@ const homeApi = axios.create({
 
 // 요청 인터셉터에서 항상 최신 accessToken을 Authorization 헤더에 추가
 homeApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token = getAccessToken();
   if (token) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+const normalizeHome = (home) => {
+  if (!home || typeof home !== 'object') return home;
+
+  const normalizedIsFollowing =
+    home.isFollowing ?? home.following ?? home.is_following ?? home.IS_FOLLOWING;
+
+  return {
+    ...home,
+    isFollowing: Boolean(normalizedIsFollowing),
+  };
+};
 
 /**
  * 회원 번호로 홈 조회 (RESTful: GET /home/{memberNo})
@@ -32,11 +45,33 @@ export const getHomeByMemberNo = async (memberNo, currentMemberNo = null) => {
     const response = await homeApi.get(`/${memberNo}`, { params });
     
     if (response.data && response.data.success) {
-      return response.data.data;
+      return normalizeHome(response.data.data);
     }
     return null;
   } catch (error) {
     console.error('홈 조회 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * 회원 닉네임으로 홈 조회 (RESTful: GET /home/by-nick/{memberNick})
+ * @param {string} memberNick - 조회할 회원 닉네임
+ * @param {number} currentMemberNo - 현재 로그인한 회원 번호 (옵션)
+ * @returns {Promise} 홈 정보
+ */
+export const getHomeByMemberNick = async (memberNick, currentMemberNo = null) => {
+  try {
+    const params = currentMemberNo ? { currentMemberNo } : {};
+    const encoded = encodeURIComponent(memberNick);
+    const response = await homeApi.get(`/by-nick/${encoded}`, { params });
+
+    if (response.data && response.data.success) {
+      return normalizeHome(response.data.data);
+    }
+    return null;
+  } catch (error) {
+    console.error('홈 조회 실패(닉네임):', error);
     throw error;
   }
 };

@@ -1,53 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import sendEmailCodeApi from "../api/sendEmailCodeApi";
 import verifyEmailCodeApi from "../api/verifyEmailCodeApi";
-import "../css/EmailVerify/EmailVerify.css"
+import "../css/EmailVerify/EmailVerify.css";
 
 const EmailVerify = ({ placeholder = "이메일", email, onChange, onVerified }) => {
-
   const [code, setCode] = useState("");
   const [verified, setVerified] = useState(false);
 
   const [codeOpen, setCodeOpen] = useState(false);
   const [verifyResult, setVerifyResult] = useState(""); 
-  // "" | "success" | "fail"
+  // "" | "sending" | "sent" | "checking" | "success" | "fail" | "sendFail"
 
-  const openCodeInput = async() => {
+  // ✅ 이메일 바뀌면 인증 상태 초기화
+  useEffect(() => {
+    setCode("");
+    setVerified(false);
+    setCodeOpen(false);
+    setVerifyResult("");
+    if (onVerified) onVerified(false);
+  }, [email]);
 
-    if(!email) return;
+  const openCodeInput = async () => {
+    if (!email) return;
 
+    // ✅ 먼저 입력창 열고 "sending" 보여주기
+    setCodeOpen(true);
     setVerifyResult("sending");
 
     const result = await sendEmailCodeApi(email);
 
-    if(result === 1) {
-
-      setCodeOpen(true);
+    if (result === 1) {
       setVerifyResult("sent");
-
     } else {
-
-      setVerifyResult("fail");
+      setVerifyResult("sendFail"); // ✅ 발송 실패는 따로
     }
-  }
+  };
 
-  const checkCode = async() => {
-
-    if(!code) return;
+  const checkCode = async () => {
+    if (!code) {
+      setVerifyResult(""); // ✅ "입력해주세요" 보이게
+      return;
+    }
 
     setVerifyResult("checking");
 
     const result = await verifyEmailCodeApi(email, code);
 
-    if(result === 1) {
-
+    if (result === 1) {
       setVerifyResult("success");
       setVerified(true);
-
-      onVerified(true);
-
+      if (onVerified) onVerified(true);
     } else {
-
       setVerifyResult("fail");
     }
   };
@@ -55,12 +58,18 @@ const EmailVerify = ({ placeholder = "이메일", email, onChange, onVerified })
   return (
     <>
       <div className="email-row">
-        <input type="email" name="email" value={email} onChange={onChange} placeholder={placeholder} />
+        <input
+          type="email"
+          name="email"
+          value={email}
+          onChange={onChange}
+          placeholder={placeholder}
+        />
         <button
           type="button"
           className="email-btn"
           onClick={openCodeInput}
-          disabled={codeOpen}
+          disabled={verified}   // ✅ 인증 완료되면 재발송 막기
         >
           인증번호 발송
         </button>
@@ -75,16 +84,8 @@ const EmailVerify = ({ placeholder = "이메일", email, onChange, onVerified })
             className="blur-in"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-          />
-
-          <button
-            type="button"
-            className="code-check-btn"
-            onClick={checkCode}
             disabled={verified}
-          >
-            인증번호 확인
-          </button>
+          />
 
           {/* 결과 멘트 */}
           {verifyResult === "" && (
@@ -111,6 +112,18 @@ const EmailVerify = ({ placeholder = "이메일", email, onChange, onVerified })
             <p className="code-ment fail">✖ 인증번호가 올바르지 않습니다</p>
           )}
 
+          {verifyResult === "sendFail" && (
+            <p className="code-ment fail">✖ 인증번호 발송에 실패했습니다</p>
+          )}
+
+          <button
+            type="button"
+            className="code-check-btn"
+            onClick={checkCode}
+            disabled={verified}
+          >
+            인증번호 확인
+          </button>
         </div>
       )}
     </>

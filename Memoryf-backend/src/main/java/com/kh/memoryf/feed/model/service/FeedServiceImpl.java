@@ -24,22 +24,23 @@ public class FeedServiceImpl implements FeedService {
 	public ArrayList<Feed> selectFeedList(String sortBy, Integer memberNo) {
 		return feedDao.selectFeedList(sqlSession, sortBy, memberNo);
 	}
+
+	@Override
+	public ArrayList<Feed> selectFeedList(String sortBy, Integer memberNo, int page, int size) {
+		if (page < 0) {
+			page = 0;
+		}
+		if (size <= 0) {
+			size = 18;
+		}
+		return feedDao.selectFeedList(sqlSession, sortBy, memberNo, page, size);
+	}
 	
 	@Override
 	public Feed selectFeed(int feedNo, Integer memberNo) {
-		Feed feed = feedDao.selectFeed(sqlSession, feedNo);
-		
-		// 현재 사용자가 좋아요 했는지 확인
-		if (memberNo != null && feed != null) {
-			int likeCount = feedDao.checkFeedLike(sqlSession, feedNo, memberNo);
-			feed.setLiked(likeCount > 0);
-			
-			// 현재 사용자가 북마크 했는지 확인
-			int bookmarkCount = feedDao.checkFeedBookmark(sqlSession, feedNo, memberNo);
-			feed.setBookmarked(bookmarkCount > 0);
-		}
-		
-		return feed;
+		// SQL에서 LEFT JOIN으로 isLiked와 isBookmarked를 직접 조회하므로
+		// 별도의 checkFeedLike, checkFeedBookmark 호출 불필요
+		return feedDao.selectFeed(sqlSession, feedNo, memberNo);
 	}
 	
 	@Override
@@ -101,5 +102,10 @@ public class FeedServiceImpl implements FeedService {
 			feedDao.insertFeedBookmark(sqlSession, feedNo, memberNo);
 			return true;
 		}
+	}
+	
+	@Override
+	public ArrayList<Feed> selectBookmarkedFeedList(int memberNo) {
+		return feedDao.selectBookmarkedFeedList(sqlSession, memberNo);
 	}
 }

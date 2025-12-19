@@ -13,6 +13,15 @@ public interface FeedService {
 	 * @return 피드 목록
 	 */
 	ArrayList<Feed> selectFeedList(String sortBy, Integer memberNo);
+
+	/**
+	 * 피드 목록 조회 (페이지네이션)
+	 * @param sortBy 정렬 기준 (popular, following, recent)
+	 * @param memberNo 현재 로그인한 회원 번호
+	 * @param page 0-based 페이지
+	 * @param size 페이지 크기
+	 */
+	ArrayList<Feed> selectFeedList(String sortBy, Integer memberNo, int page, int size);
 	
 	/**
 	 * 피드 상세 조회
@@ -51,6 +60,13 @@ public interface FeedService {
 	 * @return 북마크 여부 (true: 북마크 추가, false: 북마크 삭제)
 	 */
 	boolean toggleFeedBookmark(int feedNo, int memberNo);
+	
+	/**
+	 * 북마크한 피드 목록 조회
+	 * @param memberNo 회원 번호
+	 * @return 북마크한 피드 목록
+	 */
+	ArrayList<Feed> selectBookmarkedFeedList(int memberNo);
 	
 	/**
 	 * 피드 삭제

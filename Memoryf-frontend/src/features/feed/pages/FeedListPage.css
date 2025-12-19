@@ -114,3 +114,12 @@
   color: #666;
 }
 
+/* 무한 스크롤 sentinel */
+.feed-load-more {
+  width: 100%;
+  text-align: center;
+  padding: 20px 0;
+  color: #666;
+  font-size: 14px;
+}
+

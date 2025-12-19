@@ -2,6 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="memberMapper">
 
+	<!-- 닉네임으로 회원번호 조회 -->
+	<select id="selectMemberNoByNick" parameterType="string" resultType="_int">
+		SELECT MEMBER_NO
+		FROM TB_MEMBER
+		WHERE MEMBER_NICK = #{value}
+	</select>
+
 	<!-- 닉네임 업데이트 -->
 	<update id="updateMemberNick" parameterType="member">
 		UPDATE TB_MEMBER

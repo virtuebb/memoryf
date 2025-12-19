@@ -15,6 +15,8 @@ import {
   toggleCommentLike 
 } from '../api/feedApi';
 import { getMemberNoFromToken } from '../../../utils/jwt';
+import { getHomeByMemberNo } from '../../home/api/homeApi';
+import { followMember, unfollowMember } from '../../follow/api/followApi';
 import './FeedDetailPage.css';
 
 dayjs.extend(relativeTime);
@@ -54,6 +56,7 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
   const [isLiked, setIsLiked] = useState(false); // 좋아요 상태
   const [likeCount, setLikeCount] = useState(0); // 좋아요 수
   const [isBookmarked, setIsBookmarked] = useState(false); // 북마크 상태
+  const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -62,14 +65,30 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
         setError(null);
         const data = await getFeedDetail(feedNo);
         setFeed(data);
-        setIsLiked(data.isLiked || false);
+        // 백엔드 직렬화에 따라 isLiked가 liked로 내려올 수 있어 둘 다 처리
+        setIsLiked(Boolean(data?.isLiked ?? data?.liked));
         setLikeCount(data.likeCount || 0);
-        setIsBookmarked(data.isBookmarked || false);
+        // 백엔드 직렬화에 따라 isBookmarked가 bookmarked로 내려올 수 있어 둘 다 처리
+        setIsBookmarked(Boolean(data?.isBookmarked ?? data?.bookmarked));
         setCurrentImageIndex(0); // 피드 로드 시 첫 번째 이미지로 초기화
         
         // 댓글 목록 로드
         const commentsData = await getComments(feedNo);
         setComments(commentsData || []);
+
+    // 작성자 팔로우 상태 로드(본인 피드가 아니면)
+    try {
+      const me = getMemberNoFromToken();
+      if (me && data?.memberNo && data.memberNo !== me) {
+        const homeData = await getHomeByMemberNo(data.memberNo, me);
+        setIsFollowingAuthor(Boolean(homeData?.isFollowing ?? homeData?.following));
+      } else {
+        setIsFollowingAuthor(false);
+      }
+    } catch (e) {
+      console.error('작성자 팔로우 상태 조회 실패:', e);
+      setIsFollowingAuthor(false);
+    }
       } catch (err) {
         console.error('피드 상세 조회 오류:', err);
         setError('피드를 불러오는데 실패했습니다.');
@@ -90,6 +109,10 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
         try {
           const data = await getFeedDetail(feedNo);
           setFeed(data);
+          // 좋아요와 북마크 상태도 함께 갱신
+          setIsLiked(Boolean(data?.isLiked ?? data?.liked));
+          setLikeCount(data.likeCount || 0);
+          setIsBookmarked(Boolean(data?.isBookmarked ?? data?.bookmarked));
         } catch (err) {
           console.error('피드 갱신 오류:', err);
         }
@@ -106,6 +129,27 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
     const me = getMemberNoFromToken();
     return me && feed?.memberNo === me;
   })();
+
+  const handleToggleFollowAuthor = async () => {
+    const me = getMemberNoFromToken();
+    const targetMemberNo = feed?.memberNo;
+    if (!me || !targetMemberNo || me === targetMemberNo) return;
+
+    try {
+      const result = isFollowingAuthor
+        ? await unfollowMember(targetMemberNo, me)
+        : await followMember(targetMemberNo, me);
+
+      if (result?.success) {
+        setIsFollowingAuthor(Boolean(result.isFollowing));
+      } else {
+        alert(result?.message || '팔로우 처리에 실패했습니다.');
+      }
+    } catch (e) {
+      console.error('팔로우 처리 실패:', e);
+      alert('팔로우 처리에 실패했습니다.');
+    }
+  };
 
   // 인스타그램 스타일 시간 경과 표시
   const formatTimeAgo = (dateString) => {
@@ -413,9 +457,32 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
           <div className="feed-detail-content-section">
             {/* 헤더 */}
             <div className="feed-detail-header">
-              <div className="feed-detail-author">
-                <div className="author-avatar">👤</div>
-                <span className="author-nick">{feed?.memberNick || '익명'}</span>
+              <div className="feed-detail-author-row">
+                <div 
+                  className="feed-detail-author clickable"
+                  onClick={() => feed?.memberNick && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                >
+                  {feed?.profileImage ? (
+                    <img 
+                      src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
+                      alt="프로필"
+                      className="author-avatar-img"
+                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                    />
+                  ) : null}
+                  <div className="author-avatar" style={{ display: feed?.profileImage ? 'none' : 'flex' }}>👤</div>
+                  <span className="author-nick">{feed?.memberNick || '익명'}</span>
+                </div>
+
+                {!isOwner && (
+                  <button
+                    type="button"
+                    className="follow-text-btn"
+                    onClick={handleToggleFollowAuthor}
+                  >
+                    {isFollowingAuthor ? '팔로잉' : '팔로우'}
+                  </button>
+                )}
               </div>
               {isModal && (
                 <button
@@ -433,80 +500,117 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
             <div className="feed-detail-comments">
               {/* 피드 내용 */}
               <div className="feed-detail-content-item">
-                <div className="feed-main-text">
-                  <span className="comment-author-name">
-                    {feed?.memberNick || '익명'}
-                  </span>
-                  <span className="comment-text-inline">
-                    {feed?.content ? renderTextWithTags(feed.content) : '내용 없음'}
-                  </span>
+                <div 
+                  className="comment-author-profile clickable"
+                  onClick={() => feed?.memberNick && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                >
+                  {feed?.profileImage ? (
+                    <img 
+                      src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
+                      alt="프로필"
+                      className="comment-avatar-img"
+                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                    />
+                  ) : null}
+                  <div className="comment-avatar" style={{ display: feed?.profileImage ? 'none' : 'flex' }}>👤</div>
                 </div>
-                {/* 태그 영역 - 인스타그램처럼 내용 아래 노출 */}
-                {feed?.tag && (
-                  <div className="feed-detail-tags">
-                    {feed.tag
-                      .split(/[ ,#]+/)
-                      .filter(Boolean)
-                      .map((tag, idx) => (
-                        <span key={idx} className="feed-tag-item">
-                          #{tag}
-                        </span>
-                      ))}
+                <div className="comment-content-wrapper">
+                  <div className="feed-main-text">
+                    <span 
+                      className="comment-author-name clickable"
+                      onClick={() => feed?.memberNick && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                    >
+                      {feed?.memberNick || '익명'}
+                    </span>
+                    <span className="comment-text-inline">
+                      {feed?.content ? renderTextWithTags(feed.content) : ''}
+                    </span>
                   </div>
-                )}
-                <div className="comment-time">
-                  {feed?.createdDate ? formatTimeAgo(feed.createdDate) : ''}
+                  {/* 태그 영역 - 인스타그램처럼 내용 아래 노출 */}
+                  {feed?.tag && (
+                    <div className="feed-detail-tags">
+                      {feed.tag
+                        .split(/[ ,#]+/)
+                        .filter(Boolean)
+                        .map((tag, idx) => (
+                          <span key={idx} className="feed-tag-item">
+                            #{tag}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                  <div className="comment-time">
+                    {feed?.createdDate ? formatTimeAgo(feed.createdDate) : ''}
+                  </div>
                 </div>
               </div>
 
               {/* 댓글 목록 */}
               <div className="comments-list">
                 {comments.length === 0 ? (
-                  <p className="comments-placeholder">
-                    {likeCount === 0 
-                      ? '가장 먼저 좋아요를 눌러보세요' 
-                      : '첫 댓글을 남겨보세요'}
-                  </p>
+                  <div className="comments-placeholder">
+                    <p className="no-comments-bold">아직 댓글이 없습니다</p>
+                    <p className="no-comments-sub">댓글을 남겨주세요</p>
+                  </div>
                 ) : (
                   comments.map((comment) => (
-                    <div key={comment.commentNo} className="feed-detail-content-item">
-                      <div className="feed-main-text">
-                        <span className="comment-author-name">
-                          {comment.writerNick}
-                        </span>
-                        <span className="comment-text-inline">
-                          {renderTextWithTags(comment.content)}
-                        </span>
+                    <div key={comment.commentNo} className="feed-detail-content-item comment-item">
+                      <div 
+                        className="comment-author-profile clickable"
+                        onClick={() => comment?.writerNick && navigate(`/${encodeURIComponent(comment.writerNick)}`)}
+                      >
+                        {comment.writerProfileImage ? (
+                          <img 
+                            src={`http://localhost:8006/memoryf/profile_images/${comment.writerProfileImage}`}
+                            alt="프로필"
+                            className="comment-avatar-img"
+                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                          />
+                        ) : null}
+                        <div className="comment-avatar" style={{ display: comment.writerProfileImage ? 'none' : 'flex' }}>👤</div>
                       </div>
-                      <div className="comment-actions">
-                        <span className="comment-time">
-                          {comment.createDate
-                            ? formatTimeAgo(comment.createDate)
-                            : ''}
-                        </span>
-                        {comment.likeCount > 0 && (
-                          <span className="comment-likes">
-                            좋아요 {comment.likeCount}개
-                          </span>
-                        )}
-                        <button
-                          className={`comment-like-btn ${comment.isLiked ? 'liked' : ''}`}
-                          onClick={() => handleToggleCommentLike(comment.commentNo)}
-                          aria-label="댓글 좋아요"
-                        >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill={comment.isLiked ? '#ed4956' : 'none'} stroke="currentColor" strokeWidth="2">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                          </svg>
-                        </button>
-                        {getMemberNoFromToken() === comment.writer && (
-                          <button
-                            className="comment-delete-btn"
-                            onClick={() => handleDeleteComment(comment.commentNo)}
+                      <div className="comment-content-wrapper">
+                        <div className="feed-main-text">
+                          <span 
+                            className="comment-author-name clickable"
+                            onClick={() => comment?.writerNick && navigate(`/${encodeURIComponent(comment.writerNick)}`)}
                           >
-                            삭제
-                          </button>
-                        )}
+                            {comment.writerNick}
+                          </span>
+                          <span className="comment-text-inline">
+                            {renderTextWithTags(comment.content)}
+                          </span>
+                        </div>
+                        <div className="comment-actions">
+                          <span className="comment-time">
+                            {comment.createDate
+                              ? formatTimeAgo(comment.createDate)
+                              : ''}
+                          </span>
+                          {comment.likeCount > 0 && (
+                            <span className="comment-likes">
+                              좋아요 {comment.likeCount}개
+                            </span>
+                          )}
+                          {getMemberNoFromToken() === comment.writer && (
+                            <button
+                              className="comment-delete-btn"
+                              onClick={() => handleDeleteComment(comment.commentNo)}
+                            >
+                              삭제
+                            </button>
+                          )}
+                        </div>
                       </div>
+                      <button
+                        className={`comment-like-btn ${Boolean(comment?.isLiked ?? comment?.liked) ? 'liked' : ''}`}
+                        onClick={() => handleToggleCommentLike(comment.commentNo)}
+                        aria-label="댓글 좋아요"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" strokeWidth="2">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                      </button>
                     </div>
                   ))
                 )}
@@ -515,42 +619,46 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
 
             {/* 하단 액션 영역 */}
             <div className="feed-detail-actions">
-              <div className="feed-actions-icons">
-                <button 
-                  className={`action-btn like-btn ${isLiked ? 'liked' : ''}`} 
-                  aria-label="좋아요"
-                  onClick={handleToggleLike}
+              <div className="feed-actions-row">
+                <div className="feed-actions-icons">
+                  <button 
+                    className={`action-btn like-btn ${isLiked ? 'liked' : ''}`} 
+                    aria-label="좋아요"
+                    onClick={handleToggleLike}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? '#ed4956' : 'none'} stroke="currentColor" strokeWidth="2">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                  </button>
+                  <button className="action-btn comment-btn" aria-label="댓글">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                  </button>
+                  <button className="action-btn share-btn" aria-label="공유">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                      <polyline points="16 6 12 2 8 6"></polyline>
+                      <line x1="12" y1="2" x2="12" y2="15"></line>
+                    </svg>
+                  </button>
+                </div>
+                <button
+                  className={`action-btn bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+                  aria-label="북마크"
+                  onClick={handleToggleBookmark}
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? '#ed4956' : 'none'} stroke="currentColor" strokeWidth="2">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                  </svg>
-                </button>
-                <button className="action-btn comment-btn" aria-label="댓글">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  </svg>
-                </button>
-                <button className="action-btn share-btn" aria-label="공유">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                    <polyline points="16 6 12 2 8 6"></polyline>
-                    <line x1="12" y1="2" x2="12" y2="15"></line>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                   </svg>
                 </button>
               </div>
               
-              <button
-                className={`action-btn bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
-                aria-label="북마크"
-                onClick={handleToggleBookmark}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                </svg>
-              </button>
-              
               <div className="feed-stats">
                 <span className="feed-like-count">좋아요 {likeCount}개</span>
+                {likeCount === 0 && (
+                  <p className="first-like-text">가장 먼저 좋아요를 눌러보세요</p>
+                )}
               </div>
 
               <span className="feed-time-ago">

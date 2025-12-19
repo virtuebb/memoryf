@@ -50,4 +50,9 @@ public class MemberServiceImpl implements MemberService {
 		return memberDao.updateMemberNick(sqlSession, m);
 	}
 
+	@Override
+	public Integer selectMemberNoByNick(String memberNick) {
+		return memberDao.selectMemberNoByNick(sqlSession, memberNick);
+	}
+
 }
