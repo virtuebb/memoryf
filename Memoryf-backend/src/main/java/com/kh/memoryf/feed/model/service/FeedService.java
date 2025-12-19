@@ -67,6 +67,15 @@ public interface FeedService {
 	 * @return 북마크한 피드 목록
 	 */
 	ArrayList<Feed> selectBookmarkedFeedList(int memberNo);
+
+	/**
+	 * 프로필용(작성자 기준) 피드 목록 조회 (페이지네이션)
+	 * @param targetMemberNo 프로필 주인 회원 번호(작성자)
+	 * @param viewerMemberNo 현재 로그인한 회원 번호(좋아요 여부 확인용, optional)
+	 * @param page 0-based 페이지
+	 * @param size 페이지 크기
+	 */
+	ArrayList<Feed> selectProfileFeedList(int targetMemberNo, Integer viewerMemberNo, int page, int size);
 	
 	/**
 	 * 피드 삭제

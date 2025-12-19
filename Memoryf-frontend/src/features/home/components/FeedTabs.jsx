@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 // FeedTabs component
 import { useNavigate, useLocation } from "react-router-dom";
-import { getFeedList, getBookmarkedFeedList } from "../../feed/api/feedApi";
+import { getBookmarkedFeedList, getFeedListByMember } from "../../feed/api/feedApi";
 import { getMemberNoFromToken } from "../../../utils/jwt";
 import "../css/FeedTabs.css";
 
@@ -38,15 +38,11 @@ function FeedTabs({ memberNo, isOwner, onCreateClick }) {
 
     try {
       setLoading(true);
-      // 내 피드 목록 가져오기 (전체 피드에서 필터링)
-      const allFeeds = await getFeedList('recent');
-      const myFeedList = allFeeds.filter(feed => feed.memberNo === memberNo);
-      
-      // 북마크한 피드 목록 조회 (별도 API 호출)
-      const bookmarked = isOwner ? await getBookmarkedFeedList(currentMemberNo) : [];
-      
-      setMyFeeds(myFeedList);
-      setBookmarkedFeeds(bookmarked);
+      // 프로필(작성자) 기준 피드 목록을 백엔드에서 직접 조회
+      const feeds = await getFeedListByMember(Number(memberNo), Number(currentMemberNo), 0, 60);
+      setMyFeeds(Array.isArray(feeds) ? feeds : []);
+      // ⚠️ 북마크는 별도 요청이 느리거나 실패해도, 메인 탭 로딩을 막지 않도록 분리
+      setBookmarkedFeeds([]);
     } catch (error) {
       console.error('피드 조회 실패:', error);
       setMyFeeds([]);
@@ -54,6 +50,17 @@ function FeedTabs({ memberNo, isOwner, onCreateClick }) {
     } finally {
       setLoading(false);
     }
+
+    if (!isOwner) return;
+
+    getBookmarkedFeedList(currentMemberNo)
+      .then((bookmarked) => {
+        setBookmarkedFeeds(Array.isArray(bookmarked) ? bookmarked : []);
+      })
+      .catch((error) => {
+        console.error('북마크 피드 조회 실패:', error);
+        setBookmarkedFeeds([]);
+      });
   };
 
   const handleFeedClick = (feedNo) => {

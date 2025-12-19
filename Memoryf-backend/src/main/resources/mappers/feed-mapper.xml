@@ -52,6 +52,9 @@
 							LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{memberNo}
 						</if>
 						WHERE F.IS_DEL = 'N'
+						<if test="targetMemberNo != null">
+							AND F.MEMBER_NO = #{targetMemberNo}
+						</if>
 						<if test="sortBy == 'following' and memberNo != null">
 							AND F.MEMBER_NO IN (
 								SELECT MH.MEMBER_NO
@@ -98,6 +101,9 @@
 					LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{memberNo}
 				</if>
 				WHERE F.IS_DEL = 'N'
+				<if test="targetMemberNo != null">
+					AND F.MEMBER_NO = #{targetMemberNo}
+				</if>
 				<if test="sortBy == 'following' and memberNo != null">
 					AND F.MEMBER_NO IN (
 						SELECT MH.MEMBER_NO

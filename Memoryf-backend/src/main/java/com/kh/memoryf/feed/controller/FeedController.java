@@ -81,6 +81,31 @@ public class FeedController {
 		
 		return response;
 	}
+
+	/**
+	 * 프로필(작성자) 기준 피드 목록 조회 (RESTful: GET /feeds/by-member/{targetMemberNo})
+	 * - 기존 /feeds(recent) 를 필터링하는 방식은 페이지네이션 때문에 프로필에서 게시물이 안 보일 수 있어 별도 엔드포인트로 제공
+	 * @param targetMemberNo 프로필 주인 회원 번호(작성자)
+	 * @param viewerMemberNo 현재 로그인한 회원 번호 (좋아요 여부 조회용, optional)
+	 */
+	@GetMapping("/by-member/{targetMemberNo}")
+	public HashMap<String, Object> selectFeedListByMember(
+			@PathVariable("targetMemberNo") int targetMemberNo,
+			@RequestParam(value = "viewerMemberNo", required = false) Integer viewerMemberNo,
+			@RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "size", defaultValue = "60") int size) {
+		HashMap<String, Object> response = new HashMap<>();
+		try {
+			ArrayList<Feed> feedList = feedService.selectProfileFeedList(targetMemberNo, viewerMemberNo, page, size);
+			response.put("success", true);
+			response.put("data", feedList != null ? feedList : new ArrayList<>());
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.put("success", false);
+			response.put("message", "프로필 피드 목록 조회 실패: " + e.getMessage());
+		}
+		return response;
+	}
 	
 	/**
 	 * 북마크한 피드 목록 조회 (RESTful: GET /feeds/bookmarked)
