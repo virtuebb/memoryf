@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import dayjs from "dayjs";
 import { 
   getGuestbookList, 
   createGuestbook, 
@@ -86,14 +87,46 @@ function Guestbook({ homeNo }) {
     }
   };
 
-  const formatDate = (dateString) => {
+  // 댓글처럼 시간 경과 표시
+  const formatTimeAgo = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
-    }).replace(/\. /g, '.').replace(/\.$/, '');
+    const parsed = dayjs(dateString);
+    if (!parsed.isValid()) return '';
+
+    const now = dayjs();
+    const isDateOnly = typeof dateString === 'string' && dateString.length <= 10; // 'YYYY-MM-DD'
+
+    const diffMinutes = Math.max(0, now.diff(parsed, 'minute'));
+    const diffHours = Math.max(0, now.diff(parsed, 'hour'));
+    const diffDays = Math.max(0, now.diff(parsed, 'day'));
+
+    if (isDateOnly) {
+      if (diffDays === 0) {
+        if (diffMinutes < 1) return '방금';
+        if (diffMinutes < 60) return `${diffMinutes}분`;
+        if (diffHours < 24) return `${diffHours}시간`;
+        return '오늘';
+      }
+
+      if (diffDays < 7) return `${diffDays}일`;
+      if (diffDays === 7) return '1주';
+
+      const dateFormat = parsed.year() === now.year() ? 'MM.DD' : 'YYYY.MM.DD';
+      return parsed.format(dateFormat);
+    }
+
+    if (diffMinutes < 1) return '방금';
+    if (diffMinutes < 60) return `${diffMinutes}분`;
+    if (diffHours < 24) return `${diffHours}시간`;
+
+    if (diffDays < 7) return `${diffDays}일`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}주`;
+
+    const diffMonths = Math.max(0, now.diff(parsed, 'month'));
+    if (diffMonths < 12) return `${diffMonths}개월`;
+
+    const diffYears = Math.max(0, now.diff(parsed, 'year'));
+    return `${diffYears}년`;
   };
 
   if (loading) {
@@ -128,9 +161,27 @@ function Guestbook({ homeNo }) {
         {guestbook.map((item) => (
           <li key={item.guestbookNo}>
             <div className="guestbook-item-header">
-              <div className="meta">
-                <span className="name">{item.memberNick}</span>
-                <span className="date">{formatDate(item.createDate)}</span>
+              <div className="guestbook-author">
+                <div className="guestbook-author-profile">
+                  {item.profileChangeName ? (
+                    <img
+                      src={`http://localhost:8006/memoryf/profile_images/${item.profileChangeName}`}
+                      alt="프로필"
+                      className="guestbook-avatar-img"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div className="guestbook-avatar" style={{ display: item.profileChangeName ? 'none' : 'flex' }}>
+                    👤
+                  </div>
+                </div>
+                <div className="guestbook-author-meta">
+                  <span className="guestbook-author-name">{item.memberNick}</span>
+                  <span className="guestbook-author-time">{formatTimeAgo(item.createDate)}</span>
+                </div>
               </div>
               <div className="guestbook-actions">
                 <button
@@ -149,7 +200,7 @@ function Guestbook({ homeNo }) {
                 )}
               </div>
             </div>
-            <p>{item.guestbookContent}</p>
+            <p className="guestbook-content">{item.guestbookContent}</p>
           </li>
         ))}
       </ul>

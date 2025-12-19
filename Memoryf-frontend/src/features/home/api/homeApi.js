@@ -21,6 +21,18 @@ homeApi.interceptors.request.use((config) => {
   return config;
 });
 
+const normalizeHome = (home) => {
+  if (!home || typeof home !== 'object') return home;
+
+  const normalizedIsFollowing =
+    home.isFollowing ?? home.following ?? home.is_following ?? home.IS_FOLLOWING;
+
+  return {
+    ...home,
+    isFollowing: Boolean(normalizedIsFollowing),
+  };
+};
+
 /**
  * 회원 번호로 홈 조회 (RESTful: GET /home/{memberNo})
  * @param {number} memberNo - 조회할 회원 번호
@@ -33,7 +45,7 @@ export const getHomeByMemberNo = async (memberNo, currentMemberNo = null) => {
     const response = await homeApi.get(`/${memberNo}`, { params });
     
     if (response.data && response.data.success) {
-      return response.data.data;
+      return normalizeHome(response.data.data);
     }
     return null;
   } catch (error) {
@@ -55,7 +67,7 @@ export const getHomeByMemberNick = async (memberNick, currentMemberNo = null) =>
     const response = await homeApi.get(`/by-nick/${encoded}`, { params });
 
     if (response.data && response.data.success) {
-      return response.data.data;
+      return normalizeHome(response.data.data);
     }
     return null;
   } catch (error) {

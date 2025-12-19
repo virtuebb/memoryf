@@ -24,6 +24,17 @@ public class FeedServiceImpl implements FeedService {
 	public ArrayList<Feed> selectFeedList(String sortBy, Integer memberNo) {
 		return feedDao.selectFeedList(sqlSession, sortBy, memberNo);
 	}
+
+	@Override
+	public ArrayList<Feed> selectFeedList(String sortBy, Integer memberNo, int page, int size) {
+		if (page < 0) {
+			page = 0;
+		}
+		if (size <= 0) {
+			size = 18;
+		}
+		return feedDao.selectFeedList(sqlSession, sortBy, memberNo, page, size);
+	}
 	
 	@Override
 	public Feed selectFeed(int feedNo, Integer memberNo) {

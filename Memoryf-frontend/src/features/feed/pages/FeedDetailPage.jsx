@@ -15,6 +15,8 @@ import {
   toggleCommentLike 
 } from '../api/feedApi';
 import { getMemberNoFromToken } from '../../../utils/jwt';
+import { getHomeByMemberNo } from '../../home/api/homeApi';
+import { followMember, unfollowMember } from '../../follow/api/followApi';
 import './FeedDetailPage.css';
 
 dayjs.extend(relativeTime);
@@ -54,6 +56,7 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
   const [isLiked, setIsLiked] = useState(false); // 좋아요 상태
   const [likeCount, setLikeCount] = useState(0); // 좋아요 수
   const [isBookmarked, setIsBookmarked] = useState(false); // 북마크 상태
+  const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -72,6 +75,20 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
         // 댓글 목록 로드
         const commentsData = await getComments(feedNo);
         setComments(commentsData || []);
+
+    // 작성자 팔로우 상태 로드(본인 피드가 아니면)
+    try {
+      const me = getMemberNoFromToken();
+      if (me && data?.memberNo && data.memberNo !== me) {
+        const homeData = await getHomeByMemberNo(data.memberNo, me);
+        setIsFollowingAuthor(Boolean(homeData?.isFollowing ?? homeData?.following));
+      } else {
+        setIsFollowingAuthor(false);
+      }
+    } catch (e) {
+      console.error('작성자 팔로우 상태 조회 실패:', e);
+      setIsFollowingAuthor(false);
+    }
       } catch (err) {
         console.error('피드 상세 조회 오류:', err);
         setError('피드를 불러오는데 실패했습니다.');
@@ -112,6 +129,27 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
     const me = getMemberNoFromToken();
     return me && feed?.memberNo === me;
   })();
+
+  const handleToggleFollowAuthor = async () => {
+    const me = getMemberNoFromToken();
+    const targetMemberNo = feed?.memberNo;
+    if (!me || !targetMemberNo || me === targetMemberNo) return;
+
+    try {
+      const result = isFollowingAuthor
+        ? await unfollowMember(targetMemberNo, me)
+        : await followMember(targetMemberNo, me);
+
+      if (result?.success) {
+        setIsFollowingAuthor(Boolean(result.isFollowing));
+      } else {
+        alert(result?.message || '팔로우 처리에 실패했습니다.');
+      }
+    } catch (e) {
+      console.error('팔로우 처리 실패:', e);
+      alert('팔로우 처리에 실패했습니다.');
+    }
+  };
 
   // 인스타그램 스타일 시간 경과 표시
   const formatTimeAgo = (dateString) => {
@@ -419,20 +457,32 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
           <div className="feed-detail-content-section">
             {/* 헤더 */}
             <div className="feed-detail-header">
-              <div 
-                className="feed-detail-author clickable"
-                onClick={() => feed?.memberNick && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
-              >
-                {feed?.profileImage ? (
-                  <img 
-                    src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
-                    alt="프로필"
-                    className="author-avatar-img"
-                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                  />
-                ) : null}
-                <div className="author-avatar" style={{ display: feed?.profileImage ? 'none' : 'flex' }}>👤</div>
-                <span className="author-nick">{feed?.memberNick || '익명'}</span>
+              <div className="feed-detail-author-row">
+                <div 
+                  className="feed-detail-author clickable"
+                  onClick={() => feed?.memberNick && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                >
+                  {feed?.profileImage ? (
+                    <img 
+                      src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
+                      alt="프로필"
+                      className="author-avatar-img"
+                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                    />
+                  ) : null}
+                  <div className="author-avatar" style={{ display: feed?.profileImage ? 'none' : 'flex' }}>👤</div>
+                  <span className="author-nick">{feed?.memberNick || '익명'}</span>
+                </div>
+
+                {!isOwner && (
+                  <button
+                    type="button"
+                    className="follow-text-btn"
+                    onClick={handleToggleFollowAuthor}
+                  >
+                    {isFollowingAuthor ? '팔로잉' : '팔로우'}
+                  </button>
+                )}
               </div>
               {isModal && (
                 <button
@@ -473,7 +523,7 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                       {feed?.memberNick || '익명'}
                     </span>
                     <span className="comment-text-inline">
-                      {feed?.content ? renderTextWithTags(feed.content) : '내용 없음'}
+                      {feed?.content ? renderTextWithTags(feed.content) : ''}
                     </span>
                   </div>
                   {/* 태그 영역 - 인스타그램처럼 내용 아래 노출 */}

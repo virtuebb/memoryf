@@ -45,12 +45,19 @@ public class FeedController {
 	@GetMapping("")
 	public HashMap<String, Object> selectFeedList(
 			@RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
-			@RequestParam(value = "memberNo", required = false) Integer memberNo) {
+			@RequestParam(value = "memberNo", required = false) Integer memberNo,
+			@RequestParam(value = "page", required = false) Integer page,
+			@RequestParam(value = "size", required = false) Integer size) {
 		
 		HashMap<String, Object> response = new HashMap<>();
 		
 		try {
-			ArrayList<Feed> feedList = feedService.selectFeedList(sortBy, memberNo);
+			ArrayList<Feed> feedList;
+			if (page != null && size != null) {
+				feedList = feedService.selectFeedList(sortBy, memberNo, page, size);
+			} else {
+				feedList = feedService.selectFeedList(sortBy, memberNo);
+			}
 			System.out.println("피드 목록 조회 결과: " + (feedList != null ? feedList.size() + "개" : "null"));
 			if (feedList != null && !feedList.isEmpty()) {
 				System.out.println("첫 번째 피드: " + feedList.get(0).toString());

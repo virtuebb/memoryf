@@ -25,6 +25,22 @@ public class FeedDao {
 		
 		return new ArrayList<>(sqlSession.selectList("feedMapper.selectFeedList", params));
 	}
+
+	/**
+	 * 피드 목록 조회 (페이지네이션)
+	 */
+	public ArrayList<Feed> selectFeedList(SqlSession sqlSession, String sortBy, Integer memberNo, int page, int size) {
+		HashMap<String, Object> params = new HashMap<>();
+		params.put("sortBy", sortBy);
+		params.put("memberNo", memberNo);
+
+		int startRow = (page * size) + 1;
+		int endRow = (page + 1) * size;
+		params.put("startRow", startRow);
+		params.put("endRow", endRow);
+
+		return new ArrayList<>(sqlSession.selectList("feedMapper.selectFeedList", params));
+	}
 	
 	/**
 	 * 피드 상세 조회

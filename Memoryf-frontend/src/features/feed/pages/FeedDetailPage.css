@@ -215,6 +215,26 @@
   gap: 12px;
 }
 
+.feed-detail-author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.follow-text-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: #0095f6;
+  font-weight: 600;
+}
+
+.follow-text-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* 인스타 상단 점점점 메뉴 버튼 */
 .feed-header-menu-btn {
   background: none;

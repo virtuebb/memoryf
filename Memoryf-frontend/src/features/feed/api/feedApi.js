@@ -28,10 +28,10 @@ feedApi.interceptors.request.use((config) => {
  * @param {string} sortBy - 정렬 기준 ('popular' | 'following' | 'recent')
  * @returns {Promise} 피드 목록 데이터
  */
-export const getFeedList = async (sortBy = 'recent') => {
+export const getFeedList = async (sortBy = 'recent', page = 0, size = 18) => {
   try {
     const memberNo = getMemberNoFromToken();
-    const params = { sortBy };
+    const params = { sortBy, page, size };
     if (memberNo) params.memberNo = memberNo;
 
     const response = await feedApi.get('', {
@@ -61,7 +61,7 @@ export const getFeedList = async (sortBy = 'recent') => {
     // 네트워크 오류 상세 정보 로깅
     if (error.code === 'ERR_NETWORK') {
       console.error('네트워크 오류: 백엔드 서버가 실행 중인지 확인하세요.');
-      console.error('요청 URL:', `${feedApi.defaults.baseURL}?sortBy=${sortBy}`);
+      console.error('요청 URL:', `${feedApi.defaults.baseURL}?sortBy=${sortBy}&page=${page}&size=${size}`);
     } else if (error.response) {
       // 서버 응답이 있는 경우
       console.error('서버 응답 오류:', error.response.status, error.response.data);

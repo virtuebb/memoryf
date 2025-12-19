@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="followMapper">
+
+	<select id="checkFollow" parameterType="hashmap" resultType="_int">
+		SELECT COUNT(*)
+		FROM TB_FOLLOWS
+		WHERE MEMBER_NO = #{memberNo}
+		AND HOME_NO = #{homeNo}
+	</select>
+
+	<insert id="insertFollow" parameterType="hashmap">
+		INSERT INTO TB_FOLLOWS (MEMBER_NO, HOME_NO)
+		VALUES (#{memberNo}, #{homeNo})
+	</insert>
+
+	<delete id="deleteFollow" parameterType="hashmap">
+		DELETE FROM TB_FOLLOWS
+		WHERE MEMBER_NO = #{memberNo}
+		AND HOME_NO = #{homeNo}
+	</delete>
+
+	<!-- 팔로워 목록: 특정 memberNo의 홈을 팔로우하는 회원 목록 -->
+	<select id="selectFollowers" parameterType="hashmap" resultType="hashmap">
+		SELECT *
+		FROM (
+			SELECT
+				FM.MEMBER_NO AS "memberNo",
+				FM.MEMBER_NICK AS "memberNick",
+				FH.PROFILE_CHANGE_NAME AS "profileChangeName"
+				<if test="currentMemberNo != null">
+					, CASE WHEN CF.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS "isFollowing"
+				</if>
+				, ROW_NUMBER() OVER (ORDER BY FM.MEMBER_NICK ASC) AS RN
+			FROM TB_MEMBER_HOME TH
+			JOIN TB_FOLLOWS F ON F.HOME_NO = TH.HOME_NO
+			JOIN TB_MEMBER FM ON FM.MEMBER_NO = F.MEMBER_NO
+			LEFT JOIN TB_MEMBER_HOME FH ON FH.MEMBER_NO = FM.MEMBER_NO
+			<if test="currentMemberNo != null">
+				LEFT JOIN TB_FOLLOWS CF ON CF.MEMBER_NO = #{currentMemberNo} AND CF.HOME_NO = FH.HOME_NO
+			</if>
+			WHERE TH.MEMBER_NO = #{memberNo}
+			<if test="keyword != null and keyword != ''">
+				AND LOWER(FM.MEMBER_NICK) LIKE LOWER(#{keyword}) || '%'
+			</if>
+		)
+		WHERE RN BETWEEN #{startRow} AND #{endRow}
+		ORDER BY RN
+	</select>
+
+	<!-- 팔로잉 목록: 특정 memberNo가 팔로우(구독) 중인 회원 목록 -->
+	<select id="selectFollowing" parameterType="hashmap" resultType="hashmap">
+		SELECT *
+		FROM (
+			SELECT
+				TM.MEMBER_NO AS "memberNo",
+				TM.MEMBER_NICK AS "memberNick",
+				TH.PROFILE_CHANGE_NAME AS "profileChangeName"
+				<if test="currentMemberNo != null">
+					, CASE WHEN CF.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS "isFollowing"
+				</if>
+				, ROW_NUMBER() OVER (ORDER BY TM.MEMBER_NICK ASC) AS RN
+			FROM TB_FOLLOWS F
+			JOIN TB_MEMBER_HOME TH ON TH.HOME_NO = F.HOME_NO
+			JOIN TB_MEMBER TM ON TM.MEMBER_NO = TH.MEMBER_NO
+			<if test="currentMemberNo != null">
+				LEFT JOIN TB_FOLLOWS CF ON CF.MEMBER_NO = #{currentMemberNo} AND CF.HOME_NO = TH.HOME_NO
+			</if>
+			WHERE F.MEMBER_NO = #{memberNo}
+			<if test="keyword != null and keyword != ''">
+				AND LOWER(TM.MEMBER_NICK) LIKE LOWER(#{keyword}) || '%'
+			</if>
+		)
+		WHERE RN BETWEEN #{startRow} AND #{endRow}
+		ORDER BY RN
+	</select>
+
+</mapper>
