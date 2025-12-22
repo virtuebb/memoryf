@@ -66,4 +66,9 @@ public class HomeServiceImpl implements HomeService {
 	public int updateStatusMsg(Home home) {
 		return homeDao.updateStatusMsg(sqlSession, home);
 	}
+
+	@Override
+	public int updatePrivacy(Home home) {
+		return homeDao.updatePrivacy(sqlSession, home);
+	}
 }

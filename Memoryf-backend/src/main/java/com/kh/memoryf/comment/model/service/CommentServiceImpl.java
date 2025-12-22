@@ -9,12 +9,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kh.memoryf.comment.model.dao.CommentDao;
 import com.kh.memoryf.comment.model.vo.Comment;
+import com.kh.memoryf.feed.model.dao.FeedDao;
+import com.kh.memoryf.feed.model.vo.Feed;
+import com.kh.memoryf.notification.model.service.NotificationService;
+import com.kh.memoryf.notification.model.vo.Notification;
 
 @Service
 public class CommentServiceImpl implements CommentService {
 	
 	@Autowired
 	private CommentDao commentDao;
+	
+	@Autowired
+	private FeedDao feedDao;
+	
+	@Autowired
+	private NotificationService notificationService;
 	
 	@Autowired
 	private SqlSessionTemplate sqlSession;
@@ -25,8 +35,24 @@ public class CommentServiceImpl implements CommentService {
 	}
 	
 	@Override
+	@Transactional
 	public int insertComment(Comment comment) {
-		return commentDao.insertComment(sqlSession, comment);
+		int result = commentDao.insertComment(sqlSession, comment);
+		
+		if (result > 0) {
+			// 알림 생성
+			Feed feed = feedDao.selectFeed(sqlSession, comment.getFeedNo(), comment.getWriter());
+			if (feed != null && feed.getMemberNo() != comment.getWriter()) { // 자기 자신 게시물 댓글은 알림 제외
+				Notification noti = new Notification();
+				noti.setReceiverNo(feed.getMemberNo());
+				noti.setSenderNo(comment.getWriter());
+				noti.setType("COMMENT_FEED");
+				noti.setTargetId(comment.getFeedNo());
+				notificationService.createNotification(noti);
+			}
+		}
+		
+		return result;
 	}
 	
 	@Override

@@ -1,10 +1,35 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { getUnreadCount } from '../../features/notification/api/notificationApi';
+import { decodeToken } from '../../utils/jwt';
 import '../css/Sidebar.css';
 
 function Sidebar({ onCreateClick }) {
   const location = useLocation();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      const decoded = decodeToken(token);
+      if (decoded && decoded.memberNo) {
+        fetchUnreadCount(decoded.memberNo);
+      }
+    }
+  }, [location.pathname]); // Update count on navigation
+
+  const fetchUnreadCount = async (memberNo) => {
+    try {
+      const response = await getUnreadCount(memberNo);
+      if (response.success) {
+        setUnreadCount(response.count);
+      }
+    } catch (error) {
+      console.error("Failed to fetch unread count", error);
+    }
+  };
 
   return (
     <nav className="sidebar">
@@ -41,11 +66,12 @@ function Sidebar({ onCreateClick }) {
           </Link>
         </li>
 
-        <li>
-          <span>
-            <span className="icon">🖼</span>
-            Album
-          </span>
+        <li className={isActive('/notifications') ? 'active' : ''}>
+          <Link to="/notifications" className="notification-link">
+            <span className="icon">❤️</span>
+            Notifications
+            {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
+          </Link>
         </li>
 
         {/* SYSTEM */}

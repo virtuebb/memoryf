@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getLikedFeeds, getCommentedFeeds, toggleLike } from '../api/activityApi';
+import { getAccountHistory } from '../api/historyApi';
 import { deleteComment } from '../../feed/api/feedApi';
 import { getMemberNoFromToken } from '../../../utils/jwt';
 import '../css/ActivitySection.css';
+import '../css/HistoryStyles.css';
 
 function ActivitySection() {
   const navigate = useNavigate();
@@ -11,6 +13,7 @@ function ActivitySection() {
   const [activeSidebar, setActiveSidebar] = useState('interactions');
   const [activeTab, setActiveTab] = useState('likes');
   const [items, setItems] = useState([]); // Renamed from feeds to items
+  const [historyItems, setHistoryItems] = useState([]); // 계정 내역 아이템
   const [loading, setLoading] = useState(false);
   
   // 선택 모드 및 선택된 아이템 (feedNo 또는 commentNo)
@@ -63,11 +66,15 @@ function ActivitySection() {
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
   useEffect(() => {
-    if (activeSidebar === 'interactions' && memberNo) {
-      fetchItems();
-      // 탭 변경 시 선택 모드 초기화
-      setIsSelectionMode(false);
-      setSelectedItems(new Set());
+    if (memberNo) {
+      if (activeSidebar === 'interactions') {
+        fetchItems();
+        // 탭 변경 시 선택 모드 초기화
+        setIsSelectionMode(false);
+        setSelectedItems(new Set());
+      } else if (activeSidebar === 'history') {
+        fetchHistory();
+      }
     }
   }, [activeSidebar, activeTab, filter, memberNo]);
 
@@ -90,6 +97,24 @@ function ActivitySection() {
       setItems(data.list || []);
     } catch (error) {
       console.error('데이터 로딩 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchHistory = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        memberNo,
+        sortBy: filter.sortBy === 'recent' ? 'newest' : 'oldest',
+        startDate: filter.startDate,
+        endDate: filter.endDate
+      };
+      const data = await getAccountHistory(params);
+      setHistoryItems(data.list || []);
+    } catch (error) {
+      console.error('계정 내역 로딩 실패:', error);
     } finally {
       setLoading(false);
     }
@@ -339,9 +364,60 @@ function ActivitySection() {
       );
     } else if (activeSidebar === 'history') {
       return (
-        <div className="empty-state">
-          <p>계정 내역이 없습니다.</p>
-        </div>
+        <>
+          <div className="activity-content-header">
+            <h2>계정 내역 정보</h2>
+            <p className="activity-desc">계정을 만든 이후 변경한 사항을 검토해보세요.</p>
+            <div className="activity-filters">
+              <div className="sort-filter-btn" onClick={handleOpenModal}>
+                {filter.sortBy === 'recent' ? '최신순' : '오래된 순'}
+                <span className="filter-icon">⇅</span>
+              </div>
+              <button className="filter-btn" onClick={handleOpenModal}>정렬 및 필터</button>
+            </div>
+          </div>
+
+          <div className="history-list">
+            {loading ? (
+              <div className="loading-state">로딩 중...</div>
+            ) : historyItems.length > 0 ? (
+              historyItems.map((item) => {
+                const date = new Date(item.eventDate);
+                const dateStr = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+                
+                let icon = 'ℹ️';
+                let title = '정보 변경';
+                
+                switch(item.eventType) {
+                  case 'CREATE': icon = '🎉'; title = '계정 생성됨'; break;
+                  case 'PASSWORD': icon = '🔒'; title = '비밀번호 변경'; break;
+                  case 'NICKNAME': icon = '👤'; title = '닉네임 변경'; break;
+                  case 'EMAIL': icon = '📧'; title = '이메일 변경'; break;
+                  case 'BIO': icon = '📝'; title = '소개글 변경'; break;
+                  case 'PRIVACY': icon = '👁️'; title = '공개 범위 변경'; break;
+                  default: break;
+                }
+
+                return (
+                  <div key={item.historyNo} className="history-item">
+                    <div className="history-icon-wrapper">
+                      <span className="history-icon">{icon}</span>
+                    </div>
+                    <div className="history-info">
+                      <div className="history-title">{title}</div>
+                      <div className="history-desc">{item.eventDesc}</div>
+                      <div className="history-date">{dateStr}</div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="empty-state">
+                <p>계정 내역이 없습니다.</p>
+              </div>
+            )}
+          </div>
+        </>
       );
     }
   };

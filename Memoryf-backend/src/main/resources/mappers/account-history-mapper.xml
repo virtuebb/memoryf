@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="accountHistoryMapper">
+
+	<resultMap id="accountHistoryResultSet" type="accountHistory">
+		<id column="HISTORY_NO" property="historyNo" />
+		<result column="MEMBER_NO" property="memberNo" />
+		<result column="EVENT_TYPE" property="eventType" />
+		<result column="EVENT_DESC" property="eventDesc" />
+		<result column="EVENT_DATE" property="eventDate" />
+	</resultMap>
+
+	<!-- 계정 내역 추가 -->
+	<insert id="insertAccountHistory" parameterType="accountHistory">
+		INSERT INTO TB_ACCOUNT_HISTORY (
+			HISTORY_NO,
+			MEMBER_NO,
+			EVENT_TYPE,
+			EVENT_DESC,
+			EVENT_DATE
+		) VALUES (
+			SEQ_HISTORY_NO.NEXTVAL,
+			#{memberNo},
+			#{eventType},
+			#{eventDesc},
+			SYSDATE
+		)
+	</insert>
+
+	<!-- 계정 내역 조회 -->
+	<select id="selectAccountHistoryList" parameterType="map" resultMap="accountHistoryResultSet">
+		SELECT *
+		FROM TB_ACCOUNT_HISTORY
+		WHERE MEMBER_NO = #{memberNo}
+		<if test="startDate != null and startDate != ''">
+			AND EVENT_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND EVENT_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+		</if>
+		ORDER BY 
+		<choose>
+			<when test="sortBy == 'oldest'">EVENT_DATE ASC</when>
+			<otherwise>EVENT_DATE DESC</otherwise>
+		</choose>
+	</select>
+
+</mapper>

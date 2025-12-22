@@ -7,11 +7,19 @@
 		FROM TB_FOLLOWS
 		WHERE MEMBER_NO = #{memberNo}
 		AND HOME_NO = #{homeNo}
+		AND STATUS = 'Y'
+	</select>
+	
+	<select id="checkFollowStatus" parameterType="hashmap" resultType="string">
+		SELECT STATUS
+		FROM TB_FOLLOWS
+		WHERE MEMBER_NO = #{memberNo}
+		AND HOME_NO = #{homeNo}
 	</select>
 
 	<insert id="insertFollow" parameterType="hashmap">
-		INSERT INTO TB_FOLLOWS (MEMBER_NO, HOME_NO)
-		VALUES (#{memberNo}, #{homeNo})
+		INSERT INTO TB_FOLLOWS (MEMBER_NO, HOME_NO, STATUS)
+		VALUES (#{memberNo}, #{homeNo}, #{status})
 	</insert>
 
 	<delete id="deleteFollow" parameterType="hashmap">
@@ -19,6 +27,13 @@
 		WHERE MEMBER_NO = #{memberNo}
 		AND HOME_NO = #{homeNo}
 	</delete>
+
+	<update id="updateFollowStatus" parameterType="hashmap">
+		UPDATE TB_FOLLOWS
+		SET STATUS = #{status}
+		WHERE MEMBER_NO = #{memberNo}
+		AND HOME_NO = #{homeNo}
+	</update>
 
 	<!-- 팔로워 목록: 특정 memberNo의 홈을 팔로우하는 회원 목록 -->
 	<select id="selectFollowers" parameterType="hashmap" resultType="hashmap">
@@ -33,11 +48,11 @@
 				</if>
 				, ROW_NUMBER() OVER (ORDER BY FM.MEMBER_NICK ASC) AS RN
 			FROM TB_MEMBER_HOME TH
-			JOIN TB_FOLLOWS F ON F.HOME_NO = TH.HOME_NO
+			JOIN TB_FOLLOWS F ON F.HOME_NO = TH.HOME_NO AND F.STATUS = 'Y'
 			JOIN TB_MEMBER FM ON FM.MEMBER_NO = F.MEMBER_NO
 			LEFT JOIN TB_MEMBER_HOME FH ON FH.MEMBER_NO = FM.MEMBER_NO
 			<if test="currentMemberNo != null">
-				LEFT JOIN TB_FOLLOWS CF ON CF.MEMBER_NO = #{currentMemberNo} AND CF.HOME_NO = FH.HOME_NO
+				LEFT JOIN TB_FOLLOWS CF ON CF.MEMBER_NO = #{currentMemberNo} AND CF.HOME_NO = FH.HOME_NO AND CF.STATUS = 'Y'
 			</if>
 			WHERE TH.MEMBER_NO = #{memberNo}
 			<if test="keyword != null and keyword != ''">
@@ -64,9 +79,10 @@
 			JOIN TB_MEMBER_HOME TH ON TH.HOME_NO = F.HOME_NO
 			JOIN TB_MEMBER TM ON TM.MEMBER_NO = TH.MEMBER_NO
 			<if test="currentMemberNo != null">
-				LEFT JOIN TB_FOLLOWS CF ON CF.MEMBER_NO = #{currentMemberNo} AND CF.HOME_NO = TH.HOME_NO
+				LEFT JOIN TB_FOLLOWS CF ON CF.MEMBER_NO = #{currentMemberNo} AND CF.HOME_NO = TH.HOME_NO AND CF.STATUS = 'Y'
 			</if>
 			WHERE F.MEMBER_NO = #{memberNo}
+			AND F.STATUS = 'Y'
 			<if test="keyword != null and keyword != ''">
 				AND LOWER(TM.MEMBER_NICK) LIKE LOWER(#{keyword}) || '%'
 			</if>

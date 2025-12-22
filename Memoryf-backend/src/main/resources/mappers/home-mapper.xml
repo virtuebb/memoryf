@@ -21,6 +21,7 @@
 			NVL(FOLLOWING_CNT.FOLLOWING_COUNT, 0) AS FOLLOWING_COUNT
 			<if test="currentMemberNo != null">
 				, CASE WHEN FLW.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_FOLLOWING
+				, FLW.STATUS AS FOLLOW_STATUS
 			</if>
 		FROM TB_MEMBER_HOME H
 		LEFT JOIN TB_MEMBER M ON H.MEMBER_NO = M.MEMBER_NO
@@ -33,11 +34,13 @@
 		LEFT JOIN (
 			SELECT HOME_NO, COUNT(*) AS FOLLOWER_COUNT
 			FROM TB_FOLLOWS
+			WHERE STATUS = 'Y'
 			GROUP BY HOME_NO
 		) FOLLOWER_CNT ON H.HOME_NO = FOLLOWER_CNT.HOME_NO
 		LEFT JOIN (
 			SELECT MEMBER_NO, COUNT(*) AS FOLLOWING_COUNT
 			FROM TB_FOLLOWS
+			WHERE STATUS = 'Y'
 			GROUP BY MEMBER_NO
 		) FOLLOWING_CNT ON H.MEMBER_NO = FOLLOWING_CNT.MEMBER_NO
 		<if test="currentMemberNo != null">
@@ -144,6 +147,13 @@
 		WHERE MEMBER_NO = #{memberNo}
 	</update>
 
+	<!-- 계정 공개 범위 업데이트 -->
+	<update id="updatePrivacy" parameterType="home">
+		UPDATE TB_MEMBER_HOME
+		SET IS_PRIVATE_PROFILE = #{isPrivateProfile}
+		WHERE MEMBER_NO = #{memberNo}
+	</update>
+
 	<!-- ResultMap: Home -->
 	<resultMap type="home" id="homeResultMap">
 		<id property="homeNo" column="HOME_NO"/>
@@ -161,6 +171,7 @@
 		<result property="followerCount" column="FOLLOWER_COUNT"/>
 		<result property="followingCount" column="FOLLOWING_COUNT"/>
 		<result property="isFollowing" column="IS_FOLLOWING"/>
+		<result property="followStatus" column="FOLLOW_STATUS"/>
 	</resultMap>
 
 	<!-- ResultMap: Guestbook -->

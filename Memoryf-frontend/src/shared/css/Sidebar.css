@@ -50,6 +50,25 @@
     border-color 0.15s ease;
 }
 
+.notification-link {
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background-color: #ff3b30;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+  min-width: 18px;
+  text-align: center;
+}
+
+
 /* =========================
    아이콘 영역 "칩" (허전함 해결 핵심)
    - 메뉴 안에 첫 번째 요소(아이콘)를 감싸는 span이 있다면 적용

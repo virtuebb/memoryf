@@ -84,7 +84,7 @@ function SettingsPage() {
             </button>
 
             <button className={activeTab === "preferences" ? "active" : ""} onClick={() => handleTabClick("preferences")}>
-              환경 설정
+              계정 공개 범위
             </button>
 
             {/* 로그아웃 버튼 추가 */}

@@ -121,4 +121,14 @@ public class HomeDao {
 	public int updateStatusMsg(SqlSessionTemplate sqlSession, Home home) {
 		return sqlSession.update("homeMapper.updateStatusMsg", home);
 	}
+
+	/**
+	 * 계정 공개 범위 업데이트
+	 * @param sqlSession
+	 * @param home
+	 * @return int
+	 */
+	public int updatePrivacy(SqlSessionTemplate sqlSession, Home home) {
+		return sqlSession.update("homeMapper.updatePrivacy", home);
+	}
 }

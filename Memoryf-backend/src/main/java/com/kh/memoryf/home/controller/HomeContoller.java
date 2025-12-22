@@ -22,6 +22,7 @@ import com.kh.memoryf.guestbook.model.vo.Guestbook;
 import com.kh.memoryf.home.model.service.HomeService;
 import com.kh.memoryf.home.model.vo.Home;
 import com.kh.memoryf.member.model.service.MemberService;
+import com.kh.memoryf.member.model.vo.AccountHistory;
 import com.kh.memoryf.member.model.vo.Member;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -268,6 +269,13 @@ public class HomeContoller {
 			int result = homeService.updateProfileImage(home);
 			
 			if (result > 0) {
+				// 계정 내역 저장
+				AccountHistory history = new AccountHistory();
+				history.setMemberNo(memberNo);
+				history.setEventType("UPDATE");
+				history.setEventDesc("프로필 사진을 변경했습니다.");
+				memberService.insertAccountHistory(history);
+				
 				response.put("success", true);
 				response.put("message", "프로필 이미지가 업데이트되었습니다.");
 				response.put("profileChangeName", changeName);
@@ -318,6 +326,51 @@ public class HomeContoller {
 		} catch (Exception e) {
 			response.put("success", false);
 			response.put("message", "프로필 업데이트 실패: " + e.getMessage());
+		}
+		
+		return response;
+	}
+
+	/**
+	 * 계정 공개 범위 수정 (RESTful: PUT /home/{memberNo}/privacy)
+	 * @param memberNo 회원 번호
+	 * @param request 요청 본문 (isPrivate)
+	 * @return 수정 결과
+	 */
+	@PutMapping("/{memberNo}/privacy")
+	public HashMap<String, Object> updatePrivacy(
+			@PathVariable("memberNo") int memberNo,
+			@RequestBody HashMap<String, Object> request) {
+		
+		HashMap<String, Object> response = new HashMap<>();
+		
+		try {
+			boolean isPrivate = (boolean) request.get("isPrivate");
+			String isPrivateStr = isPrivate ? "Y" : "N";
+			
+			Home home = new Home();
+			home.setMemberNo(memberNo);
+			home.setIsPrivateProfile(isPrivateStr);
+			
+			int result = homeService.updatePrivacy(home);
+			
+			if (result > 0) {
+				// 계정 내역 저장
+				AccountHistory history = new AccountHistory();
+				history.setMemberNo(memberNo);
+				history.setEventType("PRIVACY");
+				history.setEventDesc(isPrivate ? "계정을 비공개로 전환했습니다." : "계정을 공개로 전환했습니다.");
+				memberService.insertAccountHistory(history);
+				
+				response.put("success", true);
+				response.put("message", "계정 공개 범위가 변경되었습니다.");
+			} else {
+				response.put("success", false);
+				response.put("message", "계정 공개 범위 변경에 실패했습니다.");
+			}
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "계정 공개 범위 변경 실패: " + e.getMessage());
 		}
 		
 		return response;

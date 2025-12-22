@@ -31,4 +31,5 @@ public class Home {
 	private int followerCount;          // 팔로워 수
 	private int followingCount;         // 팔로잉 수
 	private boolean isFollowing;        // 현재 사용자가 팔로우 했는지 여부
+	private String followStatus;        // 팔로우 상태 (Y: 팔로우 중, P: 요청 중, N: 팔로우 안함)
 }

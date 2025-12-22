@@ -52,7 +52,27 @@
 						<if test="memberNo != null">
 							LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{memberNo}
 						</if>
+						LEFT JOIN TB_MEMBER_HOME MH_CHECK ON F.MEMBER_NO = MH_CHECK.MEMBER_NO
 						WHERE F.IS_DEL = 'N'
+						<if test="memberNo == null">
+							AND MH_CHECK.IS_PRIVATE_PROFILE = 'N'
+						</if>
+						<if test="memberNo != null">
+							AND (
+								MH_CHECK.IS_PRIVATE_PROFILE = 'N'
+								OR F.MEMBER_NO = #{memberNo}
+								OR (
+									MH_CHECK.IS_PRIVATE_PROFILE = 'Y'
+									AND EXISTS (
+										SELECT 1
+										FROM TB_FOLLOWS FLW
+										WHERE FLW.MEMBER_NO = #{memberNo}
+										AND FLW.HOME_NO = MH_CHECK.HOME_NO
+										AND FLW.STATUS = 'Y'
+									)
+								)
+							)
+						</if>
 						<if test="targetMemberNo != null">
 							AND F.MEMBER_NO = #{targetMemberNo}
 						</if>
@@ -102,7 +122,27 @@
 				<if test="memberNo != null">
 					LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{memberNo}
 				</if>
+				LEFT JOIN TB_MEMBER_HOME MH_CHECK ON F.MEMBER_NO = MH_CHECK.MEMBER_NO
 				WHERE F.IS_DEL = 'N'
+				<if test="memberNo == null">
+					AND MH_CHECK.IS_PRIVATE_PROFILE = 'N'
+				</if>
+				<if test="memberNo != null">
+					AND (
+						MH_CHECK.IS_PRIVATE_PROFILE = 'N'
+						OR F.MEMBER_NO = #{memberNo}
+						OR (
+							MH_CHECK.IS_PRIVATE_PROFILE = 'Y'
+							AND EXISTS (
+								SELECT 1
+								FROM TB_FOLLOWS FLW
+								WHERE FLW.MEMBER_NO = #{memberNo}
+								AND FLW.HOME_NO = MH_CHECK.HOME_NO
+								AND FLW.STATUS = 'Y'
+							)
+						)
+					)
+				</if>
 				<if test="targetMemberNo != null">
 					AND F.MEMBER_NO = #{targetMemberNo}
 				</if>

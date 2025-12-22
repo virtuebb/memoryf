@@ -29,6 +29,7 @@ import FloatingDm from './features/dm/components/FloatingDm';
 import Chat from './features/dm/components/Chat';
 import { DmProvider } from './features/dm/context/DmContext';
 import DiaryPage from "./features/diary/pages/DiaryPage";
+import NotificationPage from './features/notification/pages/NotificationPage';
 
 // 로그인, 회원가입
 import LoginPage from './features/auth/pages/LoginPage';
@@ -162,6 +163,7 @@ function App() {
               <Route path="/chat-test" element={<Chat />} />
               <Route path="/settings/*" element={<SettingsPage />} />
               <Route path="/diary" element={<DiaryPage />} />
+              <Route path="/notifications" element={<NotificationPage />} />
               <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
 

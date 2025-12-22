@@ -58,4 +58,11 @@ public interface HomeService {
 	 * @return int
 	 */
 	int updateStatusMsg(Home home);
+
+	/**
+	 * 계정 공개 범위 업데이트
+	 * @param home
+	 * @return int
+	 */
+	int updatePrivacy(Home home);
 }
