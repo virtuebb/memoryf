@@ -43,19 +43,7 @@ public class DmController {
     }
     */
 
-    // ===============================
-    // 1️⃣ 단체 채팅 (채팅방)
-    // ===============================
-    // 이 메서드는 방에 있는 모든 사람에게 메시지를 보내.
-    @MessageMapping("/chat/room/{roomId}")
-    @SendTo("/sub/chat/room/{roomId}")
-    public Dm roomChat(
-            @DestinationVariable String roomId,
-            Dm message) {
-
-        return message;
-    }
-
+    
     // ===============================
     // 2️⃣ 1:1 채팅
     // ===============================
@@ -64,22 +52,44 @@ public class DmController {
     public void privateChat(Dm message) {
 
         // 🔥 사용자 전용 채널로 직접 전송
-        System.out.println("📨 메시지 수신: " + message.getContent() + " to " + message.getSender());
-        messagingTemplate.convertAndSend(
-                "/sub/private/" + message.getRoomId(), // 받는 사람 ID
-                message
-        );
+        // System.out.println("📨 메시지 수신: " + message);
+        // 우선적으로 recipientId 필드를 사용하고, 없으면 기존 roomId(레거시) 사용
+        String recipient = message.getRecipientId() != null ? message.getRecipientId() : message.getRoomId();
+
+        System.out.println("➡️ 대상(recipient): " + recipient + " , roomNo: " + message.getRoomNo());
+
+        // -- 서버에서 메시지 저장하도록 함 (클라이언트가 별도 REST 호출하지 않아도 DB에 저장)
+        try {
+            if (message.getRoomNo() != null && message.getSender() != null && message.getContent() != null) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("roomNo", message.getRoomNo());
+                map.put("senderId", message.getSender());
+                map.put("content", message.getContent());
+                dmService.insertMessage(map);
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ 메시지 DB 저장 실패: " + e.getMessage());
+        }
+
+        // 1) 기존 구독 경로로 발송
+        messagingTemplate.convertAndSend("/sub/private/" + recipient, message);
+        // 2) Spring의 user destination으로도 발송(구독 방식에 따라 수신 보장)
+        try {
+            messagingTemplate.convertAndSendToUser(recipient, "/queue/private", message);
+        } catch (Exception e) {
+            System.err.println("⚠️ convertAndSendToUser 실패: " + e.getMessage());
+        }
     }
 
     // DM 방 목록 조회 (userId로 채팅방 목록 조회)
     @GetMapping("/rooms/{userId}")
     public ArrayList<DmRoom> selectDmRoomList(@PathVariable String userId) {
 
-        System.out.println("📡 채팅방 조회 요청 - userId: " + userId);
+        // System.out.println("📡 채팅방 조회 요청 - userId: " + userId);
 
         ArrayList<DmRoom> list = dmService.selectDmRoomList(userId);
 
-        System.out.println("✅ 조회된 채팅방 목록: " + list);
+        // System.out.println("✅ 조회된 채팅방 목록: " + list);
 
         return list;
     }
@@ -88,60 +98,79 @@ public class DmController {
     // @RequestBody는 JSON을 자바 객체로 매핑해주는 것이지, JSON 내부 필드를 자동 추출해주는 게 아님
     // 그래서 외부 클래스를 하나 만들어서 jackson 라이브러리가 자동으로 json을 파싱하고 DmRoomRequset 객체를 생성하고 JSON의 targetuserId 키의 값우루 객체의 targetUserId 필드에 매핑
     @PostMapping("insertRoom")
-    public String insertRoom(@RequestBody DmRoomRequest request) {
+    public Map<String, Object> insertRoom(@RequestBody DmRoomRequest request) {
 
         String targetUserId = request.getTargetUserId();
         String userId = request.getUserId();
 
-        // System.out.println("targetUserId: " + request.getTargetUserId());
-        // System.out.println("userId: " + request.getUserId());
+        // System.out.println(targetUserId);
+        // System.out.println(userId);
 
+        int roomNo = dmService.insertRoom(targetUserId, userId);
 
-        return (dmService.insertRoom(targetUserId, userId) > 0) ? "채팅방 추가 성공" : "체팅방 추가 실패";
+        int sender  = dmService.insertParticipantSender(roomNo, targetUserId, userId);
+        int reciever = dmService.insertParticipantReciever(roomNo, targetUserId, userId);
+
+        // System.out.println(sender);
+        // System.out.println(reciever);
+
+        Map<String, Object> resp = new HashMap<>();
+        if (roomNo > 0) {
+            resp.put("roomNo", roomNo);
+            resp.put("roomName", targetUserId);
+            resp.put("targetUserId", targetUserId);
+            resp.put("message", "채팅방 추가 성공");
+        } else {
+            resp.put("roomNo", 0);
+            resp.put("message", "채팅방 추가 실패");
+        }
+
+        return resp;
 
     }
 
     // DM 메세지 조회
     // 같은 방을 기준으로 내가 보낸거랑 상대가 보낸거를 전부 조회해야됨
-    @PostMapping("{roomId}/select")
+    @PostMapping("{roomNo}/select")
     public ArrayList<DmMessage> selectMessage(@RequestBody DmRoomRequest request) {
         
-        int roomId = request.getRoomId();
+        int roomNo = request.getRoomNo();
         String senderId = request.getSenderId();
 
         Map<String, Object> map = new HashMap<String,Object>();
 
-        map.put("roomId", roomId);
+        map.put("roomNo", roomNo);
         map.put("senderId", senderId);
 
         ArrayList<DmMessage> list = dmService.selectMessage(map);
 
-        System.out.println("📥 조회된 메시지 목록: " + list);
+        // System.out.println("📥 조회된 메시지 목록: " + list);
 
         return list;
 
     }
     
     // DM 메세지 저장
-    @PostMapping("{roomId}/insert")
+    @PostMapping("{roomNo}/insert")
     public int insertMessage(@RequestBody DmRoomRequest request) {
 
-        int roomId = request.getRoomId();
+        int roomNo = request.getRoomNo();
         String senderId = request.getSenderId();
         String content = request.getContent();
 
         Map<String, Object> map = new HashMap<String,Object>();
 
-        map.put("roomId", roomId);
+        map.put("roomNo", roomNo);
         map.put("senderId", senderId);
         map.put("content", content);
 
+
+
+        System.out.println("roomNo : " + roomNo);
+        System.out.println("senderId : " + senderId);
+        System.out.println("content : " + content);
+
         return dmService.insertMessage(map);
-
-
-        // System.out.println("roomId : " + roomId);
-        // System.out.println("senderId : " + senderId);
-        // System.out.println("content : " + content);
 
 
     }

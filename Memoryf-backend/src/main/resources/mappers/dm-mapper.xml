@@ -7,6 +7,7 @@
 	
 	<resultMap id="dmResultSet" type="dmRoom">
 		<id column="ROOM_NO" property="roomNo" />
+		<result column="CREATE_DATE" property="createDate" />
 		<result column="ROOM_NAME" property="roomName" />
 		<!-- <result column="MEMBER_PWD" property="memberPwd" />
 		<result column="MEMBER_NAME" property="memberName" />
@@ -24,24 +25,60 @@
 	
 	<!-- Dm 방 조회용 쿼리 -->
 	<select id="selectDmRoomList" parameterType="string" resultMap="dmResultSet">
-		SELECT ROOM_NO
-			 , ROOM_NAME
-		  FROM TB_DM_ROOM
-		 WHERE ROOM_TYPE = 'PRIVATE'
-		   AND IS_DEL = 'N'
-		   AND MEMBER_ID = #{userId}
+		SELECT r.ROOM_NO,
+			   p2.MEMBER_ID AS DISPLAY_NAME,
+			   MEMBER_NAME AS ROOM_NAME
+		  FROM TB_DM_ROOM r
+		  JOIN TB_DM_PARTICIPANT p1 ON r.ROOM_NO = p1.ROOM_NO
+		  JOIN TB_DM_PARTICIPANT p2 ON r.ROOM_NO = p2.ROOM_NO
+		  JOIN TB_MEMBER m ON m.MEMBER_ID = p2.MEMBER_ID
+		 WHERE p1.MEMBER_ID = #{userId}
+		   AND p2.MEMBER_ID != #{userId}
+
 	</select>
 
 	<!-- 새로운 DM 방 생성용 쿼리 -->
-	<insert id="insertRoom" parameterType="map">
+	<!-- selectKey로 시퀀스 값을 먼저 가져와 parameter의 roomNo에 설정하고 그걸 반환할 수 있음-->
+	<insert id="insertRoom" parameterType="map" useGeneratedKeys="false">
+		<selectKey keyProperty="roomNo" order="BEFORE" resultType="int">
+			SELECT SEQ_DM_ROOM_NO.NEXTVAL FROM DUAL
+		</selectKey>
 		INSERT INTO TB_DM_ROOM(
-						  ROOM_NO
-						, ROOM_NAME
-						, MEMBER_ID)
-               VALUES(
-						  SEQ_DM_ROOM_NO.NEXTVAL
-						, #{targetUserId}
-						, #{userId})
+					  ROOM_NO)
+		       VALUES(
+					  #{roomNo})
+	</insert>
+
+	<!-- 새로운 방에 참여자(발신자) 정보 삽입용 쿼리 -->
+	<insert id="insertParticipantSender" parameterType="map">
+		INSERT INTO TB_DM_PARTICIPANT (
+					ROOM_NO,
+					MEMBER_ID,
+					LAST_READ_MESSAGE_NO,
+					JOINED_AT
+				)
+				VALUES (
+					#{roomNo},
+					#{userId},
+					NULL,
+					SYSDATE
+				)
+	</insert>
+	
+	<!-- 새로운 방에 참여자(발신자) 정보 삽입용 쿼리 -->
+	<insert id="insertParticipantReciever" parameterType="map">
+		INSERT INTO TB_DM_PARTICIPANT (
+					ROOM_NO,
+					MEMBER_ID,
+					LAST_READ_MESSAGE_NO,
+					JOINED_AT
+				)
+				VALUES (
+					#{roomNo},
+					#{targetUserId},
+					NULL,
+					SYSDATE
+				)
 	</insert>
 	
 	<!-- 메세지 저장용 쿼리 -->
@@ -51,7 +88,7 @@
                         , SENDER_ID
                         , CONTENT)
 				VALUES(SEQ_DM_MESSAGE_NO.NEXTVAL
-						, #{roomId}
+						, #{roomNo}
 						, #{senderId}
 						, #{content})
 	</insert>
@@ -64,7 +101,7 @@
 		     , CONTENT
 		     , CREATE_DATE
 		  FROM TB_DM_MESSAGE
-		 WHERE ROOM_NO = #{roomId}
+		 WHERE ROOM_NO = #{roomNo}
 		   AND IS_DEL = 'N'
 		 ORDER BY CREATE_DATE ASC
 	</select>

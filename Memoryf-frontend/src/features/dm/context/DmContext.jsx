@@ -131,9 +131,14 @@ export function DmProvider({ children }) {
           // 내게 오는 메시지 구독
           stompClient.subscribe(`/sub/private/${myUserId}`, (msg) => {
             const data = JSON.parse(msg.body);
-            console.log('📩 메시지 수신:', data);
-            
+            console.log('📩 /sub 메시지 수신:', data);
             // 받은 메시지를 해당 채팅방에 추가
+            handleReceiveMessage(data);
+          });
+          // Spring의 user destination으로 발송된 메시지도 받기 위해 별도 구독
+          stompClient.subscribe('/user/queue/private', (msg) => {
+            const data = JSON.parse(msg.body);
+            console.log('📩 /user/queue 메시지 수신:', data);
             handleReceiveMessage(data);
           });
         },
@@ -182,7 +187,7 @@ export function DmProvider({ children }) {
    */
   const handleReceiveMessage = useCallback((data) => {
     // data = { type, roomId, sender, content }
-    const { type, sender, content } = data;
+    const { type, sender, content, roomNo, recipientId } = data;
     
     // 👀 읽음 이벤트 처리 (type이 'read'이거나, content가 빈 문자열인 경우)
     if (type === 'read' || (content === '' && type !== 'message')) {
@@ -212,7 +217,8 @@ export function DmProvider({ children }) {
     }
     
     // 👁️ 현재 이 사람과의 채팅방을 보고 있으면 즉시 읽음 이벤트 전송!
-    const isCurrentlyViewing = currentViewingUserIdRef.current === sender;
+    // viewing 비교: 기존에는 sender(상대ID)로 했지만, room 기반으로 보고 있음을 지원
+    const isCurrentlyViewing = currentViewingUserIdRef.current === sender || currentViewingUserIdRef.current === recipientId;
     
     if (isCurrentlyViewing && stompClientRef.current) {
       // 상대방에게 "나 지금 이 채팅방 보고 있어! 바로 읽었어!" 알림
@@ -242,7 +248,15 @@ export function DmProvider({ children }) {
 
     // 해당 채팅방 찾기 (sender의 userId로)
     setChatRooms((prevRooms) => {
-      const roomIndex = prevRooms.findIndex(room => room.userId === sender);
+      // 우선 roomNo로 찾기
+      let roomIndex = -1;
+      if (roomNo != null) {
+        roomIndex = prevRooms.findIndex(room => String(room.id) === String(roomNo));
+      }
+      // roomNo로 못찾으면 sender 기준으로 찾기 (레거시)
+      if (roomIndex === -1) {
+        roomIndex = prevRooms.findIndex(room => room.userId === sender);
+      }
       
       if (roomIndex !== -1) {
         // 기존 채팅방에 메시지 추가
@@ -259,7 +273,7 @@ export function DmProvider({ children }) {
       } else {
         // 새로운 채팅방 생성 (처음 메시지 받는 경우)
         const newRoom = {
-          id: Date.now(),
+          id: roomNo || Date.now(),
           userId: sender,
           userName: sender,  // 실제로는 서버에서 이름 가져와야 함
           lastMessage: content,
@@ -373,13 +387,6 @@ export function DmProvider({ children }) {
         })
       });
 
-      try {
-        insertDmMessage(chat.id, myUserId, messageText);
-      } catch(e) {
-        console.log("메세지 저장 실패 : " + e);
-      }
-
-      
       console.log(`👀 읽음 이벤트 전송: ${myUserId} → ${targetUserId}`);
     }
     
@@ -423,11 +430,34 @@ export function DmProvider({ children }) {
       const targetUserId = user.userId;
       const created = await createDmRoom(targetUserId);
 
-      console.log(created);
+      console.log('방 생성 응답:', created);
+
+      // 우선 서버에서 반환한 roomNo를 사용
+      let roomNo = created?.roomNo || created?.roomNoString || null;
+
+      // 만약 서버가 roomNo를 반환하지 않으면, 채팅방 목록을 재조회하여 해당 상대방의 방을 찾아 roomNo를 확보
+      if (!roomNo) {
+        try {
+          const listResp = await selectDmRoomList();
+          const list = Array.isArray(listResp) ? listResp : (listResp?.chatRooms || []);
+          const found = list.find(r => (
+            String(r.roomName) === String(targetUserId) ||
+            String(r.targetUserId) === String(targetUserId) ||
+            String(r.target_user_id) === String(targetUserId)
+          ));
+          if (found) roomNo = found.roomNo || found.ROOM_NO || found.room_no;
+        } catch (e) {
+          console.warn('방 생성 후 목록 재조회 실패:', e);
+        }
+      }
+
+      if (!roomNo) {
+        // roomNo를 확보하지 못하면 에러를 던집니다. 호출자에서 처리하게 합니다.
+        throw new Error('생성된 채팅방의 roomNo를 확인할 수 없습니다.');
+      }
 
       const newChat = {
-        // id: created.roomNo || created.roomNoString || Date.now(),
-        id: targetUserId,
+        id: roomNo,
         userId: created.roomName || created.targetUserId || targetUserId,
         userName: created.targetUserName || created.roomName || targetUserId,
         lastMessage: created.lastMessage || '대화 없음',
@@ -441,21 +471,9 @@ export function DmProvider({ children }) {
       setChatRooms((prev) => [newChat, ...prev]);
       return newChat;
     } catch (error) {
-      console.error('❌ 서버에 방 생성 실패, 로컬로 임시 방 생성:', error);
-      const newPendingChat = {
-        id: `pending-${Date.now()}`,
-        userId: user.userId,
-        userName: user.userId,
-        lastMessage: '대기 중',
-        time: '대기',
-        unread: 0,
-        avatar: '👤',
-        messages: [],
-        isPending: true,
-      };
-
-      setPendingChats((prev) => [newPendingChat, ...prev]);
-      return newPendingChat;
+      console.error('❌ 서버에 방 생성 실패:', error);
+      // 임시 로컬 채팅 생성 로직을 제거했습니다. 호출자에게 에러를 던져 처리하도록 함.
+      throw error;
     }
   }, []);
 
@@ -474,18 +492,22 @@ export function DmProvider({ children }) {
     // 🔌 WebSocket으로 메시지 전송
     if (stompClientRef.current && isConnected) {
       const targetUserId = chat.userId;  // 상대방 ID
-      
+      const roomNo = chat.id; // numeric roomNo
+
+      // 발행 메시지에 숫자 roomNo와 recipientId(상대 사용자 ID)를 포함
       stompClientRef.current.publish({
         destination: '/pub/chat/private',
         body: JSON.stringify({
           type: 'message',       // 📌 메시지 타입
-          roomId: targetUserId,  // 받는 사람 ID (상대방이 구독하는 채널)
+          roomNo: roomNo,        // DB의 숫자 채팅방 ID
+          roomId: targetUserId,  // 레거시 필드(받는 사람 ID)
+          recipientId: targetUserId,
           sender: myUserId,      // 보내는 사람 ID (나)
           content: messageText
         })
       });
 
-      console.log(`📤 메시지 전송: ${myUserId} → ${targetUserId}: ${messageText}`);
+      console.log(`📤 메시지 전송: ${myUserId} → ${targetUserId} (roomNo:${roomNo}): ${messageText}`);
     } else {
       console.warn('⚠️ WebSocket이 연결되지 않았습니다. 로컬에서만 메시지가 추가됩니다.');
     }
@@ -518,11 +540,7 @@ export function DmProvider({ children }) {
       setChatRooms((prev) => [activatedChat, ...prev]);
       
       // 활성화된 채팅(서버에 생성된 방)이면 서버에 메시지 저장 시도
-      if (!String(activatedChat.id).startsWith('pending-')) {
-        insertDmMessage(activatedChat.id, myUserId, messageText).catch(err => {
-          console.error('메시지 DB 저장 실패 (활성화 후):', err);
-        });
-      }
+      // 메시지 저장은 서버가 WebSocket 수신 시 처리합니다.
 
       return activatedChat; // 새 ID 반환 (라우팅용)
     } else {
@@ -540,12 +558,7 @@ export function DmProvider({ children }) {
         )
       );
       
-      // 서버에 비동기 저장 시도 (로컬 UI 우선 표시)
-      if (!String(chat.id).startsWith('pending-')) {
-        insertDmMessage(chat.id, myUserId, messageText).catch(err => {
-          console.error('메시지 DB 저장 실패:', err);
-        });
-      }
+      // 메시지 저장은 서버가 WebSocket 수신 시 처리합니다.
 
       return null;
     }

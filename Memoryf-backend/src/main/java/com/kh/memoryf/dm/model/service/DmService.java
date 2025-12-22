@@ -14,9 +14,17 @@ public interface DmService {
     // 채팅방 저장
     int insertRoom(String targetUserId, String userId);
 
+    // 채팅방 발신자 저장
+    int insertParticipantSender(int roomNo, String targetUserId, String userId);
+    
+    // 채팅방 수신자 저장
+    int insertParticipantReciever(int roomNo, String targetUserId, String userId);
+
+
     // 메세지 저장
     int insertMessage(Map<String, Object> map);
 
     // 메세지 조회
     ArrayList<DmMessage> selectMessage(Map<String, Object> map);
+
 }

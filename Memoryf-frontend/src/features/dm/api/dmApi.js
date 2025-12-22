@@ -33,7 +33,7 @@ const selectDmRoomList = async () => {
     }
 };
 
-
+// 방 생성 
 export const createDmRoom = async (targetUserId) => {
     console.log("보내는 targetUserId:", targetUserId);
     console.log("타입:", typeof targetUserId);
@@ -59,7 +59,7 @@ export const createDmRoom = async (targetUserId) => {
 
     console.log('응답:', response.data);
 
-    alert(response.data);
+    // alert(response.data);
 
     return response.data;
 };
@@ -68,17 +68,18 @@ export const createDmRoom = async (targetUserId) => {
  * 채팅방의 메시지 목록 조회
  * GET /messages/rooms/{roomId}/messages
  */
-const selectDmMessages = async (roomId) => {
+const selectDmMessages = async (roomNo) => {
     try {
         const token = getAccessToken();
-        const url = `${API_BASE}/messages/${roomId}/select`;
+        const url = `${API_BASE}/messages/${roomNo}/select`;
         const userId = getUserIdFromToken();
 
 
+        // 서버 컨트롤러는 request body에서 'roomId' 키를 기대합니다.
         const response = await axios({
             url,
             method: 'POST',
-            data: {roomId: Number(roomId), senderId: userId},
+            data: { roomNo: Number(roomNo), senderId: userId },
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -97,15 +98,15 @@ const selectDmMessages = async (roomId) => {
  * 채팅 메시지 저장
  * POST /messages/rooms/{roomId}/messages
  */
-const insertDmMessage = async (roomId, senderId, content) => {
+const insertDmMessage = async (roomNo, senderId, content) => {
     try {
         const token = getAccessToken();
-        const url = `${API_BASE}/messages/${roomId}/insert`;
+        const url = `${API_BASE}/messages/${roomNo}/insert`;
 
         const response = await axios({
             url,
             method: 'POST',
-            data: { roomId: Number(roomId), senderId: senderId, content },
+            data: { roomNo: Number(roomNo), senderId: senderId, content },
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'

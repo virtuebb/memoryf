@@ -16,7 +16,9 @@ import lombok.ToString;
 @ToString
 public class Dm {
     private String type;    // 메시지 타입: "message" (일반 메시지) / "read" (읽음 이벤트)
-    private String roomId;  // 받는 사람의 ID (1:1 채팅에서)
+    private String roomId;  // 기존: 받는 사람의 ID (레거시 호환)
+    private Integer roomNo; // 숫자 방번호 (DB의 ROOM_NO) - 우선 사용
+    private String recipientId; // 받는 사람의 사용자 ID
     private String sender;  // 보낸 사람의 이름
     private String content; // 메시지 내용
 
