@@ -347,6 +347,77 @@
 		ORDER BY B.BOOKMARK_NO DESC
 	</select>
 
+	<!-- 내가 좋아요한 피드 목록 조회 -->
+	<select id="selectLikedFeedList" parameterType="hashmap" resultMap="feedResultMap">
+		SELECT 
+			F.FEED_NO,
+			F.CONTENT,
+			F.TAG,
+			F.LATITUDE,
+			F.LONGITUDE,
+			F.LOCATION_NAME,
+			F.CREATED_DATE,
+			F.IS_DEL,
+			F.MEMBER_NO,
+			M.MEMBER_NICK,
+			(SELECT COUNT(*) FROM TB_FEED_LIKE WHERE FEED_NO = F.FEED_NO) AS LIKE_COUNT,
+			(SELECT COUNT(*) FROM TB_COMMENT WHERE FEED_NO = F.FEED_NO AND IS_DEL = 'N') AS COMMENT_COUNT,
+			1 AS IS_LIKED
+		FROM TB_FEED F
+		JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO
+		LEFT JOIN TB_MEMBER M ON F.MEMBER_NO = M.MEMBER_NO
+		WHERE FL.MEMBER_NO = #{memberNo}
+		AND F.IS_DEL = 'N'
+		<if test="startDate != null and startDate != ''">
+			AND TO_CHAR(F.CREATED_DATE, 'YYYY-MM-DD') &gt;= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND TO_CHAR(F.CREATED_DATE, 'YYYY-MM-DD') &lt;= #{endDate}
+		</if>
+		<choose>
+			<when test="sortBy == 'oldest'">
+				ORDER BY F.CREATED_DATE ASC
+			</when>
+			<otherwise>
+				ORDER BY F.CREATED_DATE DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 내가 댓글 단 목록 조회 (피드 이미지 포함) -->
+	<select id="selectCommentedFeedList" parameterType="hashmap" resultType="comment">
+		SELECT 
+			C.COMMENT_NO AS commentNo,
+			C.CONTENT AS content,
+			C.CREATE_DATE AS createDate,
+			C.FEED_NO AS feedNo,
+			C.WRITER AS writer,
+			M.MEMBER_NICK AS writerNick,
+			MH.PROFILE_CHANGE_NAME AS writerProfileImage,
+			(SELECT CHANGE_NAME FROM TB_FEED_FILE WHERE FEED_NO = F.FEED_NO AND ROWNUM = 1) AS feedImage
+		FROM TB_COMMENT C
+		JOIN TB_FEED F ON C.FEED_NO = F.FEED_NO
+		JOIN TB_MEMBER M ON C.WRITER = M.MEMBER_NO
+		LEFT JOIN TB_MEMBER_HOME MH ON M.MEMBER_NO = MH.MEMBER_NO
+		WHERE C.WRITER = #{memberNo}
+		AND C.IS_DEL = 'N'
+		AND F.IS_DEL = 'N'
+		<if test="startDate != null and startDate != ''">
+			AND TO_CHAR(C.CREATE_DATE, 'YYYY-MM-DD') &gt;= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND TO_CHAR(C.CREATE_DATE, 'YYYY-MM-DD') &lt;= #{endDate}
+		</if>
+		<choose>
+			<when test="sortBy == 'oldest'">
+				ORDER BY C.CREATE_DATE ASC
+			</when>
+			<otherwise>
+				ORDER BY C.CREATE_DATE DESC
+			</otherwise>
+		</choose>
+	</select>
+
 	<!-- ResultMap: Feed -->
 	<resultMap type="feed" id="feedResultMap">
 		<id property="feedNo" column="FEED_NO"/>

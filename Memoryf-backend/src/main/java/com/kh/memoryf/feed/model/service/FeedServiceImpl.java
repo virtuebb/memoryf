@@ -119,4 +119,14 @@ public class FeedServiceImpl implements FeedService {
 		}
 		return feedDao.selectFeedListByTargetMember(sqlSession, targetMemberNo, viewerMemberNo, page, size);
 	}
+
+	@Override
+	public ArrayList<Feed> selectLikedFeedList(java.util.HashMap<String, Object> map) {
+		return feedDao.selectLikedFeedList(sqlSession, map);
+	}
+
+	@Override
+	public ArrayList<com.kh.memoryf.comment.model.vo.Comment> selectCommentedFeedList(java.util.HashMap<String, Object> map) {
+		return feedDao.selectCommentedFeedList(sqlSession, map);
+	}
 }

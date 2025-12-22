@@ -213,4 +213,18 @@ public class FeedDao {
 	public ArrayList<Feed> selectBookmarkedFeedList(SqlSession sqlSession, int memberNo) {
 		return new ArrayList<>(sqlSession.selectList("feedMapper.selectBookmarkedFeedList", memberNo));
 	}
+
+	/**
+	 * 내가 좋아요한 피드 목록 조회
+	 */
+	public ArrayList<Feed> selectLikedFeedList(SqlSession sqlSession, HashMap<String, Object> map) {
+		return new ArrayList<>(sqlSession.selectList("feedMapper.selectLikedFeedList", map));
+	}
+
+	/**
+	 * 내가 댓글 단 목록 조회
+	 */
+	public ArrayList<com.kh.memoryf.comment.model.vo.Comment> selectCommentedFeedList(SqlSession sqlSession, HashMap<String, Object> map) {
+		return new ArrayList<>(sqlSession.selectList("feedMapper.selectCommentedFeedList", map));
+	}
 }

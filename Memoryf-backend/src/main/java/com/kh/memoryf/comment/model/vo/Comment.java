@@ -26,4 +26,6 @@ public class Comment {
 	private String writerProfileImage; // 작성자 프로필 이미지
 	private int likeCount;        // 댓글 좋아요 수
 	private boolean isLiked;      // 현재 사용자가 좋아요 했는지 여부
+	
+	private String feedImage;     // 피드 썸네일 이미지 (내 활동 - 댓글 목록용)
 }

@@ -1,8 +1,8 @@
 .menu-list {
   list-style: none;
-  margin: 16px 0 24px;
+  margin: 16px 16px 24px 0;
   padding: 0;
-  width: 100%;
+  width: calc(100% - 16px);
 
   display: flex;
   flex-direction: column;
@@ -82,7 +82,7 @@
 .menu-list button:hover {
   background: color-mix(
     in srgb,
-    var(--color-sidebar-link-active-bg) 38%,
+    var(--color-sidebar-link-active-bg) 42%,
     transparent
   );
 
@@ -92,14 +92,12 @@
     transparent
   );
 
-  transform: translateX(4px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 .menu-list a:hover .icon,
 .menu-list button:hover .icon {
-  transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 /* =========================

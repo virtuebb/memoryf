@@ -495,4 +495,50 @@ public class FeedController {
 		
 		return response;
 	}
+
+	/**
+	 * 내가 좋아요한 피드 목록 조회
+	 */
+	@GetMapping("/liked")
+	public HashMap<String, Object> selectLikedFeedList(
+			@RequestParam(value = "memberNo") Integer memberNo,
+			@RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+			@RequestParam(value = "startDate", required = false) String startDate,
+			@RequestParam(value = "endDate", required = false) String endDate) {
+		
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("memberNo", memberNo);
+		map.put("sortBy", sortBy);
+		map.put("startDate", startDate);
+		map.put("endDate", endDate);
+		
+		List<Feed> list = feedService.selectLikedFeedList(map);
+		
+		HashMap<String, Object> response = new HashMap<>();
+		response.put("list", list);
+		return response;
+	}
+
+	/**
+	 * 내가 댓글 단 목록 조회
+	 */
+	@GetMapping("/commented")
+	public HashMap<String, Object> selectCommentedFeedList(
+			@RequestParam(value = "memberNo") Integer memberNo,
+			@RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+			@RequestParam(value = "startDate", required = false) String startDate,
+			@RequestParam(value = "endDate", required = false) String endDate) {
+		
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("memberNo", memberNo);
+		map.put("sortBy", sortBy);
+		map.put("startDate", startDate);
+		map.put("endDate", endDate);
+		
+		List<com.kh.memoryf.comment.model.vo.Comment> list = feedService.selectCommentedFeedList(map);
+		
+		HashMap<String, Object> response = new HashMap<>();
+		response.put("list", list);
+		return response;
+	}
 }

@@ -100,8 +100,10 @@ body,
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding: 4px; 
+  padding: 4px 8px 4px 4px;
   box-sizing: border-box;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
 .sidebar-section.card {
