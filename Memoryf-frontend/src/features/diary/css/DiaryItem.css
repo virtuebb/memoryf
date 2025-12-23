@@ -8,23 +8,40 @@
   gap: 6px;
 
   box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.diary-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
 }
 
 .diary-item .date {
   font-size: 11px;
   color: var(--color-text-muted);
+
+  display: inline-block;
+  width: fit-content;
+
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(
+    in srgb,
+    var(--color-accent) 20%,
+    transparent
+  );
 }
 
 .diary-item p {
-  font-size: 14px;
-  line-height: 1.6;
   margin: 0;
 }
 
 .diary-content {
   font-size: 14px;
-  line-height: 1.8;
-  color: var(--color-sidebar-link);
+  line-height: 1.75;
+  color: var(--color-text-main);
   white-space: pre-wrap;
 }
 
