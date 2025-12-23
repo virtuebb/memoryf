@@ -1,29 +1,6 @@
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.pagination button {
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  background: white;
-  cursor: pointer;
-}
-
-.pagination button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.diary-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
+/* =========================
+   🔢 Pagination
+========================= */
 .pagination {
   display: flex;
   justify-content: center;
@@ -40,6 +17,7 @@
   border: none;
 
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
 
   background: color-mix(
@@ -64,6 +42,7 @@
     var(--color-accent) 35%,
     transparent
   );
+  transform: translateY(-1px);
 }
 
 .pagination button.active {
@@ -72,7 +51,6 @@
     var(--color-accent) 55%,
     transparent
   );
-
   color: var(--color-accent-strong);
   font-weight: 700;
 }
@@ -80,4 +58,5 @@
 .pagination button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  box-shadow: none;
 }
