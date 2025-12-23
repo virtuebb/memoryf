@@ -299,7 +299,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
             // 1단계: 사진 선택 (수정 모드에서는 건너뛰기)
             <div className="upload-step-1">
               <div className="upload-icon">📷</div>
-              <h3>사진을 여기에 끌어다 놓으세요</h3>
+              <h3>사진과 동영상을 여기에 끌어다 놓으세요</h3>
               <button className="select-photos-btn" onClick={handleSelectClick}>
                 컴퓨터에서 선택
               </button>

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getBookmarkedFeedList, getFeedListByMember } from "../../feed/api/feedApi";
 import { getMemberNoFromToken } from "../../../utils/jwt";
+import FeedItem from "../../feed/components/FeedItem";
 import "../css/FeedTabs.css";
 
 function FeedTabs({ memberNo, isOwner, onCreateClick }) {
@@ -63,17 +64,6 @@ function FeedTabs({ memberNo, isOwner, onCreateClick }) {
       });
   };
 
-  const handleFeedClick = (feedNo) => {
-    navigate(`/feeds/${feedNo}`, { state: { backgroundLocation: location } });
-  };
-
-  const getImageUrl = (feed) => {
-    if (feed.feedFiles && feed.feedFiles.length > 0) {
-      return `http://localhost:8006/memoryf${feed.feedFiles[0].filePath}`;
-    }
-    return 'https://via.placeholder.com/400x400?text=No+Image';
-  };
-
   if (loading) {
     return (
       <section className="feed-tabs">
@@ -126,17 +116,7 @@ function FeedTabs({ memberNo, isOwner, onCreateClick }) {
               </div>
             ) : (
               myFeeds.map((feed) => (
-                <div 
-                  key={feed.feedNo} 
-                  className="grid-card"
-                  onClick={() => handleFeedClick(feed.feedNo)}
-                >
-                  <img src={getImageUrl(feed)} alt={feed.content || ''} />
-                  <div className="grid-card-overlay">
-                    <span>❤️ {feed.likeCount || 0}</span>
-                    <span>💬 {feed.commentCount || 0}</span>
-                  </div>
-                </div>
+                <FeedItem key={feed.feedNo} feed={feed} isGrid={true} />
               ))
             )}
           </div>
@@ -150,17 +130,7 @@ function FeedTabs({ memberNo, isOwner, onCreateClick }) {
               </div>
             ) : (
               bookmarkedFeeds.map((feed) => (
-                <div 
-                  key={feed.feedNo} 
-                  className="grid-card"
-                  onClick={() => handleFeedClick(feed.feedNo)}
-                >
-                  <img src={getImageUrl(feed)} alt={feed.content || ''} />
-                  <div className="grid-card-overlay">
-                    <span>❤️ {feed.likeCount || 0}</span>
-                    <span>💬 {feed.commentCount || 0}</span>
-                  </div>
-                </div>
+                <FeedItem key={feed.feedNo} feed={feed} isGrid={true} />
               ))
             )}
           </div>
