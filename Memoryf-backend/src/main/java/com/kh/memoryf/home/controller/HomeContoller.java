@@ -109,15 +109,17 @@ public class HomeContoller {
 	 * @param currentMemberNo 현재 로그인한 회원 번호 (옵션)
 	 * @return 방명록 목록
 	 */
-	@GetMapping("/{homeNo}/guestbook")
-	public HashMap<String, Object> getGuestbookList(
-			@PathVariable("homeNo") int homeNo,
-			@RequestParam(value = "currentMemberNo", required = false) Integer currentMemberNo) {
+	    @GetMapping("/{homeNo}/guestbook")
+	    public HashMap<String, Object> getGuestbookList(
+		    @PathVariable("homeNo") int homeNo,
+		    @RequestParam(value = "currentMemberNo", required = false) Integer currentMemberNo,
+		    @RequestParam(value = "offset", defaultValue = "0") int offset,
+		    @RequestParam(value = "limit", defaultValue = "3") int limit) {
 		
 		HashMap<String, Object> response = new HashMap<>();
 		
 		try {
-			ArrayList<Guestbook> guestbookList = homeService.getGuestbookList(homeNo, currentMemberNo);
+			ArrayList<Guestbook> guestbookList = homeService.getGuestbookList(homeNo, currentMemberNo, offset, limit);
 			response.put("success", true);
 			response.put("data", guestbookList);
 		} catch (Exception e) {

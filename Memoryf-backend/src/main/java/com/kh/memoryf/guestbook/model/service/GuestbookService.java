@@ -5,7 +5,7 @@ import com.kh.memoryf.guestbook.model.vo.Guestbook;
 
 public interface GuestbookService {
 
-    List<Guestbook> getGuestbookList(int homeNo);
+    List<Guestbook> getGuestbookList(int homeNo, int offset, int limit);
 
     int insertGuestbook(Guestbook guestbook);
 }

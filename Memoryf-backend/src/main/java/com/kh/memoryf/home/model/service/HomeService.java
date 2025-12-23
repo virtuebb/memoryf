@@ -21,7 +21,7 @@ public interface HomeService {
 	 * @param currentMemberNo 현재 로그인한 회원 번호
 	 * @return ArrayList<Guestbook>
 	 */
-	ArrayList<Guestbook> getGuestbookList(int homeNo, Integer currentMemberNo);
+	ArrayList<Guestbook> getGuestbookList(int homeNo, Integer currentMemberNo, int offset, int limit);
 	
 	/**
 	 * 방명록 생성

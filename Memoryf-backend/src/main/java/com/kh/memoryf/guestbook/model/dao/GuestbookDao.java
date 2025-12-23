@@ -12,11 +12,18 @@ public class GuestbookDao {
 
     public List<Guestbook> selectGuestbookList(
             SqlSessionTemplate sqlSession,
-            int homeNo
+            int homeNo,
+            int offset,
+            int limit
     ) {
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
+        params.put("homeNo", homeNo);
+        params.put("offset", offset);
+        params.put("limit", limit);
+        
         return sqlSession.selectList(
             "guestbookMapper.selectGuestbookList",
-            homeNo
+            params
         );
     }
 

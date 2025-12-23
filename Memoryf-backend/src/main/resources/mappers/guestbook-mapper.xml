@@ -7,19 +7,28 @@
 
     <!-- 방명록 목록 조회 -->
     <select id="selectGuestbookList"
-            parameterType="int"
+            parameterType="map"
             resultType="guestbook">
-        SELECT
-            G.GUESTBOOK_NO        AS guestbookNo,
-            G.GUESTBOOK_CONTENT   AS guestbookContent,
-            G.CREATE_DATE         AS createDate,
-            G.IS_DEL              AS isDel,
-            G.MEMBER_NO           AS memberNo,
-            G.HOME_NO             AS homeNo
-        FROM TB_GUESTBOOK G
-        WHERE G.HOME_NO = #{_parameter}
-          AND G.IS_DEL = 'N'
-        ORDER BY G.CREATE_DATE DESC
+        SELECT *
+        FROM (
+            SELECT
+                G.GUESTBOOK_NO        AS guestbookNo,
+                G.GUESTBOOK_CONTENT   AS guestbookContent,
+                G.CREATE_DATE         AS createDate,
+                G.IS_DEL              AS isDel,
+                G.MEMBER_NO           AS memberNo,
+                G.HOME_NO             AS homeNo,
+                ROWNUM AS rnum
+            FROM (
+                SELECT *
+                FROM TB_GUESTBOOK G
+                WHERE G.HOME_NO = #{homeNo}
+                  AND G.IS_DEL = 'N'
+                ORDER BY G.CREATE_DATE DESC
+            ) G
+            WHERE ROWNUM <![CDATA[<=]]> #{offset} + #{limit}
+        )
+        WHERE rnum > #{offset}
     </select>
 
     <!-- 방명록 등록 -->

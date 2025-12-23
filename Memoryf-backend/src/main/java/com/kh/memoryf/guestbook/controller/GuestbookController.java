@@ -30,10 +30,12 @@ public class GuestbookController {
     // 방명록 조회
     @GetMapping("/{homeNo}")
     public ResponseEntity<List<Guestbook>> getGuestbookList(
-            @PathVariable int homeNo
+            @PathVariable int homeNo,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int offset,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "3") int limit
     ) {
         return ResponseEntity.ok(
-            guestbookService.getGuestbookList(homeNo)
+            guestbookService.getGuestbookList(homeNo, offset, limit)
         );
     }
 

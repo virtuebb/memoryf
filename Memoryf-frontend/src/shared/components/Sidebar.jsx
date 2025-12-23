@@ -74,6 +74,16 @@ function Sidebar({ onCreateClick }) {
           </Link>
         </li>
 
+        {/* CREATE */}
+        {onCreateClick && (
+          <li>
+            <button onClick={onCreateClick}>
+              <span className="icon">➕</span>
+              Post
+            </button>
+          </li>
+        )}
+
         {/* SYSTEM */}
         <li className="menu-label">SYSTEM</li>
 
@@ -83,15 +93,6 @@ function Sidebar({ onCreateClick }) {
             Settings
           </Link>
         </li>
-
-        {/* CREATE */}
-        {onCreateClick && (
-          <li className="create">
-            <button onClick={onCreateClick}>
-              😀 피드 작성
-            </button>
-          </li>
-        )}
       </ul>
     </nav>
   );

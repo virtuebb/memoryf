@@ -24,8 +24,8 @@ public class GuestbookServiceImpl implements GuestbookService {
     }
 
     @Override
-    public List<Guestbook> getGuestbookList(int homeNo) {
-        return guestbookDao.selectGuestbookList(sqlSession, homeNo);
+    public List<Guestbook> getGuestbookList(int homeNo, int offset, int limit) {
+        return guestbookDao.selectGuestbookList(sqlSession, homeNo, offset, limit);
     }
 
     @Override

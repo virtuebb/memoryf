@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ko';
 import { getNotifications, markAsRead, deleteNotification, acceptFollowRequest, rejectFollowRequest } from '../api/notificationApi';
 import { decodeToken } from '../../../utils/jwt';
 import '../css/NotificationPage.css';
+
+dayjs.extend(relativeTime);
+dayjs.locale('ko');
 
 function NotificationPage() {
   const [notifications, setNotifications] = useState([]);
   const [memberNo, setMemberNo] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -30,6 +37,21 @@ function NotificationPage() {
       }
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
+    }
+  };
+
+  const markReadLocally = (notificationNo) => {
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.notificationNo === notificationNo ? { ...n, isRead: 'Y' } : n
+      )
+    );
+  };
+
+  const ensureMarkedAsRead = async (noti) => {
+    if (noti.isRead === 'N') {
+      await markAsRead(noti.notificationNo);
+      markReadLocally(noti.notificationNo);
     }
   };
 
@@ -87,17 +109,37 @@ function NotificationPage() {
     }
   };
 
-  const handleNotificationClick = async (noti) => {
-    if (noti.isRead === 'N') {
-      await markAsRead(noti.notificationNo);
-    }
-    
-    if (noti.type === 'LIKE_FEED' || noti.type === 'COMMENT_FEED') {
-      // 해당 피드로 이동 (구현 필요)
-      // navigate(`/feed/${noti.targetId}`);
-    } else if (noti.type === 'FOLLOW' || noti.type === 'FOLLOW_ACCEPT') {
-      navigate(`/home/${noti.senderNo}`);
-    }
+  const handleGoProfile = async (noti) => {
+    await ensureMarkedAsRead(noti);
+    navigate(`/${noti.senderNick}`);
+  };
+
+  const handleGoFeed = async (noti) => {
+    await ensureMarkedAsRead(noti);
+    navigate(`/feeds/${noti.targetId}`, { state: { backgroundLocation: location } });
+  };
+
+  const formatTimeAgo = (dateString) => {
+    if (!dateString) return '';
+    const parsed = dayjs(dateString);
+    if (!parsed.isValid()) return '';
+
+    const now = dayjs();
+    const diffMinutes = Math.max(0, now.diff(parsed, 'minute'));
+    const diffHours = Math.max(0, now.diff(parsed, 'hour'));
+    const diffDays = Math.max(0, now.diff(parsed, 'day'));
+
+    if (diffMinutes < 1) return '방금';
+    if (diffMinutes < 60) return `${diffMinutes}분`;
+    if (diffHours < 24) return `${diffHours}시간`;
+    if (diffDays < 7) return `${diffDays}일`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}주`;
+
+    const diffMonths = Math.max(0, now.diff(parsed, 'month'));
+    if (diffMonths < 12) return `${diffMonths}개월`;
+
+    const diffYears = Math.max(0, now.diff(parsed, 'year'));
+    return `${diffYears}년`;
   };
 
   return (
@@ -109,24 +151,42 @@ function NotificationPage() {
         ) : (
           notifications.map(noti => (
             <div key={noti.notificationNo} className={`notification-item ${noti.isRead === 'N' ? 'unread' : ''}`}>
-              <div className="noti-content" onClick={() => handleNotificationClick(noti)}>
+              <div className="noti-content">
                 <img 
                     src={noti.senderProfile ? `http://localhost:8006/memoryf/profile_images/${noti.senderProfile}` : '/default-profile.png'} 
                     alt="profile" 
                     className="noti-profile-img"
                     onError={(e) => {e.target.src = '/default-profile.png'}}
+                    onClick={() => handleGoProfile(noti)}
                 />
                 <div className="noti-text">
-                  <span className="noti-user">{noti.senderNick}</span>
+                  <button
+                    type="button"
+                    className="noti-user"
+                    onClick={() => handleGoProfile(noti)}
+                  >
+                    {noti.senderNick}
+                  </button>
                   {noti.type === 'FOLLOW_REQUEST' && "님이 팔로우를 요청했습니다."}
                   {noti.type === 'FOLLOW_ACCEPT' && "님이 팔로우 요청을 수락했습니다."}
                   {noti.type === 'FOLLOW' && "님이 회원님을 팔로우하기 시작했습니다."}
                   {noti.type === 'LIKE_FEED' && "님이 회원님의 게시물을 좋아합니다."}
                   {noti.type === 'COMMENT_FEED' && "님이 댓글을 남겼습니다."}
-                  <span className="noti-date">{new Date(noti.createDate).toLocaleDateString()}</span>
+                  <span className="noti-date">{formatTimeAgo(noti.createDate)}</span>
                 </div>
                 {noti.feedImage && (
-                    <img src={`http://localhost:8006/memoryf/feed_images/${noti.feedImage}`} alt="feed" className="noti-feed-img" />
+                  <img
+                    src={`http://localhost:8006/memoryf/feed_upfiles/${noti.feedImage}`}
+                    alt="feed"
+                    className="noti-feed-img"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleGoFeed(noti);
+                    }}
+                    onError={(e) => {
+                      e.target.src = '/default-feed.png';
+                    }}
+                  />
                 )}
               </div>
               

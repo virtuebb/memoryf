@@ -26,8 +26,8 @@ public class HomeServiceImpl implements HomeService {
 	}
 
 	@Override
-	public ArrayList<Guestbook> getGuestbookList(int homeNo, Integer currentMemberNo) {
-		return homeDao.selectGuestbookList(sqlSession, homeNo, currentMemberNo);
+	public ArrayList<Guestbook> getGuestbookList(int homeNo, Integer currentMemberNo, int offset, int limit) {
+		return homeDao.selectGuestbookList(sqlSession, homeNo, currentMemberNo, offset, limit);
 	}
 
 	@Override
