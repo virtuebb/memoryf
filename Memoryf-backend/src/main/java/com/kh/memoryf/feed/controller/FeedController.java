@@ -189,7 +189,7 @@ public class FeedController {
 			// 파일이 없으면 에러
 			if (files == null || files.isEmpty() || files.get(0).isEmpty()) {
 				response.put("success", false);
-				response.put("message", "최소 1개 이상의 이미지를 업로드해주세요.");
+				response.put("message", "최소 1개 이상의 파일을 업로드해주세요.");
 				return response;
 			}
 			

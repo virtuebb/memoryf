@@ -501,13 +501,29 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                   </button>
                 )}
                 
-                {/* 현재 이미지 */}
+                {/* 현재 이미지/동영상 */}
                 <div className="carousel-image-wrapper">
-                  <img 
-                    src={getImageUrl(feedFiles[currentImageIndex]?.filePath)} 
-                    alt={feed.content || `피드 이미지 ${currentImageIndex + 1}`}
-                    className="carousel-image"
-                  />
+                  {(() => {
+                    const fileUrl = getImageUrl(feedFiles[currentImageIndex]?.filePath);
+                    const isVideo = ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(fileUrl.split('.').pop().toLowerCase());
+                    
+                    return isVideo ? (
+                      <video
+                        src={fileUrl}
+                        className="carousel-image"
+                        controls
+                        autoPlay
+                        muted
+                        loop
+                      />
+                    ) : (
+                      <img 
+                        src={fileUrl} 
+                        alt={feed.content || `피드 이미지 ${currentImageIndex + 1}`}
+                        className="carousel-image"
+                      />
+                    );
+                  })()}
                 </div>
                 
                 {/* 다음 버튼 */}
