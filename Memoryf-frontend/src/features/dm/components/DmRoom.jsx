@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDm } from '../context/DmContext';
+import React from 'react';
 import '../css/DmRoom.css';
 import { selectDmMessages } from '../api/dmApi.js';
 
@@ -22,7 +23,7 @@ function SendIcon() {
   );
 }
 
-export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, themeClass = 'light', hideHeader = false }) {
+function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, themeClass = 'light', hideHeader = false }) {
   // 📍 페이지 이동용 navigate
   const navigate = useNavigate();
   
@@ -63,9 +64,8 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
   // 🔌 백엔드 연동: 채팅방의 메시지 목록 불러오기
   // ============================================
   useEffect(() => {
-    // pending(대기) 상태이거나 id가 서버의 roomNo가 아닌 경우 메시지 조회를 건너뜁니다.
+    // 채팅방의 메시지 목록 불러오기
     if (!chat) return;
-    if (chat.isPending) return;
     const numericId = Number(chat.id);
     if (Number.isNaN(numericId)) return;
 
@@ -292,3 +292,5 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
     </div>
   );
 }
+
+export default React.memo(ChatRoom);

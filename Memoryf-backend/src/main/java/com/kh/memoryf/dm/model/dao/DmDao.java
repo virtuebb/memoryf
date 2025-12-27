@@ -84,7 +84,19 @@ public class DmDao {
         return sqlSession.insert("dmMapper.insertParticipantReciever", map);
 
     }
+    
+    // 읽음 처리 - 마지막으로 읽은 메시지 번호 업데이트
+    public int updateReadStatus(SqlSessionTemplate sqlSession, Map<String, Object> map) {
+        return sqlSession.update("dmMapper.updateReadStatus", map);
+    }
+    
+    // 미읽은 메시지 개수 조회
+    public int getUnreadMessageCount(SqlSessionTemplate sqlSession, Map<String, Object> map) {
+        Integer result = sqlSession.selectOne("dmMapper.getUnreadMessageCount", map);
+        return result != null ? result : 0;
+    }
 
     
 
 }
+

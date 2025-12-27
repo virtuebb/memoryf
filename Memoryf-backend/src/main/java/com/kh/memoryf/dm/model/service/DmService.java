@@ -26,5 +26,11 @@ public interface DmService {
 
     // 메세지 조회
     ArrayList<DmMessage> selectMessage(Map<String, Object> map);
+    
+    // 읽음 처리 - 마지막으로 읽은 시간 업데이트
+    int updateReadStatus(Map<String, Object> map);
+    
+    // 미읽은 메시지 개수 조회
+    int getUnreadMessageCount(Map<String, Object> map);
 
 }

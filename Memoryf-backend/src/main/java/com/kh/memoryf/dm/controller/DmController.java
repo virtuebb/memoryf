@@ -66,6 +66,7 @@ public class DmController {
                 map.put("senderId", message.getSender());
                 map.put("content", message.getContent());
                 dmService.insertMessage(map);
+                System.out.println("✅ 메시지 DB 저장 완료: " + message.getContent());
             }
         } catch (Exception e) {
             System.err.println("⚠️ 메시지 DB 저장 실패: " + e.getMessage());
@@ -73,9 +74,12 @@ public class DmController {
 
         // 1) 기존 구독 경로로 발송
         messagingTemplate.convertAndSend("/sub/private/" + recipient, message);
+        System.out.println("📤 /sub/private/" + recipient + "로 메시지 전송");
+        
         // 2) Spring의 user destination으로도 발송(구독 방식에 따라 수신 보장)
         try {
             messagingTemplate.convertAndSendToUser(recipient, "/queue/private", message);
+            System.out.println("📤 /user/queue/private로 메시지 전송 (user: " + recipient + ")");
         } catch (Exception e) {
             System.err.println("⚠️ convertAndSendToUser 실패: " + e.getMessage());
         }
@@ -89,7 +93,7 @@ public class DmController {
 
         ArrayList<DmRoom> list = dmService.selectDmRoomList(userId);
 
-        // System.out.println("✅ 조회된 채팅방 목록: " + list);
+        System.out.println("✅ 조회된 채팅방 목록: " + list);
 
         return list;
     }
@@ -144,6 +148,7 @@ public class DmController {
 
         ArrayList<DmMessage> list = dmService.selectMessage(map);
 
+        System.out.println("조회된 시간 : " + list.get(0).getCreateDate());
         // System.out.println("📥 조회된 메시지 목록: " + list);
 
         return list;
@@ -164,24 +169,94 @@ public class DmController {
         map.put("senderId", senderId);
         map.put("content", content);
 
+        System.out.println("---------------------------------------");
+        System.out.flush();
 
-
+        System.out.println("📨 메시지 저장 요청 수신");
         System.out.println("roomNo : " + roomNo);
         System.out.println("senderId : " + senderId);
         System.out.println("content : " + content);
+        System.out.flush();
 
-        return dmService.insertMessage(map);
+        int result = dmService.insertMessage(map);
+        
+        System.out.println("✅ 메시지 저장 완료 - 결과: " + result);
+        System.out.flush();
+
+        return result;
 
 
     }
     
+    // DM 읽음 처리 - 마지막으로 읽은 시간 기록
+    @PostMapping("{roomNo}/markAsRead")
+    public Map<String, Object> markAsRead(@PathVariable int roomNo, @RequestBody DmRoomRequest request) {
+        String readerId = request.getSenderId();  // 읽은 사람의 ID
+        
+        System.out.println("👁️ 읽음 처리 요청: roomNo=" + roomNo + ", readerId=" + readerId);
+        
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("roomNo", roomNo);
+        requestMap.put("readerId", readerId);
+        
+        try {
+            int result = dmService.updateReadStatus(requestMap);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", result > 0);
+            response.put("roomNo", roomNo);
+            response.put("readerId", readerId);
+            response.put("message", result > 0 ? "읽음 처리 성공" : "읽음 처리 실패");
+            
+            System.out.println("✅ 읽음 처리 완료: " + response);
+            
+            return response;
+        } catch (Exception e) {
+            System.err.println("❌ 읽음 처리 실패: " + e.getMessage());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "읽음 처리 중 오류 발생: " + e.getMessage());
+            
+            return response;
+        }
+    }
+    
+    // 미읽은 메시지 개수 조회
+    @GetMapping("{roomNo}/unreadCount/{readerId}")
+    public Map<String, Object> getUnreadCount(@PathVariable int roomNo, @PathVariable String readerId) {
+        System.out.println("📊 미읽은 메시지 조회: roomNo=" + roomNo + ", readerId=" + readerId);
+        
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("roomNo", roomNo);
+        requestMap.put("readerId", readerId);
+        
+        try {
+            int unreadCount = dmService.getUnreadMessageCount(requestMap);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("roomNo", roomNo);
+            response.put("readerId", readerId);
+            response.put("unreadCount", unreadCount);
+            
+            System.out.println("✅ 미읽은 메시지 조회 완료: " + unreadCount);
+            
+            return response;
+        } catch (Exception e) {
+            System.err.println("❌ 미읽은 메시지 조회 실패: " + e.getMessage());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "조회 중 오류 발생: " + e.getMessage());
+            
+            return response;
+        }
+    }
 
 
 
 
     // dm 방 상세 조회
-
-    // 읽음 처리
 
     // 새 메세지 저장
 

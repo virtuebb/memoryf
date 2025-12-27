@@ -9,9 +9,13 @@
 		<id column="ROOM_NO" property="roomNo" />
 		<result column="CREATE_DATE" property="createDate" />
 		<result column="ROOM_NAME" property="roomName" />
-		<!-- <result column="MEMBER_PWD" property="memberPwd" />
-		<result column="MEMBER_NAME" property="memberName" />
-		<result column="STATUS" property="status" /> -->
+		<!-- selectDmRoomList용 필드들 -->
+		<result column="TARGET_USER_ID" property="targetUserId" />
+		<result column="TARGET_USER_NAME" property="targetUserName" />
+		<result column="LAST_MESSAGE" property="lastMessage" />
+		<result column="LAST_SEND_DATE" property="lastSendDate" />
+		<result column="UNREAD_COUNT" property="unreadCount" />
+		<result column="AVATAR" property="avatar" />
 	</resultMap>
 
 	<!-- 메세지 ResultSet -->
@@ -21,20 +25,45 @@
 		<result column="SENDER_ID" property="senderId" />
 		<result column="CONTENT" property="content" />
 		<result column="CREATE_DATE" property="createDate" />
+		<!-- 읽음 여부 (0: 읽음, 1: 안읽음) -->
+		<result column="READ_CHECK" property="readCheck" />
 	</resultMap>
 	
-	<!-- Dm 방 조회용 쿼리 -->
+	<!-- Dm 방 조회용 쿼리 (채팅 목록) -->
 	<select id="selectDmRoomList" parameterType="string" resultMap="dmResultSet">
-		SELECT r.ROOM_NO,
-			   p2.MEMBER_ID AS DISPLAY_NAME,
-			   MEMBER_NAME AS ROOM_NAME
-		  FROM TB_DM_ROOM r
-		  JOIN TB_DM_PARTICIPANT p1 ON r.ROOM_NO = p1.ROOM_NO
-		  JOIN TB_DM_PARTICIPANT p2 ON r.ROOM_NO = p2.ROOM_NO
-		  JOIN TB_MEMBER m ON m.MEMBER_ID = p2.MEMBER_ID
-		 WHERE p1.MEMBER_ID = #{userId}
-		   AND p2.MEMBER_ID != #{userId}
-
+		SELECT 
+		    r.ROOM_NO,
+		    p2.MEMBER_ID AS TARGET_USER_ID,
+		    m.MEMBER_NAME AS TARGET_USER_NAME,
+		    COALESCE(
+		        (SELECT CONTENT FROM TB_DM_MESSAGE 
+		         WHERE ROOM_NO = r.ROOM_NO AND IS_DEL = 'N' 
+		         ORDER BY MESSAGE_NO DESC 
+		         FETCH FIRST 1 ROW ONLY),
+		        '대화 없음'
+		    ) AS LAST_MESSAGE,
+		    COALESCE(
+		        (SELECT TO_CHAR(CREATE_DATE + (9/24), 'YYYY-MM-DD HH24:MI:SS') FROM TB_DM_MESSAGE 
+		         WHERE ROOM_NO = r.ROOM_NO AND IS_DEL = 'N' 
+		         ORDER BY MESSAGE_NO DESC 
+		         FETCH FIRST 1 ROW ONLY),
+		        TO_CHAR(r.CREATE_DATE + (9/24), 'YYYY-MM-DD HH24:MI:SS')
+		    ) AS LAST_SEND_DATE,
+		    COALESCE(
+		        (SELECT COUNT(*) FROM TB_DM_MESSAGE 
+		         WHERE ROOM_NO = r.ROOM_NO 
+		           AND SENDER_ID = p2.MEMBER_ID
+		           AND MESSAGE_NO > NVL(p1.LAST_READ_MESSAGE_NO, 0)
+		           AND IS_DEL = 'N'),
+		        0
+		    ) AS UNREAD_COUNT
+		FROM TB_DM_ROOM r
+		JOIN TB_DM_PARTICIPANT p1 ON r.ROOM_NO = p1.ROOM_NO
+		JOIN TB_DM_PARTICIPANT p2 ON r.ROOM_NO = p2.ROOM_NO 
+		JOIN TB_MEMBER m ON m.MEMBER_ID = p2.MEMBER_ID
+		WHERE p1.MEMBER_ID = #{userId}
+		  AND p2.MEMBER_ID != p1.MEMBER_ID
+		ORDER BY LAST_SEND_DATE DESC
 	</select>
 
 	<!-- 새로운 DM 방 생성용 쿼리 -->
@@ -95,15 +124,51 @@
 
 	<!-- 메세지 조회용 쿼리 -->
 	<select id="selectMessage" parameterType="map" resultMap="dmMessageResultSet">
-		SELECT MESSAGE_NO
-		     , ROOM_NO
-		     , SENDER_ID
-		     , CONTENT
-		     , CREATE_DATE
+		SELECT m.MESSAGE_NO
+		     , m.ROOM_NO
+		     , m.SENDER_ID
+		     , m.CONTENT
+		     , TO_CHAR(m.CREATE_DATE + (9/24), 'YYYY-MM-DD HH24:MI:SS') AS CREATE_DATE
+		     , (CASE 
+		          WHEN m.MESSAGE_NO &lt;= (
+		              SELECT NVL(MAX(p.LAST_READ_MESSAGE_NO), 0)
+		              FROM TB_DM_PARTICIPANT p
+		              WHERE p.ROOM_NO = m.ROOM_NO
+		                AND p.MEMBER_ID != #{senderId}
+		          ) THEN 0  <!-- 상대방이 읽은 번호보다 작거나 같으면 읽음(0) -->
+		          ELSE 1    <!-- 아니면 안 읽음(1) -->
+		       END) AS READ_CHECK
+		  FROM TB_DM_MESSAGE m
+		 WHERE m.ROOM_NO = #{roomNo}
+		   AND m.IS_DEL = 'N'
+		 ORDER BY m.CREATE_DATE ASC
+	</select>
+	
+	<!-- 읽음 처리 - 마지막으로 읽은 메시지 번호 업데이트 -->
+	<update id="updateReadStatus" parameterType="map">
+		UPDATE TB_DM_PARTICIPANT
+		SET LAST_READ_MESSAGE_NO = (
+		    SELECT MAX(MESSAGE_NO) FROM TB_DM_MESSAGE
+		    WHERE ROOM_NO = #{roomNo}
+		      AND IS_DEL = 'N'
+		)
+		WHERE ROOM_NO = #{roomNo}
+		  AND MEMBER_ID = #{readerId}
+	</update>
+	
+	<!-- 미읽은 메시지 개수 조회 -->
+	<select id="getUnreadMessageCount" parameterType="map" resultType="int">
+		SELECT COUNT(*) 
 		  FROM TB_DM_MESSAGE
 		 WHERE ROOM_NO = #{roomNo}
+		   AND SENDER_ID != #{readerId}
 		   AND IS_DEL = 'N'
-		 ORDER BY CREATE_DATE ASC
+		   AND MESSAGE_NO > (
+		   		SELECT NVL(MAX(LAST_READ_MESSAGE_NO), 0)
+		   		  FROM TB_DM_PARTICIPANT
+		   		 WHERE ROOM_NO = #{roomNo}
+		   		   AND MEMBER_ID = #{readerId}
+		   )
 	</select>
 
 </mapper>

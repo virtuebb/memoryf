@@ -68,6 +68,17 @@ public class DmServiceImpl implements DmService {
 
     }
 
+    @Override
+    @Transactional
+    public int updateReadStatus(Map<String, Object> map) {
+        return dmDao.updateReadStatus(sqlSession, map);
+    }
+
+    @Override
+    public int getUnreadMessageCount(Map<String, Object> map) {
+        return dmDao.getUnreadMessageCount(sqlSession, map);
+    }
+
 
 
 

@@ -18,6 +18,6 @@ public class DmParticipant {
     private int roomNo;             // ROOM_NO	NUMBER
     private String memberId;        // MEMBER_ID	VARCHAR2(50 BYTE)
     private int lastReadMessageNo;  // LAST_READ_MESSAGE_NO	NUMBER
-    private Date joinDate;          // JOINED_AT	DATE
+    private String joinDate;          // JOINED_AT	DATE
 }
 

@@ -21,6 +21,8 @@ import ChatList from '../components/DmList.jsx';
 import ChatRoom from '../components/DmRoom.jsx';
 import UserSearchModal from '../components/UserSearchModal.jsx';
 import ThemeSelector from '../components/ThemeSelector.jsx';
+import { useMemo, useCallback } from 'react';
+import React from 'react';
 import './css/DmRoutes.css';
 
 export default function DmRoutes() {
@@ -65,49 +67,55 @@ export default function DmRoutes() {
   /**
    * 📤 메시지 보내기 (DmRoutes 전용 - navigate 필요)
    */
-  const onSendMessage = (chatId, messageText) => {
+  const onSendMessage = useCallback((chatId, messageText) => {
     const activatedChat = handleSendMessage(chatId, messageText);
 
     // 성공했을 시
     if (activatedChat) {
       navigate(`/messages/${activatedChat.id}`);
     }
-  };
+  }, [handleSendMessage, navigate]);
 
   // ============================================
   // 🎨 화면 그리기
   // ============================================
+  
+  // 📌 Routes를 메모이제이션해서 allChats 변경 시 재렌더링 방지
+  const routesElement = useMemo(() => (
+    <Routes location={location} key={location.pathname}>
+      {/* 📋 채팅방 목록 페이지 */}
+      <Route
+        index
+        element={
+          <DmRoomListPage
+            allChats={allChats}
+            themeClass={themeClass}
+            openSearch={openSearchModal}
+            navigateToChat={(chatId) => navigate(`/messages/${chatId}`)}
+          />
+        }
+      />
+      {/* 💬 개별 채팅방 페이지 */}
+      <Route
+        path=":chatId"
+        element={
+          <DmChatPage
+            allChats={allChats}
+            onBack={() => navigate('/messages')}
+            onSendMessage={onSendMessage}
+            onMarkAsRead={handleMarkAsRead}
+            themeClass={themeClass}
+          />
+        }
+      />
+    </Routes>
+  ), [allChats, themeClass, openSearchModal, navigate, onSendMessage, handleMarkAsRead, location]);
+  
   return (
     <div className="dm-container">
       {/* 📦 카드 형태의 DM 컨테이너 */}
       <div className="dm-card">
-        <Routes location={location} key={location.pathname}>
-          {/* 📋 채팅방 목록 페이지 */}
-          <Route
-            index
-            element={
-              <DmRoomListPage
-                allChats={allChats}
-                themeClass={themeClass}
-                openSearch={openSearchModal}
-                navigateToChat={(chatId) => navigate(`/messages/${chatId}`)}
-              />
-            }
-          />
-          {/* 💬 개별 채팅방 페이지 */}
-          <Route
-            path=":chatId"
-            element={
-              <DmChatPage
-                allChats={allChats}
-                onBack={() => navigate('/messages')}
-                onSendMessage={onSendMessage}
-                onMarkAsRead={handleMarkAsRead}
-                themeClass={themeClass}
-              />
-            }
-          />
-        </Routes>
+        {routesElement}
       </div>
 
       {/* 🔍 사용자 검색 모달 */}
@@ -148,7 +156,7 @@ function DmRoomListPage({ allChats, themeClass, openSearch, navigateToChat }) {
  *    GET /dm/rooms/{chatId}/messages
  *    → 이 채팅방의 메시지 목록 가져오기
  */
-function DmChatPage({ allChats, onBack, onSendMessage, onMarkAsRead, themeClass }) {
+const DmChatPage = React.memo(function DmChatPage({ allChats, onBack, onSendMessage, onMarkAsRead, themeClass }) {
   // 🔗 URL에서 채팅방 ID 가져오기 (예: /messages/123 → chatId = "123")
   const { chatId } = useParams();
   
@@ -174,4 +182,4 @@ function DmChatPage({ allChats, onBack, onSendMessage, onMarkAsRead, themeClass 
       themeClass={themeClass} 
     />
   );
-}
+});
