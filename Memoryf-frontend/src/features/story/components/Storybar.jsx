@@ -10,7 +10,8 @@ function StoryBar() {
   const [storyList, setStoryList] = useState([]);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
-  const memberNo = 1; // 실제 프로젝트 시 로그인된 회원 번호로 연동 필요
+  const loginMember = JSON.parse(localStorage.getItem("loginMember"));
+  const memberNo = loginMember ? loginMember.memberNo : null;
 
   // 스토리 목록 로드
   const loadStoryList = () => {

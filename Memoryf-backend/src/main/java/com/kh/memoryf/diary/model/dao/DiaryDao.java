@@ -38,8 +38,14 @@ public class DiaryDao {
         int memberNo
     ) {
         return sqlSession.selectOne(
-            "DiaryMapper.selectDiaryCount",
-            memberNo
+            "DiaryMapper.selectDiaryCount", memberNo
         );
     }
+    
+    // 다이어리 수정용
+	public int updateDiary( SqlSessionTemplate sqlSession, Diary diary) {
+		return sqlSession.update(
+	            "DiaryMapper.updateDiary", diary
+		        );
+	}
 }

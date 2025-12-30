@@ -4,7 +4,7 @@ import { useTheme } from "../../../shared/components/ThemeContext";
 import { getHomeByMemberNo, getHomeByMemberNick } from "../api/homeApi";
 import { getMemberNoFromToken } from "../../../utils/jwt";
 import { onFollowChange } from "../../../utils/followEvents";
-import { recordVisit } from "../../../shared/api/visitorApi";
+import { visitHome } from "../../../shared/api/visitorApi";
 
 import Storybar from "../../story/components/Storybar";
 import ProfileCard from "../components/ProfileCard";
@@ -59,7 +59,7 @@ function Home() {
         if (currentMemberNo && homeData?.homeNo) {
           
           // 방문 기록(실패해도 화면 동작에 영향 없도록)
-          recordVisit(currentMemberNo, data.homeNo).catch(() => {});
+          visitHome(data.homeNo).catch(() => {});
         }
       } catch (error) {
         console.error('홈 번호 조회 실패:', error);
@@ -138,6 +138,7 @@ function Home() {
 
   return (
     <div className="home-wrapper" style={{ background: theme.color }}>
+    <div className="home-scroll">
       <div className="home-layout">
         <main className="main">
           <div className="card card-story">
@@ -182,6 +183,7 @@ function Home() {
         </main>
       </div>
     </div>
+  </div>
   );
 }
 

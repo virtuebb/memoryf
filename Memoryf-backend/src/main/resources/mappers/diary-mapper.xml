@@ -67,5 +67,15 @@
             MEMBER_NO = #{memberNo}
             AND IS_DEL = 'N'
     </select>
+    
+    <!-- 다이어리 수정 -->
+    <update id="updateDiary" parameterType="Diary">
+    	UPDATE TB_DIARY
+		SET
+		  CONTENT = #{content}
+		WHERE DIARY_NO = #{diaryNo}
+		AND MEMBER_NO = #{memberNo}
+    </update>
+    
 
 </mapper>

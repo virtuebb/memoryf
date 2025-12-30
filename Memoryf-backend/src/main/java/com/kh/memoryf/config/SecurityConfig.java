@@ -82,7 +82,10 @@ public class SecurityConfig {
 				    .requestMatchers(HttpMethod.POST, "/feeds/**").authenticated()
 				    
 				    // Diary (개인 데이터 → 로그인 필요)
-				    .requestMatchers("/diaries/**").authenticated()
+				    .requestMatchers(HttpMethod.GET,    "/diaries/**", "/memoryf/diaries/**").authenticated()
+				    .requestMatchers(HttpMethod.POST,   "/diaries/**", "/memoryf/diaries/**").authenticated()
+				    .requestMatchers(HttpMethod.PUT,    "/diaries/**", "/memoryf/diaries/**").authenticated()
+				    .requestMatchers(HttpMethod.DELETE, "/diaries/**", "/memoryf/diaries/**").authenticated()
 				    
 					// server.servlet.context-path=/memoryf 환경을 고려해 두 패턴을 모두 허용
 					.requestMatchers(

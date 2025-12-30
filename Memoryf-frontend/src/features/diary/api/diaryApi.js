@@ -8,7 +8,6 @@ const diaryApi = axios.create({
 // ✅ JWT 자동 첨부
 diaryApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
-  console.log("DIARY TOKEN =", token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -20,19 +19,43 @@ diaryApi.interceptors.request.use((config) => {
  * GET /memoryf/diaries?page=1&size=5
  */
 export const getDiaryList = async (page = 1, size = 5) => {
-  const res = await diaryApi.get("", {
-    params: { page, size },
-  });
-  return res.data;
+  try {
+    const res = await diaryApi.get("", {
+      params: { page, size },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("❌ getDiaryList 실패", err);
+    throw err;
+  }
 };
 
 /**
  * ✏️ 다이어리 작성
  * POST /memoryf/diaries
  */
-export const createDiary = async (diary) => {
-  const res = await diaryApi.post("", diary);
-  return res.data;
+export const createDiary = async (content) => {
+  try {
+    const res = await diaryApi.post("", { content });
+    return res.data;
+  } catch (err) {
+    console.error("❌ createDiary 실패", err);
+    throw err;
+  }
+};
+
+/**
+ * ✏️ 다이어리 수정
+ * PUT /memoryf/diaries/{diaryNo}
+ */
+export const updateDiary = async (diaryNo, content) => {
+  try {
+    const res = await diaryApi.put(`/${diaryNo}`, { content });
+    return res.data;
+  } catch (err) {
+    console.error("❌ updateDiary 실패", err);
+    throw err;
+  }
 };
 
 /**
@@ -40,8 +63,13 @@ export const createDiary = async (diary) => {
  * DELETE /memoryf/diaries/{diaryNo}
  */
 export const deleteDiary = async (diaryNo) => {
-  const res = await diaryApi.delete(`/${diaryNo}`);
-  return res.data;
+  try {
+    const res = await diaryApi.delete(`/${diaryNo}`);
+    return res.data;
+  } catch (err) {
+    console.error("❌ deleteDiary 실패", err);
+    throw err;
+  }
 };
 
 export default diaryApi;

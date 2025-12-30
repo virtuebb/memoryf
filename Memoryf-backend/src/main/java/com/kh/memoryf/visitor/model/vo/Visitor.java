@@ -19,5 +19,13 @@ public class Visitor {
     private Date visitDate;
     private int memberNo;
     private int homeNo;
+    
+    public Visitor(int memberNo, int homeNo) {
+        this.memberNo = memberNo;
+        this.homeNo = homeNo;
+    
+    }
 
 }
+
+
