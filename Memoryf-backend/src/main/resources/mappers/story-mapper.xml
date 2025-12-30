@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="storyMapper">
+
+  <!-- Story 단건용 (필요하면 유지) -->
+  <resultMap id="storyResultSet" type="story">
+    <id property="storyNo" column="STORY_NO"/>
+    <result property="memberNo" column="MEMBER_NO"/>
+    <result property="createDate" column="CREATE_DATE"/>
+    <result property="expireDate" column="EXPIRE_DATE"/>
+    <result property="isDel" column="IS_DEL"/>
+  </resultMap>
+
+  <!-- ✅ StoryDetail (Story + StoryItem List) 한번에 조회용 -->
+  <resultMap id="storyDetailResultMap" type="storyDetail">
+	  <id property="story.storyNo" column="STORY_NO"/>
+	  <result property="story.memberNo" column="MEMBER_NO"/>
+	  <result property="story.createDate" column="CREATE_DATE"/>
+	  <result property="story.expireDate" column="EXPIRE_DATE"/>
+	  <result property="story.isDel" column="IS_DEL"/>
+	
+	  <collection property="items" ofType="storyItem">
+	    <id property="itemNo" column="ITEM_NO"/>
+	    <result property="storyNo" column="STORY_NO"/>
+	    <result property="itemOrder" column="ITEM_ORDER"/>
+	    <result property="originName" column="ORIGIN_NAME"/>
+	    <result property="changeName" column="CHANGE_NAME"/>
+	    <result property="filePath" column="FILE_PATH"/>
+	    <result property="storyText" column="STORY_TEXT"/>
+	    <result property="isDel" column="ITEM_IS_DEL"/>
+	    <result property="createDate" column="ITEM_CREATE_DATE"/>
+	  </collection>
+	</resultMap>
+
+  <!-- ✅ StoryDetail 조회 -->
+  <select id="selectStoryDetail" parameterType="int" resultMap="storyDetailResultMap">
+    SELECT
+      S.STORY_NO,
+      S.MEMBER_NO,
+      S.CREATE_DATE,
+      S.EXPIRE_DATE,
+      S.IS_DEL,
+
+      I.ITEM_NO,
+      I.ITEM_ORDER,
+      I.ORIGIN_NAME,
+      I.CHANGE_NAME,
+      I.FILE_PATH,
+      I.STORY_TEXT,
+      I.IS_DEL AS ITEM_IS_DEL,
+      I.CREATE_DATE AS ITEM_CREATE_DATE
+
+    FROM TB_STORY S
+    LEFT JOIN TB_STORY_ITEM I
+      ON I.STORY_NO = S.STORY_NO
+     AND I.IS_DEL = 'N'
+    WHERE S.STORY_NO = #{value}
+      AND S.IS_DEL = 'N'
+    ORDER BY I.ITEM_ORDER
+  </select>
+  
+	<!-- ✅ STORY_NO 시퀀스 -->
+	<select id="selectStoryNo" resultType="int">
+	  SELECT SEQ_STORY_NO.NEXTVAL FROM DUAL
+	</select>
+	
+	<!-- ✅ TB_STORY INSERT -->
+	<insert id="insertStory" parameterType="story">
+	  INSERT INTO TB_STORY
+	    (STORY_NO, MEMBER_NO, CREATE_DATE, EXPIRE_DATE, IS_DEL)
+	  VALUES
+	    (#{storyNo}, #{memberNo}, SYSDATE, SYSDATE + 1, 'N')
+	</insert>
+	
+	<!-- ✅ TB_STORY_ITEM 다건 INSERT (Oracle) -->
+	<insert id="insertStoryItems" parameterType="java.util.List">
+	    INSERT INTO TB_STORY_ITEM (
+	        ITEM_NO, 
+	        STORY_NO, 
+	        ITEM_ORDER, 
+	        ORIGIN_NAME, 
+	        CHANGE_NAME, 
+	        FILE_PATH, 
+	        STORY_TEXT, 
+	        IS_DEL, 
+	        CREATE_DATE
+	    )
+	    SELECT SEQ_STORY_ITEM_NO.NEXTVAL, A.* FROM (
+	        <foreach collection="list" item="it" separator=" UNION ALL ">
+	            SELECT 
+	                #{it.storyNo} as story_no, 
+	                #{it.itemOrder} as item_order, 
+	                #{it.originName} as origin_name, 
+	                #{it.changeName} as change_name, 
+	                #{it.filePath} as file_path, 
+	                #{it.storyText, jdbcType=VARCHAR} as story_text, 
+	                'N' as is_del, 
+	                SYSDATE as create_date
+	            FROM DUAL
+	        </foreach>
+	    ) A
+	</insert>
+	
+	<!-- 스토리 소프트 삭제 -->
+	<update id="deleteStory" parameterType="int">
+	  UPDATE TB_STORY
+	     SET IS_DEL = 'Y'
+	   WHERE STORY_NO = #{value}
+	</update>
+	
+	<!-- 스토리 아이템 소프트 삭제 -->
+	<update id="deleteStoryItems" parameterType="int">
+	  UPDATE TB_STORY_ITEM
+	     SET IS_DEL = 'Y'
+	   WHERE STORY_NO = #{value}
+	</update>
+	
+	<select id="selectStoryList" parameterType="int" resultMap="storyResultSet">
+	  SELECT
+	    STORY_NO,
+	    MEMBER_NO,
+	    CREATE_DATE,
+	    EXPIRE_DATE,
+	    IS_DEL
+	  FROM TB_STORY
+	  WHERE MEMBER_NO = #{value}
+	    AND IS_DEL = 'N'
+	  ORDER BY STORY_NO DESC
+	</select>
+	
+	<select id="selectStoryVisitorCount" parameterType="storyVisitor" resultType="int">
+	  SELECT COUNT(*)
+	  FROM TB_STORY_VISITOR
+	  WHERE MEMBER_NO = #{memberNo}
+	    AND STORY_NO  = #{storyNo}
+	</select>
+	
+	<insert id="insertStoryVisitor" parameterType="storyVisitor">
+	  INSERT INTO TB_STORY_VISITOR (MEMBER_NO, STORY_NO)
+	  VALUES (#{memberNo}, #{storyNo})
+	</insert>
+	
+	
+	
+	
+  
+</mapper>

@@ -91,5 +91,12 @@
 		WHERE RN BETWEEN #{startRow} AND #{endRow}
 		ORDER BY RN
 	</select>
+	
+	<!-- 회원 탈퇴 시 모든 팔로우 관계 삭제 (내가 팔로우한 것 + 나를 팔로우한 것) -->
+	<delete id="deleteAllFollowsByMember" parameterType="_int">
+		DELETE FROM TB_FOLLOWS
+		WHERE MEMBER_NO = #{memberNo}
+		OR HOME_NO IN (SELECT HOME_NO FROM TB_MEMBER_HOME WHERE MEMBER_NO = #{memberNo})
+	</delete>
 
 </mapper>

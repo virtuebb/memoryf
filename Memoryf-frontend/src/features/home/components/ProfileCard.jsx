@@ -472,9 +472,13 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
   /* =========================
      렌더링
   ========================= */
-  const profileImageUrl = home.profileChangeName
-    ? `http://localhost:8006/memoryf/profile_images/${home.profileChangeName}?t=${imageTimestamp}`
-    : defaultProfileImg;
+  const isDeletedUser = home.status === 'Y';
+  const displayNick = isDeletedUser ? 'deletedUser' : home.memberNick;
+  const profileImageUrl = isDeletedUser 
+    ? defaultProfileImg
+    : (home.profileChangeName
+      ? `http://localhost:8006/memoryf/profile_images/${home.profileChangeName}?t=${imageTimestamp}`
+      : defaultProfileImg);
 
   const followModal = isFollowModalOpen ? (
     <div className="follow-modal-overlay" onClick={closeFollowModal}>
@@ -586,10 +590,14 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
 
         {/* 정보 */}
         <div className="profile-content">
-          <h2 className="name">{home.memberNick}</h2>
-          <span className="username">@{home.memberNick}</span>
+          <h2 className="name">{displayNick}</h2>
+          <span className="username">@{displayNick}</span>
+          
+          {isDeletedUser && (
+            <p className="deleted-user-notice">탈퇴한 회원입니다</p>
+          )}
 
-          {home.statusMsg && <p className="bio">{home.statusMsg}</p>}
+          {!isDeletedUser && home.statusMsg && <p className="bio">{home.statusMsg}</p>}
 
           <div className="stats inline">
             <div>

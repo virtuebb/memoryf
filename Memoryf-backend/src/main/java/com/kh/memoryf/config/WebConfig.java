@@ -36,5 +36,12 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/profile_images/**")
                 .addResourceLocations("file:" + profileUploadPath)
                 .setCachePeriod(3600);
+        
+     // 업로드된 스토리 이미지 제공 (file system)
+        String storyUploadPath = System.getProperty("user.home") + "/memoryf/feed_upfiles/";
+        registry.addResourceHandler("/resources/story/**")
+                .addResourceLocations("file:" + storyUploadPath)
+                .setCachePeriod(3600);
+
     }
 }

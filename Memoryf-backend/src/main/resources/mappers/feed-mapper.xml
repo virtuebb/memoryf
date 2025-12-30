@@ -31,6 +31,7 @@
 							F.IS_DEL,
 							F.MEMBER_NO,
 							M.MEMBER_NICK,
+							M.STATUS AS MEMBER_STATUS,
 							NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
 							NVL(COMMENT_CNT.COMMENT_COUNT, 0) AS COMMENT_COUNT
 							<if test="memberNo != null">
@@ -182,6 +183,7 @@
 			F.IS_DEL,
 			F.MEMBER_NO,
 			M.MEMBER_NICK,
+			M.STATUS AS MEMBER_STATUS,
 			H.PROFILE_CHANGE_NAME AS PROFILE_IMAGE,
 			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
 			NVL(COMMENT_CNT.COMMENT_COUNT, 0) AS COMMENT_COUNT
@@ -469,6 +471,7 @@
 		<result property="isDel" column="IS_DEL"/>
 		<result property="memberNo" column="MEMBER_NO"/>
 		<result property="memberNick" column="MEMBER_NICK"/>
+		<result property="memberStatus" column="MEMBER_STATUS"/>
 		<result property="profileImage" column="PROFILE_IMAGE"/>
 		<result property="likeCount" column="LIKE_COUNT"/>
 		<result property="commentCount" column="COMMENT_COUNT"/>

@@ -29,6 +29,7 @@ public class Feed {
 	
 	// 조인을 위한 필드
 	private String memberNick;        // 회원 닉네임
+	private String memberStatus;      // 회원 상태 (Y: 탈퇴)
 	private String profileImage;      // 프로필 이미지
 	private int likeCount;            // 좋아요 수
 	private int commentCount;         // 댓글 수

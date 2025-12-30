@@ -86,5 +86,10 @@ public class FollowDao {
 		params.put("endRow", (page + 1) * size);
 		return new ArrayList<>(sqlSession.selectList("followMapper.selectFollowing", params));
 	}
+	
+	// 회원 탈퇴 시 모든 팔로우 관계 삭제
+	public int deleteAllFollowsByMember(SqlSessionTemplate sqlSession, int memberNo) {
+		return sqlSession.delete("followMapper.deleteAllFollowsByMember", memberNo);
+	}
 
 }
