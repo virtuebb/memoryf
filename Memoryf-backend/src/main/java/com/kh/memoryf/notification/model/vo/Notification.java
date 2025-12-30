@@ -1,6 +1,6 @@
 package com.kh.memoryf.notification.model.vo;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import org.apache.ibatis.type.Alias;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ public class Notification {
     private String type; // 'FOLLOW_REQUEST', 'FOLLOW_ACCEPT', 'LIKE_FEED', 'COMMENT_FEED'
     private Integer targetId; // FEED_NO, COMMENT_NO, etc.
     private String isRead;
-    private Date createDate;
+    private Timestamp createDate;
     
     // Join fields
     private String senderNick;

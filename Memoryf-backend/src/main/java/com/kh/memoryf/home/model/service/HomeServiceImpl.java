@@ -37,6 +37,7 @@ public class HomeServiceImpl implements HomeService {
 	}
 
 	@Override
+	@Transactional
 	public int createGuestbook(Guestbook guestbook) {
 		return homeDao.insertGuestbook(sqlSession, guestbook);
 	}

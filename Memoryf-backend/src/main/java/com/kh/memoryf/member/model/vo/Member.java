@@ -27,4 +27,7 @@ public class Member {
 	private Date birthday;
 	private Date createDate;
 	private String status;
+	
+	// 조인용 필드
+	private String profileImage;
 }

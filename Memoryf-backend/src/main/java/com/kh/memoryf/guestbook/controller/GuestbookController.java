@@ -43,12 +43,9 @@ public class GuestbookController {
     @PostMapping
     public ResponseEntity<?> insertGuestbook(
             @RequestBody Guestbook guestbook,
-            Authentication authentication
+            jakarta.servlet.http.HttpServletRequest request
     ) {
-        // ⚠️ principal = memberId or memberNo (닉네임 아님)
-        int memberNo = Integer.parseInt(
-            (String) authentication.getPrincipal()
-        );
+        int memberNo = (Integer) request.getAttribute("memberNo");
 
         guestbook.setMemberNo(memberNo);
 
