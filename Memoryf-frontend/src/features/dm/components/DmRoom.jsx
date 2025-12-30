@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDm } from '../context/DmContext';
 import React from 'react';
 import '../css/DmRoom.css';
-import { selectDmMessages } from '../api/dmApi.js';
+import { deleteMessage, selectDmMessages } from '../api/dmApi.js';
 
 function ArrowLeftIcon() {
   return (
@@ -19,6 +19,15 @@ function SendIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M22 2L11 13" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M22 2L15 22l-4-9-9-4 20-7z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M18 6L6 18" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -150,13 +159,18 @@ function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, themeClass = 'lig
   }, [chat.messages]);
 
   /**
-   * 📤 메시지 보내기 버튼 클릭 시
+   * �️ 메시지 삭제 핸들러
    */
-  const handleSend = () => {
-    // 빈 메시지는 안 보냄
-    if (messageInput.trim()) {
-      onSendMessage(chat.id, messageInput);  // 부모한테 "이 메시지 보내줘!" 요청
-      setMessageInput('');  // 입력창 비우기
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm('메시지를 삭제하시겠습니까?')) return;
+    
+    try {
+      console.log('메시지 삭제:', messageId);
+      await deleteMessage(messageId);
+      // 메시지 목록 새로고침
+      fetchMessages(Number(chat.id));
+    } catch (error) {
+      console.error('메시지 삭제 실패:', error);
     }
   };
 
@@ -167,6 +181,17 @@ function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, themeClass = 'lig
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();  // 줄바꿈 방지
       handleSend();
+    }
+  };
+
+  /**
+   * 📤 메시지 보내기 버튼 클릭 시
+   */
+  const handleSend = () => {
+    // 빈 메시지는 안 보냄
+    if (messageInput.trim()) {
+      onSendMessage(chat.id, messageInput);  // 부모한테 "이 메시지 보내줘!" 요청
+      setMessageInput('');  // 입력창 비우기
     }
   };
 
@@ -243,6 +268,13 @@ function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, themeClass = 'lig
                       </div>
                       <div className="chat-message-bubble mine">
                         {message.text}
+                        <button 
+                          onClick={() => handleDeleteMessage(message.id)} 
+                          className="chat-message-delete-btn"
+                          title="메시지 삭제"
+                        >
+                          <XIcon />
+                        </button>
                       </div>
                     </div>
                   ) : (

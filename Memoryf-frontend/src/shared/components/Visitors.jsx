@@ -1,30 +1,7 @@
-import { useEffect, useState } from "react";
 import "../css/Visitors.css";
-import { getVisitorStats } from "../api/visitorApi";
 
-function Visitors({ homeNo }) {
-  const [stats, setStats] = useState({ today: 0, total: 0 });
-
-  useEffect(() => {
-    if (!homeNo) return;
-
-    const fetchStats = async () => {
-      try {
-        const res = await getVisitorStats(homeNo);
-
-        setStats({
-          today: res.data?.today ?? 0,
-          total: res.data?.total ?? 0,
-        });
-      } catch (err) {
-        console.warn("Visitors: 방문자 통계 로드 실패", err);
-        setStats({ today: 0, total: 0 });
-      }
-    };
-
-    fetchStats();
-  }, [homeNo]);
-
+function Visitors({ today = 0, total = 0 }) {
+  
   return (
     <div className="visitors">
       <div className="visitors-title">VISITORS</div>
@@ -32,18 +9,14 @@ function Visitors({ homeNo }) {
       <div className="visitors-stats">
         <div className="stat">
           <span className="label">TODAY</span>
-          <span className="value">
-            {Number(stats.today).toLocaleString()}
-          </span>
+          <span className="value">{today}</span>
         </div>
 
         <div className="divider" />
 
         <div className="stat">
           <span className="label">TOTAL</span>
-          <span className="value">
-            {Number(stats.total).toLocaleString()}
-          </span>
+          <span className="value">{total}</span>
         </div>
       </div>
     </div>
@@ -51,3 +24,4 @@ function Visitors({ homeNo }) {
 }
 
 export default Visitors;
+

@@ -40,9 +40,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (path.startsWith("/signup")) return true;
         if (path.startsWith("/find")) return true;
         
-        // 🔥 Visitor 추가
-        if (path.startsWith("/visitor")) return true;
-        
         // 문제시 삭제
         if (path.startsWith("/ws")) return true;
         if (path.startsWith("/messages")) return true;
@@ -66,6 +63,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // 요청 경로 확인 (context-path=/memoryf 포함 여부를 제거해 일관되게 처리)
         String path = request.getRequestURI();
         String contextPath = request.getContextPath();
+
         if (contextPath != null && !contextPath.isEmpty() && path.startsWith(contextPath)) {
             path = path.substring(contextPath.length());
         }
@@ -91,7 +89,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Authorization 헤더에서 Bearer 토큰 추출
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-
+        
+        System.out.println("[JWT] path = " + path);
+        System.out.println("[JWT] authHeader = " + authHeader);
+        System.out.println("[JWT] before auth = " 
+            + SecurityContextHolder.getContext().getAuthentication());
+        
         // 토큰이 없으면 그냥 통과 (SecurityConfig에서 authenticated가 막아줌)
         if (!StringUtils.hasText(authHeader) || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -115,6 +118,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             Integer memberNo = (memberNoNum == null) ? null : memberNoNum.intValue();
 
             request.setAttribute("memberNo", memberNo);
+
+            // System.out.println("🔥 JWT memberNo = " + memberNo);
             
             // 만료 시간 추가 안전 체크
             Date exp = claims.getExpiration();
@@ -142,7 +147,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 // SecurityContext에 인증 등록 (=> authenticated 통과)
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                
+                System.out.println("[JWT] after auth = " + SecurityContextHolder.getContext().getAuthentication());
                 
             }
 
@@ -154,4 +159,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+    
 }

@@ -27,11 +27,17 @@ public class HomeServiceImpl implements HomeService {
 	}
 
 	@Override
+	public Home getHome(int homeNo, Integer currentMemberNo) {
+		return homeDao.selectHomeByHomeNo(sqlSession, homeNo, currentMemberNo);
+	}
+
+	@Override
 	public ArrayList<Guestbook> getGuestbookList(int homeNo, Integer currentMemberNo, int offset, int limit) {
 		return homeDao.selectGuestbookList(sqlSession, homeNo, currentMemberNo, offset, limit);
 	}
 
 	@Override
+	@Transactional
 	public int createGuestbook(Guestbook guestbook) {
 		return homeDao.insertGuestbook(sqlSession, guestbook);
 	}

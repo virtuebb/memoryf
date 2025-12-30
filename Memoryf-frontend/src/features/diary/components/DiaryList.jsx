@@ -5,7 +5,7 @@ import "../css/DiaryList.css";
 const PAGE_SIZE = 5;
 const PAGE_GROUP_SIZE = 5;
 
-function DiaryList({ list }) {
+function DiaryList({ list, onUpdate, onDelete }) {
   const [page, setPage] = useState(1);
 
   const totalPages = Math.ceil(list.length / PAGE_SIZE);
@@ -15,18 +15,19 @@ function DiaryList({ list }) {
   const groupEnd = Math.min(groupStart + PAGE_GROUP_SIZE - 1, totalPages);
 
   const startIndex = (page - 1) * PAGE_SIZE;
-  const currentDiaries = list.slice(
-    startIndex,
-    startIndex + PAGE_SIZE
-  );
+  const currentDiaries = list.slice(startIndex, startIndex + PAGE_SIZE);
 
   return (
     <div className="diary-list">
       {currentDiaries.map((diary) => (
-        <DiaryItem key={diary.diaryNo} diary={diary} />
+        <DiaryItem
+          key={diary.diaryNo}
+          diary={diary}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+        />
       ))}
 
-      {/* Pagination */}
       <div className="pagination">
         <button
           disabled={groupStart === 1}

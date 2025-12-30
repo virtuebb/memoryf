@@ -129,7 +129,7 @@ public class HomeContoller {
 			response.put("data", guestbookList);
 		} catch (Exception e) {
 			response.put("success", false);
-			response.put("message", "방명록 조회 실패: " + e.getMessage());
+			response.put("message", "방명록 등록 실패: " + e.getMessage());
 		}
 		
 		return response;
@@ -153,7 +153,13 @@ public class HomeContoller {
 			int result = homeService.createGuestbook(guestbook);
 			if (result > 0) {
 				// 방명록 알림 생성 (자신의 홈에 쓴 경우는 제외)
-				Home home = homeService.getHome(homeNo, null);
+				// Home home = homeService.getHome(homeNo, null); // getHome 메서드 없음
+				// 대신 getHomeByMemberNo를 써야 하는데 homeNo를 memberNo로 변환해야 함.
+				// 하지만 homeNo로 Home을 조회하는 메서드가 없음.
+				// 일단 알림 기능은 보류하거나, homeNo로 memberNo를 조회하는 로직이 필요함.
+				
+				// 임시: 알림 기능 주석 처리 (컴파일 에러 해결)
+				/*
 				if (home != null && home.getMemberNo() != guestbook.getMemberNo()) {
 					Notification notification = new Notification();
 					notification.setReceiverNo(home.getMemberNo());
@@ -163,6 +169,7 @@ public class HomeContoller {
 					notification.setIsRead("N");
 					notificationService.createNotification(notification);
 				}
+				*/
 				
 				response.put("success", true);
 				response.put("message", "방명록이 등록되었습니다.");
@@ -171,6 +178,7 @@ public class HomeContoller {
 				response.put("message", "방명록 등록에 실패했습니다.");
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			response.put("success", false);
 			response.put("message", "방명록 등록 실패: " + e.getMessage());
 		}

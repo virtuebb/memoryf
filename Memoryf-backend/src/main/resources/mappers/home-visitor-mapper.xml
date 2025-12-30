@@ -1,32 +1,41 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
+<mapper namespace="homeVisitorMapper">
 
+    <!-- 오늘 방문 여부 -->
+    <select id="existsToday" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_HOME_VISITOR
+        WHERE MEMBER_NO = #{memberNo}
+          AND HOME_NO = #{homeNo}
+          AND TRUNC(VISIT_DATE) = TRUNC(SYSDATE)
+    </select>
 
-<mapper namespace="visitor">
-
-    <insert id="insertTodayVisitor">
-        INSERT INTO TB_HOME_VISITOR (VISIT_DATE, MEMBER_NO, HOME_NO)
-        SELECT TRUNC(SYSDATE), #{memberNo}, #{homeNo}
-        FROM dual
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM TB_HOME_VISITOR
-            WHERE MEMBER_NO = #{memberNo}
-              AND HOME_NO = #{homeNo}
-              AND VISIT_DATE = TRUNC(SYSDATE)
+    <!-- 방문 기록 저장 -->
+    <insert id="insertVisit">
+        INSERT INTO TB_HOME_VISITOR (
+            MEMBER_NO,
+            HOME_NO,
+            VISIT_DATE
+        ) VALUES (
+            #{memberNo},
+            #{homeNo},
+            SYSDATE
         )
     </insert>
 
+    <!-- 오늘 방문자 수 -->
     <select id="selectTodayCount" resultType="int">
         SELECT COUNT(*)
         FROM TB_HOME_VISITOR
         WHERE HOME_NO = #{homeNo}
-          AND VISIT_DATE = TRUNC(SYSDATE)
+          AND TRUNC(VISIT_DATE) = TRUNC(SYSDATE)
     </select>
 
+    <!-- 전체 방문자 수 -->
     <select id="selectTotalCount" resultType="int">
         SELECT COUNT(*)
         FROM TB_HOME_VISITOR

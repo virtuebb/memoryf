@@ -177,4 +177,25 @@
 		   )
 	</select>
 
+	<!-- 메세지 삭제 -->
+	<select id="deleteMessage" parameterType="int">
+		UPDATE TB_DM_MESSAGE
+		   SET IS_DEL = 'Y'
+		 WHERE MESSAGE_NO = #{messageNo}
+	</select>
+
+	<!-- 메시지 ID로 ROOM_NO 조회 -->
+	<select id="getRoomNoByMessageId" parameterType="int" resultType="int">
+		SELECT ROOM_NO
+		  FROM TB_DM_MESSAGE
+		 WHERE MESSAGE_NO = #{messageId}
+	</select>
+
+	<!-- 채팅방 참가자 목록 조회 -->
+	<select id="getParticipantsByRoomNo" parameterType="int" resultType="string">
+		SELECT MEMBER_ID
+		  FROM TB_DM_PARTICIPANT
+		 WHERE ROOM_NO = #{roomNo}
+	</select>
+
 </mapper>

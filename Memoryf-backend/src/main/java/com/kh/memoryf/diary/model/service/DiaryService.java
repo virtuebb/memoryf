@@ -14,4 +14,7 @@ public interface DiaryService {
 
     // 일기 삭제 (soft delete)
     void deleteDiary(int diaryNo);
+
+    // 일기 수정
+	void updateDiary(Diary diary);
 }

@@ -2,16 +2,13 @@ package com.kh.memoryf.visitor.controller;
 
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.kh.memoryf.visitor.model.service.VisitorService;
 
-@CrossOrigin(origins = "http://localhost:5173")
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/visitor")
 public class VisitorController {
@@ -22,26 +19,27 @@ public class VisitorController {
         this.visitorService = visitorService;
     }
 
-    /**
-     * 방문 기록 (테스트용)
-     * POST /memoryf/visitor?memberNo=1&homeNo=2
-     */
+    // 🔹 방문 기록 (JWT 기반)
     @PostMapping
-    public void recordVisit(
-            @RequestParam int memberNo,
-            @RequestParam int homeNo) {
+    public ResponseEntity<?> recordVisit(
+            @RequestParam int homeNo,
+            HttpServletRequest request) {
+
+        Integer memberNo = (Integer) request.getAttribute("memberNo");
+        if (memberNo == null) {
+            return ResponseEntity.status(401).build();
+        }
 
         visitorService.recordVisit(memberNo, homeNo);
+        return ResponseEntity.ok().build();
     }
 
-    /**
-     * 방문자 수 조회 (테스트용)
-     * GET /memoryf/visitor/count?homeNo=2
-     */
+    // 🔹 방문자 수 조회
     @GetMapping("/count")
-    public Map<String, Integer> getVisitorStats(
+    public ResponseEntity<Map<String, Integer>> getVisitorStats(
             @RequestParam int homeNo) {
-
-        return visitorService.getVisitorStats(homeNo);
+    	
+        return ResponseEntity.ok(
+            visitorService.getVisitorStats(homeNo));
     }
 }

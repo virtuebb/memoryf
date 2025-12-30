@@ -1,47 +1,163 @@
+/* =========================
+   Diary Item Card
+========================= */
 .diary-item {
-  background: var(--color-card-bg);
-  border-radius: 20px;
-  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 22px;
+  padding: 18px 20px 16px;
 
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
 
-  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px var(--color-border-soft);
 }
 
-.diary-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+/* =========================
+   Meta (Date)
+========================= */
+.diary-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.diary-item .date {
-  font-size: 11px;
+.diary-date {
+  font-size: 12px;
+  font-weight: 600;
   color: var(--color-text-muted);
+}
 
-  display: inline-block;
-  width: fit-content;
+/* =========================
+   Content
+========================= */
+.diary-content {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--color-sidebar-link);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
-  padding: 2px 8px;
+/* 수정 중 textarea */
+.diary-content textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: none;
+
+  border: none;
+  outline: none;
+  background: transparent;
+
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--color-sidebar-link);
+}
+
+/* =========================
+   Footer (Buttons)
+========================= */
+.edit-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+/* =========================
+   Buttons - Common
+========================= */
+.edit-btn,
+.delete-btn,
+.save-btn,
+.cancel-btn {
+  padding: 6px 14px;
   border-radius: 999px;
+  border: none;
+
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: all 0.15s ease;
+}
+
+/* =========================
+   Edit / Delete
+========================= */
+.edit-btn {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.edit-btn:hover {
+  color: var(--color-accent-strong);
+}
+
+.delete-btn {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.delete-btn:hover {
+  background: rgba(216, 107, 107, 0.1);
+}
+
+/* =========================
+   Save / Cancel
+========================= */
+.save-btn {
   background: color-mix(
     in srgb,
-    var(--color-accent) 20%,
+    var(--color-accent) 35%,
+    transparent
+  );
+  color: var(--color-accent-strong);
+}
+
+.save-btn:hover {
+  background: color-mix(
+    in srgb,
+    var(--color-accent) 50%,
     transparent
   );
 }
 
-.diary-item p {
-  margin: 0;
+.cancel-btn {
+  background: transparent;
+  color: var(--color-text-muted);
 }
 
-.diary-content {
-  font-size: 14px;
-  line-height: 1.75;
-  color: var(--color-text-main);
-  white-space: pre-wrap;
+.cancel-btn:hover {
+  color: var(--color-sidebar-link);
 }
+
+.diary-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.07);
+}
+
+.diary-item:has(textarea) {
+  box-shadow:
+    0 0 0 2px color-mix(
+      in srgb,
+      var(--color-accent) 25%,
+      transparent
+    ),
+    0 12px 26px rgba(0, 0, 0, 0.212);
+}
+
+.diary-item:has(textarea):hover {
+  transform: translateY(0);
+  box-shadow:
+    0 0 0 2px color-mix(
+      in srgb,
+      var(--color-accent) 40%,
+      transparent
+    ),
+    0 12px 26px rgba(0, 0, 0, 0.212);
+}
+
 

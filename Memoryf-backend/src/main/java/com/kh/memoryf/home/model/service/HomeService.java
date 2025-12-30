@@ -46,6 +46,14 @@ public interface HomeService {
 	boolean toggleGuestbookLike(int guestbookNo, int memberNo);
 	
 	/**
+	 * 홈 번호로 홈 조회
+	 * @param homeNo 홈 번호
+	 * @param currentMemberNo 현재 로그인한 회원 번호
+	 * @return Home
+	 */
+	Home getHome(int homeNo, Integer currentMemberNo);
+	
+	/**
 	 * 프로필 이미지 업데이트
 	 * @param home
 	 * @return int

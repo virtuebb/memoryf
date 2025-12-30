@@ -40,4 +40,13 @@ public interface DmService {
     // DM 방 생성 및 참여자 추가 (중복 방지)
     int createDmRoom(DmRoomRequest request);
 
+    // 메세지 삭제
+    int deleteMessage(int messageId);
+
+    // 메시지 ID로 ROOM_NO 조회
+    Integer getRoomNoByMessageId(int messageId);
+
+    // 채팅방 참가자 목록 조회
+    ArrayList<String> getParticipantsByRoomNo(int roomNo);
+
 }

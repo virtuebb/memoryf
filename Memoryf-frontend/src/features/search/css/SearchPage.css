@@ -1,0 +1,120 @@
+.search-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.search-header {
+  margin-bottom: 20px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 15px;
+  padding-left: 40px;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  background-color: #efefef;
+  font-size: 16px;
+  outline: none;
+}
+
+.search-input:focus {
+  background-color: #fff;
+  border-color: #a8a8a8;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8e8e8e;
+}
+
+.search-tabs {
+  display: flex;
+  border-bottom: 1px solid #dbdbdb;
+  margin-bottom: 20px;
+}
+
+.search-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #8e8e8e;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.search-tab.active {
+  color: #262626;
+  border-bottom-color: #262626;
+}
+
+/* 회원 리스트 스타일 */
+.search-result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.search-member-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.search-member-item:hover {
+  background-color: #fafafa;
+}
+
+.search-member-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #dbdbdb;
+}
+
+.search-member-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-member-nick {
+  font-weight: 600;
+  font-size: 14px;
+  color: #262626;
+}
+
+.search-member-name {
+  font-size: 14px;
+  color: #8e8e8e;
+}
+
+/* 피드 그리드 스타일 (FeedItem 재사용 또는 직접 구현) */
+.search-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.no-result {
+  text-align: center;
+  color: #8e8e8e;
+  margin-top: 50px;
+}

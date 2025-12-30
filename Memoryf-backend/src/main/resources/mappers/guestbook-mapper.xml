@@ -43,7 +43,7 @@
             IS_DEL
         )
         VALUES (
-            SEQ_GUESTBOOK.NEXTVAL,
+            SEQ_GUESTBOOK_NO.NEXTVAL,
             #{guestbookContent},
             #{memberNo},
             #{homeNo},

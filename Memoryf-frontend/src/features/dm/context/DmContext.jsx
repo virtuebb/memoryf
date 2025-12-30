@@ -89,7 +89,7 @@ export function DmProvider({ children }) {
   const totalUnread = allChats.reduce((sum, chat) => sum + (chat.unread || 0), 0);
 
   // ============================================
-  // 🔌 WebSocket 연결 관리
+  // � WebSocket 연결 관리
   // ============================================
   
   /**
@@ -189,14 +189,33 @@ export function DmProvider({ children }) {
    * 📩 WebSocket으로 받은 데이터 처리
    * - type: 'message' → 일반 메시지
    * - type: 'read' → 읽음 이벤트
+   * - type: 'delete' → 메시지 삭제 이벤트
    */
   const handleReceiveMessage = useCallback((data) => {
-    // data = { type, roomId, sender, content }
-    const { type, sender, content, roomNo, recipientId } = data;
+    // data = { type, roomId, sender, content, roomNo, recipientId, messageId }
+    const { type, sender, content, roomNo, recipientId, messageId } = data;
     
     console.log('📩 handleReceiveMessage 진입:', {
-      type, sender, roomNo, contentLen: content?.length || 0
+      type, sender, roomNo, contentLen: content?.length || 0, messageId
     });
+    
+    // 🗑️ 메시지 삭제 이벤트 처리
+    if (type === 'delete') {
+      console.log(`🗑️ 메시지 삭제 이벤트 수신: roomNo=${roomNo}, messageId=${messageId}`);
+      
+      setChatRooms((prevRooms) => {
+        return prevRooms.map(room => {
+          if (String(room.id) === String(roomNo)) {
+            return {
+              ...room,
+              messages: room.messages.filter(msg => String(msg.id) !== String(messageId))
+            };
+          }
+          return room;
+        });
+      });
+      return;  // 삭제 이벤트는 여기서 끝!
+    }
     
     // 👀 읽음 이벤트 처리 (type이 'read'이거나, content가 빈 문자열인 경우)
     if (type === 'read' || (content === '' && type !== 'message')) {

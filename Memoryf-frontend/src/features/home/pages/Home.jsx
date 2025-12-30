@@ -4,7 +4,7 @@ import { useTheme } from "../../../shared/components/ThemeContext";
 import { getHomeByMemberNo, getHomeByMemberNick } from "../api/homeApi";
 import { getMemberNoFromToken } from "../../../utils/jwt";
 import { onFollowChange } from "../../../utils/followEvents";
-import { recordVisit } from "../../../shared/api/visitorApi";
+import { visitHome } from "../../../shared/api/visitorApi";
 
 import Storybar from "../../story/components/Storybar";
 import ProfileCard from "../components/ProfileCard";
@@ -20,6 +20,7 @@ function Home() {
   const [targetMemberNo, setTargetMemberNo] = useState(null);
   const [homeData, setHomeData] = useState(null);
   const [notFound, setNotFound] = useState(false);
+
   const currentMemberNo = getMemberNoFromToken();
 
 
@@ -56,11 +57,6 @@ function Home() {
         setHomeNo(data?.homeNo ?? null);
         setTargetMemberNo(data?.memberNo ?? parsedMemberNo ?? currentMemberNo ?? null);
 
-        if (currentMemberNo && homeData?.homeNo) {
-          
-          // 방문 기록(실패해도 화면 동작에 영향 없도록)
-          recordVisit(currentMemberNo, data.homeNo).catch(() => {});
-        }
       } catch (error) {
         console.error('홈 번호 조회 실패:', error);
         if (!cancelled) {
@@ -78,6 +74,12 @@ function Home() {
       cancelled = true;
     };
   }, [currentMemberNo, memberNick, memberNoParam]);
+
+  useEffect(() => {
+
+  if (!homeNo) return;
+      visitHome(homeNo); // ✅ 방문 기록만 남김
+    }, [homeNo]);
 
   // 팔로우/언팔로우가 모달(피드상세) 등 다른 화면에서 발생해도
   // 홈 화면이 새로고침 없이 즉시 반영되도록 이벤트로 동기화
@@ -138,6 +140,7 @@ function Home() {
 
   return (
     <div className="home-wrapper" style={{ background: theme.color }}>
+    <div className="home-scroll">
       <div className="home-layout">
         <main className="main">
           <div className="card card-story">
@@ -182,6 +185,7 @@ function Home() {
         </main>
       </div>
     </div>
+  </div>
   );
 }
 
