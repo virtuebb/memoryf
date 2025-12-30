@@ -102,5 +102,19 @@ public class DmDao {
         return result != null ? result : 0;
     }
 
+    public int deleteMessage(SqlSessionTemplate sqlSession, int messageId) {
+        return sqlSession.delete("dmMapper.deleteMessage", messageId);
+    }
+
+    // 메시지 ID로 ROOM_NO 조회
+    public Integer getRoomNoByMessageId(SqlSessionTemplate sqlSession, int messageId) {
+        return sqlSession.selectOne("dmMapper.getRoomNoByMessageId", messageId);
+    }
+
+    // 채팅방 참가자 목록 조회
+    public ArrayList<String> getParticipantsByRoomNo(SqlSessionTemplate sqlSession, int roomNo) {
+        return new ArrayList<>(sqlSession.selectList("dmMapper.getParticipantsByRoomNo", roomNo));
+    }
+
 }
 

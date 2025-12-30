@@ -177,6 +177,7 @@
   padding: 0.5rem 1rem;
   border-radius: 1rem;
   border-bottom-right-radius: 0.25rem;
+  position: relative;
 }
 
 /* 상대방 메시지 버블 */
@@ -185,6 +186,7 @@
   border-radius: 1rem;
   border-bottom-left-radius: 0.25rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .chat-message-bubble.theirs.light {
@@ -329,4 +331,31 @@
   font-size: 0.85rem;
   color: #6b7280;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* 메시지 삭제 버튼 */
+.chat-message-delete-btn {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 0.125rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.chat-message-bubble:hover .chat-message-delete-btn {
+  opacity: 1;
+}
+
+.chat-message-delete-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
 }

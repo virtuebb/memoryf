@@ -177,4 +177,28 @@ const getUnreadCount = async (roomNo, senderId) => {
     }
 };
 
-export { selectDmRoomList, insertDmMessage, selectDmMessages, markMessageAsRead, getUnreadCount };
+// 메세지 삭제 
+const deleteMessage = async (messageId) => {
+    const url = `${API_BASE}/messages/delete/${messageId}`;
+    const method = 'POST';
+
+    try {
+        const response = await axios({
+            url,
+            method,
+            data: { messageId : messageId },
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log("메세지 삭제 여부 : " + response.data);
+
+    } catch {
+        
+        console.log("메세지 삭제 실패");
+    }
+    
+};
+
+export { selectDmRoomList, insertDmMessage, selectDmMessages, markMessageAsRead, getUnreadCount, deleteMessage };
