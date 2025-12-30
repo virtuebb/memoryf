@@ -5,11 +5,15 @@
   width: 100%;
   min-height: 100vh;
 
+  overflow-x: auto;     /* 🔥 가로 스크롤 담당 */
+  transition: background-color 0.25s ease;
+}
+
+/* 🔥 스크롤 기준 컨테이너 */
+.home-scroll {
+  min-width: 700px;    /* 🔥 이 아래로 안 줄어듦 */
   display: flex;
   justify-content: center;
-
-  /* ThemeContext에서 내려오는 배경색 사용 */
-  transition: background-color 0.25s ease;
 }
 
 /* =========================
@@ -17,9 +21,8 @@
 ========================= */
 .home-layout {
   width: 100%;
-  max-width: 1100px;              /* 🔥 홈은 넉넉하게 */
+  max-width: 1100px;    /* 가운데 정렬용 */
   padding: 32px 20px 48px;
-
   box-sizing: border-box;
 }
 

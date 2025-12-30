@@ -115,6 +115,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             Integer memberNo = (memberNoNum == null) ? null : memberNoNum.intValue();
 
             request.setAttribute("memberNo", memberNo);
+
+            // System.out.println("🔥 JWT memberNo = " + memberNo);
             
             // 만료 시간 추가 안전 체크
             Date exp = claims.getExpiration();
@@ -154,4 +156,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+    
 }

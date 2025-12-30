@@ -1,12 +1,12 @@
 import { useState } from "react";
 import "../css/DiaryEdit.css";
 
-function DiaryEditor({ onSave }) {
+function DiaryEdit({ onSave }) {
   const [content, setContent] = useState("");
 
   const handleSubmit = () => {
     if (!content.trim()) return;
-    onSave(content);
+    onSave(content); // ✅ 문자열만 넘김
     setContent("");
   };
 
@@ -21,7 +21,7 @@ function DiaryEditor({ onSave }) {
       />
 
       <div className="edit-footer">
-        <span className="hint">나만 볼 수 있는 기록이에요</span>
+        <span className="hint">나만 볼 수 있어요</span>
         <button className="save-btn" onClick={handleSubmit}>
           저장
         </button>
@@ -30,4 +30,4 @@ function DiaryEditor({ onSave }) {
   );
 }
 
-export default DiaryEditor;
+export default DiaryEdit;
