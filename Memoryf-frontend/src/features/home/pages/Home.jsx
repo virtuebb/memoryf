@@ -20,6 +20,7 @@ function Home() {
   const [notFound, setNotFound] = useState(false);
   const currentMemberNo = getMemberNoFromToken();
 
+
   /* 홈 정보 조회 */
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +53,7 @@ function Home() {
         setTargetMemberNo(homeData?.memberNo ?? parsedMemberNo ?? currentMemberNo ?? null);
 
         if (currentMemberNo && homeData?.homeNo) {
+          
           // 방문 기록(실패해도 화면 동작에 영향 없도록)
           recordVisit(currentMemberNo, homeData.homeNo).catch(() => {});
         }

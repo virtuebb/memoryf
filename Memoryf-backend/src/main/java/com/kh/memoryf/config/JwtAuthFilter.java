@@ -38,17 +38,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // 로그인/회원가입 요청은 인증 없이 허용이므로 필터 검사 제외
         if (path.startsWith("/login")) return true;
         if (path.startsWith("/signup")) return true;
+        if (path.startsWith("/find")) return true;
         
         // 🔥 Visitor 추가
         if (path.startsWith("/visitor")) return true;
+        
+        // 문제시 삭제
+        if (path.startsWith("/ws")) return true;
+        if (path.startsWith("/messages")) return true;
 
         // 정적 리소스 제외 (필요한 경우만)
         if (path.startsWith("/images")
             || path.startsWith("/resources")
             || path.startsWith("/css")
             || path.startsWith("/js")
-            || path.startsWith("/feed_upfiles")) return true; // 업로드된 피드 이미지도 JWT 검사 제외
-
+            || path.startsWith("/feed_upfiles") // 업로드된 피드 이미지도 JWT 검사 제외
+            || path.startsWith("/profile_images")) return true;
+        	
         return false;
     }
 
@@ -137,13 +143,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 // SecurityContext에 인증 등록 (=> authenticated 통과)
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 
-                System.out.println("JWT claim keys = " + claims.keySet());
+                
             }
 
         } catch (Exception e) {
             // 토큰 위조/만료/파싱 실패 등 -> 인증 세팅 안 하고 통과
             // (SecurityConfig의 authenticated에서 최종 차단됨)
-        	e.printStackTrace();
+        		e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);
