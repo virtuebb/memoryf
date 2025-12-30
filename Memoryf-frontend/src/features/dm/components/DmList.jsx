@@ -28,6 +28,7 @@
  *    ]
  */
 
+import { deleteDmRoom } from '../api/dmApi';
 import '../css/DmList.css';
 
 function PlusIcon() {
@@ -38,7 +39,24 @@ function PlusIcon() {
   );
 }
 
-export default function ChatList({ chats, onSelectChat, onOpenSearch, themeClass = 'light' }) {
+function XIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M18 6L6 18" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export default function ChatList({ chats, onSelectChat, onOpenSearch, onDeleteChat, themeClass = 'light' }) {
   // 🎨 themeClass는 부모에서 직접 전달받음 (전역 ThemeContext 사용)
 
   return (
@@ -72,6 +90,7 @@ export default function ChatList({ chats, onSelectChat, onOpenSearch, themeClass
             {/* 👤 프로필 사진 */}
             <div className="chat-avatar">
               {chat.avatar}
+              ${chat.userId}
               {/* 🔌 백엔드 연동 시 이미지 URL로 변경: */}
               {/* <img src={chat.avatarUrl} alt={chat.userName} /> */}
             </div>
@@ -98,6 +117,20 @@ export default function ChatList({ chats, onSelectChat, onOpenSearch, themeClass
                 )}
               </div>
             </div>
+
+            {/* 🗑️ 채팅방 삭제 버튼 */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // 채팅방 선택 이벤트 방지
+                if (window.confirm(`${chat.userName}과의 채팅방을 삭제하시겠습니까?`)) {
+                  deleteDmRoom(chat.id);
+                }
+              }}
+              className={`chat-item-delete-btn ${themeClass}`}
+              title="채팅방 삭제"
+            >
+              <TrashIcon />
+            </button>
           </div>
         ))}
       </div>

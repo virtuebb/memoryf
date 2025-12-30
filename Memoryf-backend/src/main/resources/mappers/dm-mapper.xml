@@ -63,6 +63,8 @@
 		JOIN TB_MEMBER m ON m.MEMBER_ID = p2.MEMBER_ID
 		WHERE p1.MEMBER_ID = #{userId}
 		  AND p2.MEMBER_ID != p1.MEMBER_ID
+		  AND r.IS_DEL = 'N'
+		
 		ORDER BY LAST_SEND_DATE DESC
 	</select>
 
@@ -197,5 +199,13 @@
 		  FROM TB_DM_PARTICIPANT
 		 WHERE ROOM_NO = #{roomNo}
 	</select>
+
+	<!-- 채팅방 삭제 쿼리문 -->
+	<update id="deleteDmRoom" parameterType="int">
+		UPDATE TB_DM_ROOM 
+		   SET IS_DEL = 'Y'
+		 WHERE ROOM_NO = #{roomNo}
+	</update>
+
 
 </mapper>

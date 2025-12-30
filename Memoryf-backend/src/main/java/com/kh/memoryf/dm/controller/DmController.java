@@ -262,7 +262,16 @@ public class DmController {
         }
     }
 
+    // 채팅방 삭제
+    @PostMapping("deleteDmRoom/{roomNo}")
+    public String deleteDmRoom(@PathVariable int roomNo) {
 
+        System.out.println("채팅방 번호 : " + roomNo);
+
+        int result = dmService.deleteDmRoom(roomNo);
+
+        return (result > 0) ? "채팅방 삭제 성공" : "채팅방 삭제 실패";
+    }
 
 
 

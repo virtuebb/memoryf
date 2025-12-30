@@ -142,4 +142,12 @@ public class DmServiceImpl implements DmService {
         return dmDao.getParticipantsByRoomNo(sqlSession, roomNo);
     }
 
+    @Override
+    @Transactional
+    public int deleteDmRoom(int roomNo) {
+
+        return dmDao.deleteDmRoom(sqlSession, roomNo);
+
+    }
+
 }

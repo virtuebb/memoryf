@@ -228,3 +228,169 @@
   50% {
     box-shadow: 0 2px 12px rgba(255, 71, 87, 0.6);
   }
+}
+
+/* 채팅 아이템 액션 영역 */
+.chat-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+/* 더보기 버튼 */
+.chat-more-btn {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.chat-more-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.chat-more-btn.dark:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.chat-more-btn:active {
+  transform: scale(0.95);
+}
+
+/* 드롭다운 메뉴 */
+.chat-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+  min-width: 160px;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  animation: dropdown-appear 0.15s ease-out;
+}
+
+.chat-dropdown.dark {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* 드롭다운 애니메이션 */
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 드롭다운 아이템 */
+.chat-dropdown-item {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  color: #374151;
+}
+
+.chat-dropdown-item:hover {
+  background: #f3f4f6;
+}
+
+.chat-dropdown-item.dark {
+  color: #d1d5db;
+}
+
+.chat-dropdown-item.dark:hover {
+  background: #374151;
+}
+
+.chat-dropdown-item:first-child {
+  color: #dc2626;
+}
+
+.chat-dropdown-item:first-child.dark {
+  color: #ef4444;
+}
+
+.chat-dropdown-item:first-child:hover {
+  background: #fef2f2;
+}
+
+.chat-dropdown-item:first-child.dark:hover {
+  background: #451a1a;
+}
+
+/* 채팅방 삭제 버튼 */
+.chat-item-delete-btn {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.chat-item:hover .chat-item-delete-btn {
+  opacity: 1;
+}
+
+
+.chat-item-delete-btn:hover {
+  background-color: rgba(239, 68, 68, 0.9); /* 더 진한 빨간색 배경 */
+}
+
+.chat-item-delete-btn.light:hover {
+  background-color: rgba(239, 68, 68, 0.7);
+}
+
+.chat-item-delete-btn.dark:hover {
+  background-color: rgba(239, 68, 68, 0.7); /* 다크 테마 더 진하게 */
+}
+
+
+.chat-item-delete-btn svg {
+  width: 14px;
+  height: 14px;
+  color: #ffffff; /* 흰색 아이콘 */
+}
+
+.chat-item-delete-btn.light svg {
+  color: #ffffff;
+}
+
+.chat-item-delete-btn.dark svg {
+  color: #ffffff;
+}
+
+.chat-item-delete-btn:hover svg {
+  color: #ffffff; /* hover 시 흰색 유지 */
+}
+
+.chat-item-delete-btn.dark:hover svg {
+  color: #ffffff;
+}

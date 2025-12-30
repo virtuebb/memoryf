@@ -49,4 +49,7 @@ public interface DmService {
     // 채팅방 참가자 목록 조회
     ArrayList<String> getParticipantsByRoomNo(int roomNo);
 
+    // 채팅방 삭제
+    int deleteDmRoom(int roomNo);
+
 }

@@ -201,4 +201,28 @@ const deleteMessage = async (messageId) => {
     
 };
 
-export { selectDmRoomList, insertDmMessage, selectDmMessages, markMessageAsRead, getUnreadCount, deleteMessage };
+// 채팅방 삭제
+const deleteDmRoom = async (roomNo) => {
+    const url = `${API_BASE}/messages/deleteDmRoom/${roomNo}`;
+    const method = "POST";
+
+    try {
+        const response = await axios({
+            url,
+            method,
+            data: {roomNo : roomNo},
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(response.date + " / 삭제된 채팅방 : " + roomNo);
+
+        return response.date;
+    } catch {
+
+        console.log("채팅방 삭제 실패");
+
+    }
+};
+
+export { selectDmRoomList, insertDmMessage, selectDmMessages, markMessageAsRead, getUnreadCount, deleteMessage, deleteDmRoom };

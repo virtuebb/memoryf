@@ -116,5 +116,12 @@ public class DmDao {
         return new ArrayList<>(sqlSession.selectList("dmMapper.getParticipantsByRoomNo", roomNo));
     }
 
+    // 채팅방 삭제
+    public int deleteDmRoom(SqlSessionTemplate sqlSession, int roomNo) {
+
+        return sqlSession.update("dmMapper.deleteDmRoom", roomNo);
+
+    }
+
 }
 
