@@ -61,12 +61,14 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(
 					org.springframework.security.config.http.SessionCreationPolicy.STATELESS)) // JWT 인증방식임 - 세션 아님
 			.authorizeHttpRequests(auth -> auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // 프리플라이트(OPTIONS) 요청 모두 허용
-			
+				    
+					.requestMatchers(HttpMethod.POST, "/visitor/**", "/memoryf/visitor/**").authenticated()
+					.requestMatchers(HttpMethod.GET,  "/visitor/**", "/memoryf/visitor/**").permitAll()
+
 					.requestMatchers("/images/**", "/resources/**", "/css/**", "/js/**", "/feed_upfiles/**", "/profile_images/**").permitAll() // 정적 리소스 및 업로드 이미지 모두 허용
 					.requestMatchers("/login/**", "/signup/**").permitAll() // 로그인, 회원가입 요청 허용 - @RequestMapping
 					.requestMatchers("/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers("/messages/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
-					.requestMatchers("/visitor/**").permitAll()
 					
 					// Story
 					.requestMatchers(HttpMethod.GET, "/story/**", "/memoryf/story/**").permitAll()
@@ -86,6 +88,7 @@ public class SecurityConfig {
 				    .requestMatchers(HttpMethod.POST,   "/diaries/**", "/memoryf/diaries/**").authenticated()
 				    .requestMatchers(HttpMethod.PUT,    "/diaries/**", "/memoryf/diaries/**").authenticated()
 				    .requestMatchers(HttpMethod.DELETE, "/diaries/**", "/memoryf/diaries/**").authenticated()
+
 				    
 					// server.servlet.context-path=/memoryf 환경을 고려해 두 패턴을 모두 허용
 					.requestMatchers(
@@ -99,7 +102,6 @@ public class SecurityConfig {
 					).permitAll() // 정적 리소스 및 업로드 이미지 모두 허용
 					.requestMatchers("/login/**", "/memoryf/login/**", "/signup/**", "/memoryf/signup/**", "/find/**", "/memoryf/find/**").permitAll() // 로그인/회원가입 요청 허용
 					.requestMatchers("/ws/**", "/memoryf/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
-					.requestMatchers("/visitor/**", "/memoryf/visitor/**").permitAll()
 
 					.anyRequest().authenticated() // 나머지는 JWT 인증 필요함
 				)

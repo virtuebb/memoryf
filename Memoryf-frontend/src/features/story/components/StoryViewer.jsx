@@ -9,18 +9,33 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
 
   const story = selected?.story;
   const items = selected?.items || [];
-  
-  // ✅ 로그인 유저 확인 로직 (현재는 하드코딩, 실제 세션/Redux 값으로 대체 필요)
-  const loginUserNo = 1; 
+
+  // ✅ [수정] 하드코딩된 1 대신 실제 localStorage의 로그인 정보 사용
+  const getLoginMemberNo = () => {
+    const storageData = localStorage.getItem("loginMember");
+    if (!storageData) return null;
+    try {
+      const loginMember = JSON.parse(storageData);
+      return loginMember?.memberNo;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const loginUserNo = getLoginMemberNo();
   const isOwner = story && Number(story.memberNo) === Number(loginUserNo);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [tick, setTick] = useState(0);
 
-  const baseURL = `http://${window.location.hostname}:8006/memoryf`;
+  // ✅ [수정] 프로필 이미지와 스토리 아이템 이미지가 저장되는 경로가 다를 수 있음을 고려
+  const hostname = window.location.hostname;
+  const profileBaseURL = `http://${hostname}:8006/memoryf/profile_images`; // WebConfig 설정 경로
+  const contentBaseURL = `http://${hostname}:8006/memoryf`; // 아이템 파일 경로 (filePath 포함)
+
   const DURATION_MS = 3000;
 
-  // 2. 인덱스 이동 함수 (useCallback으로 최적화)
+  // 2. 인덱스 이동 함수
   const goIndex = useCallback((idx) => {
     if (idx < 0 || idx >= items.length) return;
     setActiveIndex(idx);
@@ -39,7 +54,7 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
 
     const timer = setTimeout(() => {
       if (activeIndex >= items.length - 1) {
-        onClose(); // 마지막 장이면 닫기
+        onClose();
       } else {
         goIndex(activeIndex + 1);
       }
@@ -50,13 +65,13 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
 
   // 5. 삭제 핸들러
   const handleDelete = async (e) => {
-    e.stopPropagation(); // 오버레이 클릭 이벤트 전파 방지
+    e.stopPropagation();
     if (!window.confirm("이 스토리를 삭제하시겠습니까? (복구할 수 없습니다.)")) return;
 
     try {
       await storyApi.deleteStory(story.storyNo);
       alert("삭제되었습니다.");
-      window.dispatchEvent(new Event("storyChanged")); // 목록 새로고침 알림
+      window.dispatchEvent(new Event("storyChanged"));
       onClose();
     } catch (err) {
       console.error("삭제 중 오류:", err);
@@ -70,7 +85,7 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
     <div className="storyviewer-overlay" onClick={onClose}>
       <div className="storyviewer-modal" onClick={(e) => e.stopPropagation()}>
         
-        {/* ✅ 우상단 버튼 그룹: 주인일 때만 삭제 노출 */}
+        {/* 우상단 버튼 그룹 */}
         <div className="storyviewer-actions">
           {isOwner && (
             <button className="storyviewer-delete" onClick={handleDelete} title="삭제">
@@ -82,11 +97,23 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
           </button>
         </div>
 
-        {/* 상단 정보 */}
+        {/* ✅ 상단 헤더: 프로필 이미지 및 닉네임 */}
         <div className="storyviewer-header">
-          <div className="storyviewer-avatar">S</div>
+          <div className="storyviewer-avatar">
+            {story?.profileImg ? (
+              <img 
+                src={`${profileBaseURL}/${story.profileImg}`} 
+                alt={story.memberNick} 
+                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+              />
+            ) : (
+              <span className="initial-text">
+                {story?.memberNick ? story.memberNick.charAt(0) : 'S'}
+              </span>
+            )}
+          </div>
           <div className="storyviewer-name">
-            {story ? `story#${story.storyNo}` : "Story"}
+            {story?.memberNick || `story#${story?.storyNo}`}
           </div>
         </div>
 
@@ -112,7 +139,6 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
             <div className="storyviewer-empty">등록된 콘텐츠가 없습니다.</div>
           ) : (
             <>
-              {/* 클릭 감지 영역 (좌/우) */}
               <div className="storyviewer-hit">
                 <div className="hit-left" onClick={() => goIndex(activeIndex - 1)} />
                 <div className="hit-right" onClick={() => goIndex(activeIndex + 1)} />
@@ -121,10 +147,10 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
               <div className="storyviewer-active">
                 {active?.filePath && (
                   <img
-                    src={`${baseURL}${active.filePath}/${active.changeName}`}
+                    src={`${contentBaseURL}${active.filePath}/${active.changeName}`}
                     alt=""
                     className="storyviewer-mainimg"
-                    onError={(e) => { e.target.src = "/fallback-image.png"; }} // 이미지 로드 실패 대비
+                    onError={(e) => { e.target.src = "/fallback-image.png"; }}
                   />
                 )}
                 {active?.storyText && (
@@ -141,7 +167,7 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
                     className={`thumb ${idx === activeIndex ? "on" : ""}`}
                     onClick={() => goIndex(idx)}
                   >
-                    <img src={`${baseURL}${it.filePath}/${it.changeName}`} alt="thumb" />
+                    <img src={`${contentBaseURL}${it.filePath}/${it.changeName}`} alt="thumb" />
                   </button>
                 ))}
               </div>

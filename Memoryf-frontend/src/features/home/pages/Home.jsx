@@ -20,6 +20,7 @@ function Home() {
   const [targetMemberNo, setTargetMemberNo] = useState(null);
   const [homeData, setHomeData] = useState(null);
   const [notFound, setNotFound] = useState(false);
+
   const currentMemberNo = getMemberNoFromToken();
 
 
@@ -56,11 +57,6 @@ function Home() {
         setHomeNo(data?.homeNo ?? null);
         setTargetMemberNo(data?.memberNo ?? parsedMemberNo ?? currentMemberNo ?? null);
 
-        if (currentMemberNo && homeData?.homeNo) {
-          
-          // 방문 기록(실패해도 화면 동작에 영향 없도록)
-          visitHome(data.homeNo).catch(() => {});
-        }
       } catch (error) {
         console.error('홈 번호 조회 실패:', error);
         if (!cancelled) {
@@ -78,6 +74,12 @@ function Home() {
       cancelled = true;
     };
   }, [currentMemberNo, memberNick, memberNoParam]);
+
+  useEffect(() => {
+
+  if (!homeNo) return;
+      visitHome(homeNo); // ✅ 방문 기록만 남김
+    }, [homeNo]);
 
   // 팔로우/언팔로우가 모달(피드상세) 등 다른 화면에서 발생해도
   // 홈 화면이 새로고침 없이 즉시 반영되도록 이벤트로 동기화

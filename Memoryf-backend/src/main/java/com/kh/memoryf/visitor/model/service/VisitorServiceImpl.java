@@ -29,6 +29,12 @@ public class VisitorServiceImpl implements VisitorService {
         boolean visitedToday =
             visitorDao.existsToday(sqlSession, memberNo, homeNo);
 
+        System.out.println("[VISIT] check visitedToday="
+                + visitedToday
+                + " memberNo=" + memberNo
+                + " homeNo=" + homeNo);
+
+        
         if (visitedToday) return;
 
         Visitor visitor = new Visitor();
@@ -36,6 +42,9 @@ public class VisitorServiceImpl implements VisitorService {
         visitor.setHomeNo(homeNo);
 
         visitorDao.insertVisit(sqlSession, visitor);
+        
+        System.out.println("[VISIT] INSERT SUCCESS memberNo="
+                + memberNo + " homeNo=" + homeNo);
     }
 
     @Override

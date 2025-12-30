@@ -42,6 +42,13 @@ function Sidebar({ onCreateClick }) {
           </Link>
         </li>
 
+        <li className={isActive('/search') ? 'active' : ''}>
+          <Link to="/search">
+            <span className="icon">🔍</span>
+            Search
+          </Link>
+        </li>
+
         {/* CONTENT */}
         <li className="menu-label">CONTENT</li>
 

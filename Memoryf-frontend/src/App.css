@@ -34,6 +34,20 @@ body,
   transition: background-color 0.2s ease;
 }
 
+/* 🔥 가로 스크롤 담당 */
+.app-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+/* 🔥 사이드바 + 홈 전체 폭 */
+.main-layout {
+  display: flex;
+  min-width: 1200px;  
+}
+
 /* =========================
    메인 레이아웃 (사이드바 + 콘텐츠)
 ========================= */
@@ -249,5 +263,16 @@ body,
   display: flex;
   justify-content: center;   /* ⭐ 전체를 가운데로 */
   background: #f8dada;       /* 지금 쓰는 배경 */
+}
+
+@media (max-width: 768px) {
+  .app-scroll {
+    overflow-x: hidden;
+  }
+
+  .main-layout {
+    min-width: auto;
+    flex-direction: column;
+  }
 }
   

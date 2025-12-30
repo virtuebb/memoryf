@@ -21,4 +21,8 @@ public class Story {
     private Date createDate;    // CREATE_DATE
     private Date expireDate;    // EXPIRE_DATE
     private String isDel;       // IS_DEL
+    
+    // ✅ 추가: JOIN 결과를 담기 위한 필드
+    private String memberNick;  // 닉네임
+    private String profileImg;  // 프로필 이미지 경로
 }
