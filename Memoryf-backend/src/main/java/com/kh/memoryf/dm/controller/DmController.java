@@ -240,11 +240,28 @@ public class DmController {
     }
 
 
+    // 메세지 삭제
+    @PostMapping("delete/{messageId}")
+    public String deleteMessage(@PathVariable int messageId) {
+        
+        int result = dmService.deleteMessage(messageId);
 
+        if (result > 0) {
+            // 삭제 성공 시 WebSocket으로 삭제 이벤트 브로드캐스트
+            Integer roomNo = dmService.getRoomNoByMessageId(messageId);
+            if (roomNo != null) {
+                ArrayList<String> participants = dmService.getParticipantsByRoomNo(roomNo);
+                for (String participantId : participants) {
+                    messagingTemplate.convertAndSend("/sub/private/" + participantId, 
+                        Map.of("type", "delete", "roomNo", roomNo, "messageId", messageId));
+                }
+            }
+            return "메세지 삭제 성공";
+        } else {
+            return "메세지 삭제 실패";
+        }
+    }
 
-    // dm 방 상세 조회
-
-    // 새 메세지 저장
 
 
 

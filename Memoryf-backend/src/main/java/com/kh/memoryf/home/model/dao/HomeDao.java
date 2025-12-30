@@ -27,6 +27,20 @@ public class HomeDao {
 	}
 	
 	/**
+	 * 홈 번호로 홈 조회
+	 * @param sqlSession
+	 * @param homeNo
+	 * @param currentMemberNo 현재 로그인한 회원 번호
+	 * @return Home
+	 */
+	public Home selectHomeByHomeNo(SqlSessionTemplate sqlSession, int homeNo, Integer currentMemberNo) {
+		HashMap<String, Object> params = new HashMap<>();
+		params.put("homeNo", homeNo);
+		params.put("currentMemberNo", currentMemberNo);
+		return sqlSession.selectOne("homeMapper.selectHomeByHomeNo", params);
+	}
+	
+	/**
 	 * 홈 번호로 방명록 목록 조회
 	 * @param sqlSession
 	 * @param homeNo

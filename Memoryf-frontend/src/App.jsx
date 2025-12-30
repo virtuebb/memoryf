@@ -26,7 +26,7 @@ import FeedUploadModal from './features/feed/components/FeedUploadModal';
 import SettingsPage from './features/settings/pages/SettingsPage';
 import DmRoutes from './features/dm/pages/DmRoutes';
 import FloatingDm from './features/dm/components/FloatingDm';
-import Chat from './features/dm/components/Chat';
+import DmRoom from './features/dm/components/DmRoom';
 import { DmProvider } from './features/dm/context/DmContext';
 import DiaryPage from "./features/diary/pages/DiaryPage";
 import NotificationPage from './features/notification/pages/NotificationPage';
@@ -164,7 +164,7 @@ function App() {
               <Route path="/feeds" element={<FeedListPage reloadKey={feedReloadKey} />} />
               <Route path="/messages/*" element={<DmRoutes />} />
               {/* 채팅 테스트 주소 */}
-              <Route path="/chat-test" element={<Chat />} />
+              <Route path="/chat-test" element={<DmRoom />} />
               <Route path="/settings/*" element={<SettingsPage />} />
               <Route path="/diary" element={<DiaryPage />} />
               <Route path="/notifications" element={<NotificationPage />} />
