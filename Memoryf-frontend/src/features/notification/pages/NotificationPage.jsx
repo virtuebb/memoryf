@@ -6,6 +6,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ko';
 import { getNotifications, markAsRead, deleteNotification, acceptFollowRequest, rejectFollowRequest } from '../api/notificationApi';
 import { decodeToken } from '../../../utils/jwt';
+import defaultProfileImg from '../../../assets/images/profiles/default-profile.svg';
 import '../css/NotificationPage.css';
 
 dayjs.extend(relativeTime);
@@ -119,6 +120,11 @@ function NotificationPage() {
     navigate(`/feeds/${noti.targetId}`, { state: { backgroundLocation: location } });
   };
 
+  const handleGoHome = async (noti) => {
+    await ensureMarkedAsRead(noti);
+    navigate(`/${noti.senderNick}`);
+  };
+
   const formatTimeAgo = (dateString) => {
     if (!dateString) return '';
     const parsed = dayjs(dateString);
@@ -153,40 +159,74 @@ function NotificationPage() {
             <div key={noti.notificationNo} className={`notification-item ${noti.isRead === 'N' ? 'unread' : ''}`}>
               <div className="noti-content">
                 <img 
-                    src={noti.senderProfile ? `http://localhost:8006/memoryf/profile_images/${noti.senderProfile}` : '/default-profile.png'} 
+                    src={(noti.senderProfile && noti.senderStatus !== 'Y') ? `http://localhost:8006/memoryf/profile_images/${noti.senderProfile}` : defaultProfileImg} 
                     alt="profile" 
                     className="noti-profile-img"
-                    onError={(e) => {e.target.src = '/default-profile.png'}}
-                    onClick={() => handleGoProfile(noti)}
+                    onError={(e) => {e.target.src = defaultProfileImg}}
+                    onClick={() => noti.senderStatus !== 'Y' && handleGoProfile(noti)}
+                    style={{ cursor: noti.senderStatus === 'Y' ? 'default' : 'pointer' }}
                 />
                 <div className="noti-text">
                   <button
                     type="button"
                     className="noti-user"
-                    onClick={() => handleGoProfile(noti)}
+                    onClick={() => noti.senderStatus !== 'Y' && handleGoProfile(noti)}
+                    style={{ cursor: noti.senderStatus === 'Y' ? 'default' : 'pointer' }}
                   >
-                    {noti.senderNick}
+                    {noti.senderStatus === 'Y' ? 'deletedUser' : noti.senderNick}
                   </button>
                   {noti.type === 'FOLLOW_REQUEST' && "님이 팔로우를 요청했습니다."}
                   {noti.type === 'FOLLOW_ACCEPT' && "님이 팔로우 요청을 수락했습니다."}
                   {noti.type === 'FOLLOW' && "님이 회원님을 팔로우하기 시작했습니다."}
                   {noti.type === 'LIKE_FEED' && "님이 회원님의 게시물을 좋아합니다."}
                   {noti.type === 'COMMENT_FEED' && "님이 댓글을 남겼습니다."}
+                  {noti.type === 'GUESTBOOK' && (
+                    <>
+                      님이 회원님의{" "}
+                      <button
+                        type="button"
+                        className="noti-link"
+                        onClick={() => handleGoHome(noti)}
+                      >
+                        홈
+                      </button>
+                      에 방명록을 남겼습니다.
+                    </>
+                  )}
                   <span className="noti-date">{formatTimeAgo(noti.createDate)}</span>
                 </div>
                 {noti.feedImage && (
-                  <img
-                    src={`http://localhost:8006/memoryf/feed_upfiles/${noti.feedImage}`}
-                    alt="feed"
-                    className="noti-feed-img"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleGoFeed(noti);
-                    }}
-                    onError={(e) => {
-                      e.target.src = '/default-feed.png';
-                    }}
-                  />
+                  (() => {
+                    const isVideo = ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(
+                      noti.feedImage.split('.').pop()?.toLowerCase()
+                    );
+                    
+                    return isVideo ? (
+                      <video
+                        src={`http://localhost:8006/memoryf/feed_upfiles/${noti.feedImage}#t=1.0`}
+                        className="noti-feed-img"
+                        muted
+                        preload="metadata"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleGoFeed(noti);
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src={`http://localhost:8006/memoryf/feed_upfiles/${noti.feedImage}`}
+                        alt="feed"
+                        className="noti-feed-img"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleGoFeed(noti);
+                        }}
+                        onError={(e) => {
+                          e.target.src = '/default-feed.png';
+                        }}
+                      />
+                    );
+                  })()
                 )}
               </div>
               

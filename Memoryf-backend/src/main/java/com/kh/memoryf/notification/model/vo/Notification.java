@@ -24,5 +24,6 @@ public class Notification {
     // Join fields
     private String senderNick;
     private String senderProfile; // profileChangeName
+    private String senderStatus; // 회원 상태 (N: 정상, Y: 탈퇴)
     private String feedImage; // For LIKE/COMMENT notifications (thumbnail)
 }

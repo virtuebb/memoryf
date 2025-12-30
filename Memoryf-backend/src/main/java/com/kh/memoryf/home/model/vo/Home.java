@@ -27,6 +27,7 @@ public class Home {
 	// 조인 및 통계를 위한 필드
 	private String memberNick;          // 회원 닉네임
 	private String memberName;          // 회원 이름
+	private String status;              // 회원 상태 (N: 정상, Y: 탈퇴)
 	private int feedCount;              // 게시물 수
 	private int followerCount;          // 팔로워 수
 	private int followingCount;         // 팔로잉 수

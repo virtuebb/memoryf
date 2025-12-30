@@ -12,6 +12,7 @@
         <result property="createDate" column="CREATE_DATE"/>
         <result property="senderNick" column="SENDER_NICK"/>
         <result property="senderProfile" column="SENDER_PROFILE"/>
+        <result property="senderStatus" column="SENDER_STATUS"/>
         <result property="feedImage" column="FEED_IMAGE"/>
     </resultMap>
 
@@ -45,6 +46,7 @@
             N.IS_READ,
             N.CREATE_DATE,
             M.MEMBER_NICK AS SENDER_NICK,
+            M.STATUS AS SENDER_STATUS,
             H.PROFILE_CHANGE_NAME AS SENDER_PROFILE,
             (SELECT CHANGE_NAME FROM TB_FEED_FILE WHERE FEED_NO = N.TARGET_ID AND ROWNUM = 1) AS FEED_IMAGE
         FROM TB_NOTIFICATION N

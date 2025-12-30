@@ -184,6 +184,9 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
     const targetMemberNo = feed?.memberNo;
     if (!me || !targetMemberNo || me === targetMemberNo) return;
 
+    // 탈퇴한 회원은 팔로우 불가
+    if (feed?.memberStatus === 'Y') return;
+
     // 요청됨 상태일 경우 모달 오픈
     if (followStatus === 'P') {
       setIsCancelRequestModalOpen(true);
@@ -508,14 +511,23 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                     const isVideo = ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(fileUrl.split('.').pop().toLowerCase());
                     
                     return isVideo ? (
-                      <video
-                        src={fileUrl}
-                        className="carousel-image"
-                        controls
-                        autoPlay
-                        muted
-                        loop
-                      />
+                      <>
+                        <video
+                          src={fileUrl}
+                          className="carousel-image-blur"
+                          muted
+                          loop
+                          autoPlay
+                        />
+                        <video
+                          src={fileUrl}
+                          className="carousel-image"
+                          controls
+                          autoPlay
+                          muted
+                          loop
+                        />
+                      </>
                     ) : (
                       <img 
                         src={fileUrl} 
@@ -565,21 +577,28 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
               <div className="feed-detail-author-row">
                 <div 
                   className="feed-detail-author clickable"
-                  onClick={() => feed?.memberNick && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                  onClick={() => feed?.memberNick && feed?.memberStatus !== 'Y' && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                  style={{ cursor: feed?.memberStatus === 'Y' ? 'default' : 'pointer' }}
                 >
-                  {feed?.profileImage ? (
-                    <img 
-                      src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
-                      alt="프로필"
-                      className="author-avatar-img"
-                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                    />
-                  ) : null}
-                  <div className="author-avatar" style={{ display: feed?.profileImage ? 'none' : 'flex' }}>👤</div>
-                  <span className="author-nick">{feed?.memberNick || '익명'}</span>
+                  {feed?.memberStatus === 'Y' ? (
+                    <div className="author-avatar" style={{ display: 'flex' }}>👤</div>
+                  ) : feed?.profileImage ? (
+                    <>
+                      <img 
+                        src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
+                        alt="프로필"
+                        className="author-avatar-img"
+                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                      />
+                      <div className="author-avatar" style={{ display: 'none' }}>👤</div>
+                    </>
+                  ) : (
+                    <div className="author-avatar" style={{ display: 'flex' }}>👤</div>
+                  )}
+                  <span className="author-nick">{feed?.memberStatus === 'Y' ? 'deletedUser' : (feed?.memberNick || '익명')}</span>
                 </div>
 
-                {!isOwner && (
+                {!isOwner && feed?.memberStatus !== 'Y' && (
                   <button
                     type="button"
                     className="follow-text-btn"
@@ -607,25 +626,33 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
               <div className="feed-detail-content-item">
                 <div 
                   className="comment-author-profile clickable"
-                  onClick={() => feed?.memberNick && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                  onClick={() => feed?.memberNick && feed?.memberStatus !== 'Y' && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                  style={{ cursor: feed?.memberStatus === 'Y' ? 'default' : 'pointer' }}
                 >
-                  {feed?.profileImage ? (
-                    <img 
-                      src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
-                      alt="프로필"
-                      className="comment-avatar-img"
-                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                    />
-                  ) : null}
-                  <div className="comment-avatar" style={{ display: feed?.profileImage ? 'none' : 'flex' }}>👤</div>
+                  {feed?.memberStatus === 'Y' ? (
+                    <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
+                  ) : feed?.profileImage ? (
+                    <>
+                      <img 
+                        src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
+                        alt="프로필"
+                        className="comment-avatar-img"
+                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                      />
+                      <div className="comment-avatar" style={{ display: 'none' }}>👤</div>
+                    </>
+                  ) : (
+                    <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
+                  )}
                 </div>
                 <div className="comment-content-wrapper">
                   <div className="feed-main-text">
                     <span 
                       className="comment-author-name clickable"
-                      onClick={() => feed?.memberNick && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                      onClick={() => feed?.memberNick && feed?.memberStatus !== 'Y' && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                      style={{ cursor: feed?.memberStatus === 'Y' ? 'default' : 'pointer' }}
                     >
-                      {feed?.memberNick || '익명'}
+                      {feed?.memberStatus === 'Y' ? 'deletedUser' : (feed?.memberNick || '익명')}
                     </span>
                     <span className="comment-text-inline">
                       {feed?.content ? renderTextWithTags(feed.content) : ''}
@@ -698,25 +725,33 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                     <div key={comment.commentNo} className="feed-detail-content-item comment-item">
                       <div 
                         className="comment-author-profile clickable"
-                        onClick={() => comment?.writerNick && navigate(`/${encodeURIComponent(comment.writerNick)}`)}
+                        onClick={() => comment?.writerNick && comment?.writerStatus !== 'Y' && navigate(`/${encodeURIComponent(comment.writerNick)}`)}
+                        style={{ cursor: comment?.writerStatus === 'Y' ? 'default' : 'pointer' }}
                       >
-                        {comment.writerProfileImage ? (
-                          <img 
-                            src={`http://localhost:8006/memoryf/profile_images/${comment.writerProfileImage}`}
-                            alt="프로필"
-                            className="comment-avatar-img"
-                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                          />
-                        ) : null}
-                        <div className="comment-avatar" style={{ display: comment.writerProfileImage ? 'none' : 'flex' }}>👤</div>
+                        {comment?.writerStatus === 'Y' ? (
+                          <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
+                        ) : comment.writerProfileImage ? (
+                          <>
+                            <img 
+                              src={`http://localhost:8006/memoryf/profile_images/${comment.writerProfileImage}`}
+                              alt="프로필"
+                              className="comment-avatar-img"
+                              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                            />
+                            <div className="comment-avatar" style={{ display: 'none' }}>👤</div>
+                          </>
+                        ) : (
+                          <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
+                        )}
                       </div>
                       <div className="comment-content-wrapper">
                         <div className="feed-main-text">
                           <span 
                             className="comment-author-name clickable"
-                            onClick={() => comment?.writerNick && navigate(`/${encodeURIComponent(comment.writerNick)}`)}
+                            onClick={() => comment?.writerNick && comment?.writerStatus !== 'Y' && navigate(`/${encodeURIComponent(comment.writerNick)}`)}
+                            style={{ cursor: comment?.writerStatus === 'Y' ? 'default' : 'pointer' }}
                           >
-                            {comment.writerNick}
+                            {comment?.writerStatus === 'Y' ? 'deletedUser' : comment.writerNick}
                           </span>
                           <span className="comment-text-inline">
                             {renderTextWithTags(comment.content)}

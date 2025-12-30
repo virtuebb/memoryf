@@ -20,6 +20,12 @@ function SettingsEdit() {
     statusMsg: "",
   });
 
+  // 닉네임 유효성 검사 state
+  const [nickValid, setNickValid] = useState(null);
+
+  // 닉네임 정규식 (회원가입과 동일)
+  const nickRegex = /^[A-Za-z0-9가-힣_.]{2,10}$/;
+
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!currentMemberNo) {
@@ -51,6 +57,27 @@ function SettingsEdit() {
       ...prev,
       [name]: value
     }));
+    
+    // 닉네임 변경 시 유효성 검사 상태 초기화
+    if (name === 'memberNick') {
+      setNickValid(null);
+    }
+  };
+
+  // 닉네임 형식 검사
+  const checkNickType = () => {
+    if (!formData.memberNick) {
+      setNickValid(null);
+      return;
+    }
+    setNickValid(nickRegex.test(formData.memberNick));
+  };
+
+  // 닉네임 형식 검증 메시지
+  const nickTypeMsg = () => {
+    if (nickValid === true) return <p className="type-ok" style={{ fontSize: '12px', marginTop: '5px', color: '#28a745' }}>올바른 닉네임 형식입니다.</p>;
+    if (nickValid === false) return <p className="type-fail" style={{ fontSize: '12px', marginTop: '5px', color: '#dc3545' }}>올바르지 않은 닉네임 형식입니다. (2~10자, 한글/영문/숫자/_ /. 만 가능)</p>;
+    return null;
   };
 
   const handleProfileImageClick = () => {
@@ -93,6 +120,11 @@ function SettingsEdit() {
     
     if (!formData.memberNick.trim()) {
       alert('닉네임을 입력해주세요.');
+      return;
+    }
+
+    if (!nickRegex.test(formData.memberNick)) {
+      alert('닉네임 형식을 확인해주세요. (2~10자, 한글/영문/숫자/_ /. 만 가능)');
       return;
     }
 
@@ -176,9 +208,11 @@ function SettingsEdit() {
               name="memberNick"
               value={formData.memberNick}
               onChange={handleChange}
-              placeholder="닉네임"
+              onBlur={checkNickType}
+              placeholder="닉네임 (2~10자, 한글/영문/숫자/_ /. 만 가능)"
             />
           </div>
+          {nickTypeMsg()}
         </div>
 
         <div className="form-group">

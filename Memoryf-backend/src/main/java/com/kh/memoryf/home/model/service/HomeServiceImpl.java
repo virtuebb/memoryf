@@ -22,7 +22,8 @@ public class HomeServiceImpl implements HomeService {
 
 	@Override
 	public Home getHomeByMemberNo(int memberNo, Integer currentMemberNo) {
-		return homeDao.selectHomeByMemberNo(sqlSession, memberNo, currentMemberNo);
+		Home home = homeDao.selectHomeByMemberNo(sqlSession, memberNo, currentMemberNo);
+		return home;
 	}
 
 	@Override

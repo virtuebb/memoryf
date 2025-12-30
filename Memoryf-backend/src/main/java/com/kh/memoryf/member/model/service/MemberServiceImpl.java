@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.kh.memoryf.member.model.dao.MemberDao;
 import com.kh.memoryf.member.model.vo.AccountHistory;
 import com.kh.memoryf.member.model.vo.Member;
+import com.kh.memoryf.follow.model.dao.FollowDao;
 
 @Service
 public class MemberServiceImpl implements MemberService {
@@ -26,6 +27,9 @@ public class MemberServiceImpl implements MemberService {
 	
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	@Autowired
+	private FollowDao followDao;
 	
 	@Override
 	public ArrayList<Member> selectMemberList() {
@@ -55,6 +59,9 @@ public class MemberServiceImpl implements MemberService {
 		if(!bCryptPasswordEncoder.matches(memberPwd, m.getMemberPwd())) {
 			return -1;
 		}
+		
+		// 탈퇴 전에 모든 팔로우 관계 삭제
+		followDao.deleteAllFollowsByMember(sqlSession, memberNo);
 		
 		return memberDao.deleteMember(sqlSession, memberNo);
 	}

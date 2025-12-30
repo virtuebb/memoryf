@@ -42,15 +42,24 @@ function FeedItem({ feed, isGrid = true }) {
           >
         <div className="feed-image-wrapper">
           {['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(imageUrl.split('.').pop().toLowerCase()) ? (
-            <video 
-              src={`${imageUrl}#t=1.0`} 
-              className="feed-image" 
-              muted 
-              loop 
-              preload="metadata"
-              onMouseOver={e => { e.target.currentTime = 0; e.target.play(); }} 
-              onMouseOut={e => { e.target.pause(); e.target.currentTime = 1; }}
-            />
+            <>
+              <video 
+                src={`${imageUrl}#t=1.0`} 
+                className="feed-image-blur" 
+                muted 
+                loop 
+                preload="metadata"
+              />
+              <video 
+                src={`${imageUrl}#t=1.0`} 
+                className="feed-image" 
+                muted 
+                loop 
+                preload="metadata"
+                onMouseOver={e => { e.target.currentTime = 0; e.target.play(); }} 
+                onMouseOut={e => { e.target.pause(); e.target.currentTime = 1; }}
+              />
+            </>
           ) : (
             <img src={imageUrl} alt={feed.content || '피드 이미지'} className="feed-image" />
           )}
