@@ -27,7 +27,7 @@
             #{phone},
             #{gender},
             #{birthday},
-            'Y'
+            'N'
         )	
 	</insert>
 	
