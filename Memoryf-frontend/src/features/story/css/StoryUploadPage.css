@@ -1,0 +1,208 @@
+/* 1. 기본 레이아웃 및 배경 */
+.story-upload-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.story-upload-modal {
+  width: min(500px, 95vw);
+  height: 650px; /* 고정 높이를 주어야 스크롤바가 정상 작동합니다 */
+  max-height: 85vh;
+  background: #262626;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* 2. 헤더 디자인 (공유 버튼 포함) */
+.story-upload-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #363636;
+}
+
+.story-upload-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  width: 32px;
+  display: flex;
+  align-items: center;
+}
+
+/* 공유 버튼 스타일 (JSX에서 btn-submit-text 클래스 사용) */
+.btn-submit-text {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 50px;
+}
+
+.btn-submit-text:hover {
+  background: #dbdbdb;
+}
+
+/* 3. 커스텀 스크롤바 디자인 */
+.story-upload-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* 스크롤바 전체 너비 */
+.story-upload-body::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* 스크롤바 트랙(바탕) */
+.story-upload-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 스크롤바 막대 */
+.story-upload-body::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 10px;
+  border: 3px solid #262626; /* 배경과 여백을 주어 얇게 보이게 함 */
+}
+
+.story-upload-body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 4. 초기 빈 화면 디자인 (보라색 아이콘 포함) */
+.story-upload-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.empty-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background-color: #0095f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.empty-icon-plus {
+  font-size: 40px;
+  color: white;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.btn-add-main {
+  background: #0095f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+/* 5. 리스트 디자인 (이미지가 있을 때) */
+.story-upload-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 이미지 추가 선택 버튼 */
+.btn-add-more {
+  width: 100%;
+  padding: 12px;
+  background: #363636;
+  border: none;
+  border-radius: 8px;
+  color: #efefef;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.btn-add-more:hover {
+  background: #444;
+}
+
+.story-upload-item {
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid #333;
+}
+
+.preview-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.story-upload-preview {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* 개별 이미지 삭제 버튼 */
+.btn-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-upload-text {
+  width: 100%;
+  background: #262626;
+  border: 1px solid #363636;
+  color: white;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  resize: none;
+  font-size: 14px;
+}

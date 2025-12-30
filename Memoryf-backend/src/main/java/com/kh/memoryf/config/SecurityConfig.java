@@ -68,16 +68,20 @@ public class SecurityConfig {
 					.requestMatchers("/messages/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers("/visitor/**").permitAll()
 					
+					// Story
+					.requestMatchers(HttpMethod.GET, "/story/**", "/memoryf/story/**").permitAll()
+					.requestMatchers(HttpMethod.POST, "/story/**", "/memoryf/story/**").authenticated()
+					.requestMatchers(HttpMethod.DELETE, "/story/**", "/memoryf/story/**").authenticated()
 
-				    // ✅ Home (조회는 공개)
+				    // Home (조회는 공개)
 				    .requestMatchers(HttpMethod.GET, "/guestbook/**").permitAll()
 				    .requestMatchers(HttpMethod.POST, "/guestbook").authenticated()
 
-				    // ✅ Feed (조회는 공개)
+				    // Feed (조회는 공개)
 				    .requestMatchers(HttpMethod.GET, "/feeds/**").permitAll()
 				    .requestMatchers(HttpMethod.POST, "/feeds/**").authenticated()
 				    
-				    // ✅ Diary (개인 데이터 → 로그인 필요)
+				    // Diary (개인 데이터 → 로그인 필요)
 				    .requestMatchers("/diaries/**").authenticated()
 				    
 					// server.servlet.context-path=/memoryf 환경을 고려해 두 패턴을 모두 허용

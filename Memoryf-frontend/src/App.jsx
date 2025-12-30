@@ -31,6 +31,10 @@ import { DmProvider } from './features/dm/context/DmContext';
 import DiaryPage from "./features/diary/pages/DiaryPage";
 import NotificationPage from './features/notification/pages/NotificationPage';
 
+// 스토리
+import StoryUploadPage from "./features/story/pages/StoryUploadPage";
+
+
 // 로그인, 회원가입
 import LoginPage from './features/auth/pages/LoginPage';
 import SignupPage from './features/auth/pages/SignupPage';
@@ -165,7 +169,12 @@ function App() {
               <Route path="/diary" element={<DiaryPage />} />
               <Route path="/notifications" element={<NotificationPage />} />
               <Route path="*" element={<Navigate to="/home" replace />} />
+              
+              {/* 스토리 */}
+              <Route path="/story/upload" element={<StoryUploadPage />} />
             </Routes>
+
+
 
               {/* 🔥 피드 상세 모달 라우트 */}
               {backgroundLocation && (
