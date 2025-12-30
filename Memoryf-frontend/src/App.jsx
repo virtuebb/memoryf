@@ -61,6 +61,7 @@ function App() {
 
 
   const [visitorStats, setVisitorStats] = useState({ today: 0, total: 0 });
+  const [activeHomeMemberNo, setActiveHomeMemberNo] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFeed, setEditingFeed] = useState(null); // 수정할 피드 데이터
@@ -84,22 +85,32 @@ function App() {
   })();
 
    useEffect(() => {
-    if (!homeMemberNo) {
-      setVisitorStats({ today: 0, total: 0 });
-      return;
+   if (location.pathname === '/home' && currentMemberNo) {
+      setActiveHomeMemberNo(currentMemberNo);
     }
 
-    getVisitorStats(homeMemberNo)
-      .then(res => {
-        setVisitorStats({
-          today: res.data?.today ?? 0,
-          total: res.data?.total ?? 0,
-        });
-      })
-      .catch(() => {
-        setVisitorStats({ today: 0, total: 0 });
+    if (location.pathname.startsWith('/home/')) {
+      const no = Number(location.pathname.split('/')[2]);
+      if (!isNaN(no)) setActiveHomeMemberNo(no);
+    }
+  }, [location.pathname, currentMemberNo]);
+
+  // ✅ activeHomeMemberNo 기준으로 방문자 조회
+useEffect(() => {
+  if (!activeHomeMemberNo) return;
+
+  getVisitorStats(activeHomeMemberNo)
+    .then(res => {
+      setVisitorStats({
+        today: res.data?.today ?? 0,
+        total: res.data?.total ?? 0,
       });
-  }, [homeMemberNo, location.pathname]);
+    })
+    .catch(() => {
+      setVisitorStats({ today: 0, total: 0 });
+    });
+}, [activeHomeMemberNo]);
+
 
   // 설정 페이지 여부
   const isSettings = location.pathname.startsWith('/settings');
