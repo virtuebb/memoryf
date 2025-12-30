@@ -12,53 +12,45 @@
     <result property="createDate" column="CREATE_DATE"/>
     <result property="expireDate" column="EXPIRE_DATE"/>
     <result property="isDel" column="IS_DEL"/>
+    <result property="memberNick" column="MEMBER_NICK"/>
+    <result property="profileImg" column="PROFILE_CHANGE_NAME"/> 
   </resultMap>
 
-  <!-- ✅ StoryDetail (Story + StoryItem List) 한번에 조회용 -->
   <resultMap id="storyDetailResultMap" type="storyDetail">
-	  <id property="story.storyNo" column="STORY_NO"/>
-	  <result property="story.memberNo" column="MEMBER_NO"/>
-	  <result property="story.createDate" column="CREATE_DATE"/>
-	  <result property="story.expireDate" column="EXPIRE_DATE"/>
-	  <result property="story.isDel" column="IS_DEL"/>
+    <id property="story.storyNo" column="STORY_NO"/>
+    <result property="story.memberNo" column="MEMBER_NO"/>
+    <result property="story.createDate" column="CREATE_DATE"/>
+    <result property="story.expireDate" column="EXPIRE_DATE"/>
+    <result property="story.isDel" column="IS_DEL"/>
+    <result property="story.memberNick" column="MEMBER_NICK"/>
+    <result property="story.profileImg" column="PROFILE_CHANGE_NAME"/>
 	
-	  <collection property="items" ofType="storyItem">
-	    <id property="itemNo" column="ITEM_NO"/>
-	    <result property="storyNo" column="STORY_NO"/>
-	    <result property="itemOrder" column="ITEM_ORDER"/>
-	    <result property="originName" column="ORIGIN_NAME"/>
-	    <result property="changeName" column="CHANGE_NAME"/>
-	    <result property="filePath" column="FILE_PATH"/>
-	    <result property="storyText" column="STORY_TEXT"/>
-	    <result property="isDel" column="ITEM_IS_DEL"/>
-	    <result property="createDate" column="ITEM_CREATE_DATE"/>
-	  </collection>
-	</resultMap>
+    <collection property="items" ofType="storyItem">
+      <id property="itemNo" column="ITEM_NO"/>
+      <result property="storyNo" column="STORY_NO"/>
+      <result property="itemOrder" column="ITEM_ORDER"/>
+      <result property="originName" column="ORIGIN_NAME"/>
+      <result property="changeName" column="CHANGE_NAME"/>
+      <result property="filePath" column="FILE_PATH"/>
+      <result property="storyText" column="STORY_TEXT"/>
+      <result property="isDel" column="ITEM_IS_DEL"/>
+      <result property="createDate" column="ITEM_CREATE_DATE"/>
+    </collection>
+  </resultMap>
 
   <!-- ✅ StoryDetail 조회 -->
   <select id="selectStoryDetail" parameterType="int" resultMap="storyDetailResultMap">
     SELECT
-      S.STORY_NO,
-      S.MEMBER_NO,
-      S.CREATE_DATE,
-      S.EXPIRE_DATE,
-      S.IS_DEL,
-
-      I.ITEM_NO,
-      I.ITEM_ORDER,
-      I.ORIGIN_NAME,
-      I.CHANGE_NAME,
-      I.FILE_PATH,
-      I.STORY_TEXT,
-      I.IS_DEL AS ITEM_IS_DEL,
-      I.CREATE_DATE AS ITEM_CREATE_DATE
-
+      S.STORY_NO, S.MEMBER_NO, S.CREATE_DATE, S.EXPIRE_DATE, S.IS_DEL,
+      M.MEMBER_NICK,
+      H.PROFILE_CHANGE_NAME,
+      I.ITEM_NO, I.ITEM_ORDER, I.ORIGIN_NAME, I.CHANGE_NAME, I.FILE_PATH,
+      I.STORY_TEXT, I.IS_DEL AS ITEM_IS_DEL, I.CREATE_DATE AS ITEM_CREATE_DATE
     FROM TB_STORY S
-    LEFT JOIN TB_STORY_ITEM I
-      ON I.STORY_NO = S.STORY_NO
-     AND I.IS_DEL = 'N'
-    WHERE S.STORY_NO = #{value}
-      AND S.IS_DEL = 'N'
+    JOIN TB_MEMBER M ON (S.MEMBER_NO = M.MEMBER_NO)
+    LEFT JOIN TB_MEMBER_HOME H ON (S.MEMBER_NO = H.MEMBER_NO)
+    LEFT JOIN TB_STORY_ITEM I ON (I.STORY_NO = S.STORY_NO AND I.IS_DEL = 'N')
+    WHERE S.STORY_NO = #{value} AND S.IS_DEL = 'N'
     ORDER BY I.ITEM_ORDER
   </select>
   
@@ -119,17 +111,29 @@
 	</update>
 	
 	<select id="selectStoryList" parameterType="int" resultMap="storyResultSet">
-	  SELECT
-	    STORY_NO,
-	    MEMBER_NO,
-	    CREATE_DATE,
-	    EXPIRE_DATE,
-	    IS_DEL
-	  FROM TB_STORY
-	  WHERE MEMBER_NO = #{value}
-	    AND IS_DEL = 'N'
-	  ORDER BY STORY_NO DESC
-	</select>
+	    SELECT
+	      S.STORY_NO,
+	      S.MEMBER_NO,
+	      S.CREATE_DATE,
+	      S.EXPIRE_DATE,
+	      S.IS_DEL,
+	      M.MEMBER_NICK,
+	      H.PROFILE_CHANGE_NAME
+	    FROM TB_STORY S
+	    JOIN TB_MEMBER M ON (S.MEMBER_NO = M.MEMBER_NO)
+	    LEFT JOIN TB_MEMBER_HOME H ON (S.MEMBER_NO = H.MEMBER_NO)
+	    WHERE S.IS_DEL = 'N'
+	      AND (
+	        S.MEMBER_NO = #{value}
+	        OR 
+	        S.MEMBER_NO IN (
+	          SELECT MEMBER_NO 
+	          FROM TB_FOLLOWS 
+	          WHERE HOME_NO = (SELECT HOME_NO FROM TB_MEMBER_HOME WHERE MEMBER_NO = #{value})
+	        )
+	      )
+	    ORDER BY S.STORY_NO DESC
+	  </select>
 	
 	<select id="selectStoryVisitorCount" parameterType="storyVisitor" resultType="int">
 	  SELECT COUNT(*)

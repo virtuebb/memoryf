@@ -50,21 +50,50 @@ const StoryUploadPage = ({ isOpen, onClose }) => {
     if (items.length === 0) return alert("이미지를 추가해주세요.");
 
     try {
-      const memberNo = 1; // TODO: 실제 세션 유저 번호로 교체
+      // 1. 로컬스토리지에서 데이터를 꺼내옵니다.
+      const storageData = localStorage.getItem("loginMember");
+      
+      // 데이터가 있는지 콘솔에 찍어 확인해봅니다 (나중에 지워도 됨)
+      console.log("저장된 유저 정보:", storageData);
+
+      if (!storageData) {
+        alert("로그인 세션이 만료되었습니다. 다시 로그인해주세요.");
+        return;
+      }
+
+      // 2. JSON 문자열을 객체로 변환
+      const loginMember = JSON.parse(storageData);
+      
+      // 3. 객체에서 memberNo 추출 (변수명 주의: memberNo 인지 확인)
+      const memberNo = loginMember.memberNo; 
+
+      if (!memberNo) {
+        alert("사용자 번호(memberNo)를 찾을 수 없습니다.");
+        return;
+      }
+
       const fd = new FormData();
+      // 4. 백엔드 VO 구조에 맞춰 데이터 구성
       fd.append("detail", JSON.stringify({
-        story: { memberNo },
+        story: { memberNo: memberNo }, 
         items: items.map(it => ({ storyText: it.storyText }))
       }));
+
+      // 5. 파일 추가
       items.forEach(it => fd.append("files", it.file));
 
-      await storyApi.insertStory(fd);
-      window.dispatchEvent(new Event("storyChanged"));
-      alert("업로드 완료");
-      onClose();
+      // 6. 서버 전송
+      const res = await storyApi.insertStory(fd);
+      
+      if(res.status === 200 || res.data > 0) {
+        window.dispatchEvent(new Event("storyChanged"));
+        alert("업로드 완료");
+        setItems([]); // 아이템 초기화
+        onClose();    // 모달 닫기
+      }
     } catch (err) {
-      console.error(err);
-      alert("업로드 실패");
+      console.error("업로드 에러 상세:", err);
+      alert("업로드 실패: 서버 로그를 확인하세요.");
     }
   };
 
