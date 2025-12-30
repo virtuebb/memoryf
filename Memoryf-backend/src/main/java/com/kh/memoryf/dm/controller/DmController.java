@@ -99,30 +99,16 @@ public class DmController {
     }
 
     // DM 방 추가
-    // @RequestBody는 JSON을 자바 객체로 매핑해주는 것이지, JSON 내부 필드를 자동 추출해주는 게 아님
-    // 그래서 외부 클래스를 하나 만들어서 jackson 라이브러리가 자동으로 json을 파싱하고 DmRoomRequset 객체를 생성하고 JSON의 targetuserId 키의 값우루 객체의 targetUserId 필드에 매핑
     @PostMapping("insertRoom")
     public Map<String, Object> insertRoom(@RequestBody DmRoomRequest request) {
 
-        String targetUserId = request.getTargetUserId();
-        String userId = request.getUserId();
-
-        // System.out.println(targetUserId);
-        // System.out.println(userId);
-
-        int roomNo = dmService.insertRoom(targetUserId, userId);
-
-        int sender  = dmService.insertParticipantSender(roomNo, targetUserId, userId);
-        int reciever = dmService.insertParticipantReciever(roomNo, targetUserId, userId);
-
-        // System.out.println(sender);
-        // System.out.println(reciever);
+        int roomNo = dmService.createDmRoom(request);
 
         Map<String, Object> resp = new HashMap<>();
         if (roomNo > 0) {
             resp.put("roomNo", roomNo);
-            resp.put("roomName", targetUserId);
-            resp.put("targetUserId", targetUserId);
+            resp.put("roomName", request.getTargetUserId());
+            resp.put("targetUserId", request.getTargetUserId());
             resp.put("message", "채팅방 추가 성공");
         } else {
             resp.put("roomNo", 0);

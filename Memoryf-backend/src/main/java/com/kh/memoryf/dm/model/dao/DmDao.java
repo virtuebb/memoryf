@@ -96,7 +96,11 @@ public class DmDao {
         return result != null ? result : 0;
     }
 
-    
+    // 참여자 존재 여부 확인
+    public int checkParticipantExists(SqlSessionTemplate sqlSession, Map<String, Object> map) {
+        Integer result = sqlSession.selectOne("dmMapper.checkParticipantExists", map);
+        return result != null ? result : 0;
+    }
 
 }
 

@@ -69,6 +69,7 @@
 		FROM (
 			SELECT
 				TM.MEMBER_NO AS "memberNo",
+				TM.MEMBER_ID AS "memberId",
 				TM.MEMBER_NICK AS "memberNick",
 				TH.PROFILE_CHANGE_NAME AS "profileChangeName"
 				<if test="currentMemberNo != null">
