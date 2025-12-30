@@ -19,13 +19,39 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background: #000;
 }
 
-.feed-image {
+/* 블러 배경 동영상 */
+.feed-image-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: blur(20px);
+  transform: scale(1.1);
+  opacity: 0.6;
+  z-index: 0;
+}
+
+.feed-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
+  z-index: 1;
+}
+
+/* 동영상 타입에 따라 다른 object-fit 적용 */
+video.feed-image {
+  object-fit: contain;
+}
+
+img.feed-image {
+  object-fit: cover;
 }
 
 .feed-overlay {

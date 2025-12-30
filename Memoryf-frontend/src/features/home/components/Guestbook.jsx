@@ -245,7 +245,7 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
             <div className="guestbook-item-header">
               <div className="guestbook-author">
                 <div className="guestbook-author-profile">
-                  {item.profileChangeName ? (
+                  {item.profileChangeName && item.status !== 'Y' ? (
                     <img
                       src={`http://localhost:8006/memoryf/profile_images/${item.profileChangeName}`}
                       alt="프로필"
@@ -260,7 +260,7 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
                   ) : null}
                   <div
                     className="guestbook-avatar"
-                    style={{ display: item.profileChangeName ? "none" : "flex" }}
+                    style={{ display: (item.profileChangeName && item.status !== 'Y') ? "none" : "flex" }}
                   >
                     👤
                   </div>
@@ -270,9 +270,10 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
                   <button
                     type="button"
                     className="guestbook-author-name"
-                    onClick={() => handleClickMemberNick(item.memberNick)}
+                    onClick={() => item.status !== 'Y' && handleClickMemberNick(item.memberNick)}
+                    style={{ cursor: item.status === 'Y' ? 'default' : 'pointer' }}
                   >
-                    {item.memberNick}
+                    {item.status === 'Y' ? 'deletedUser' : item.memberNick}
                   </button>
                   <span className="guestbook-author-time">
                     {formatTimeAgo(item.createDate)}

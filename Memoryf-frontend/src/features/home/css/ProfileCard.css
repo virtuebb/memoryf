@@ -109,6 +109,18 @@
   color: #444;
 }
 
+/* 탈퇴한 회원 안내 */
+.deleted-user-notice {
+  margin: 14px 0 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #888;
+  background: #f5f5f5;
+  border-radius: 8px;
+  text-align: center;
+}
+
 /* =========================
    Stats (메시지 바로 아래)
 ========================= */

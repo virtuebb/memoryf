@@ -24,6 +24,8 @@ import com.kh.memoryf.home.model.vo.Home;
 import com.kh.memoryf.member.model.service.MemberService;
 import com.kh.memoryf.member.model.vo.AccountHistory;
 import com.kh.memoryf.member.model.vo.Member;
+import com.kh.memoryf.notification.model.service.NotificationService;
+import com.kh.memoryf.notification.model.vo.Notification;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -37,6 +39,9 @@ public class HomeContoller {
 	
 	@Autowired
 	private MemberService memberService;
+	
+	@Autowired
+	private NotificationService notificationService;
 	
 	/**
 	 * 회원 번호로 홈 조회 (RESTful: GET /home/{memberNo})
@@ -147,6 +152,18 @@ public class HomeContoller {
 			guestbook.setHomeNo(homeNo);
 			int result = homeService.createGuestbook(guestbook);
 			if (result > 0) {
+				// 방명록 알림 생성 (자신의 홈에 쓴 경우는 제외)
+				Home home = homeService.getHome(homeNo, null);
+				if (home != null && home.getMemberNo() != guestbook.getMemberNo()) {
+					Notification notification = new Notification();
+					notification.setReceiverNo(home.getMemberNo());
+					notification.setSenderNo(guestbook.getMemberNo());
+					notification.setType("GUESTBOOK");
+					notification.setTargetId(homeNo);
+					notification.setIsRead("N");
+					notificationService.createNotification(notification);
+				}
+				
 				response.put("success", true);
 				response.put("message", "방명록이 등록되었습니다.");
 			} else {

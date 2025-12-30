@@ -26,6 +26,7 @@ public class Guestbook {
 	// 조인을 위한 필드
 	private String memberNick;         // 작성자 닉네임
 	private String profileChangeName;  // 작성자 프로필 이미지
+	private String status;             // 회원 상태 (N: 정상, Y: 탈퇴)
 	private int likeCount;             // 좋아요 수
 	private boolean isLiked;           // 현재 사용자가 좋아요 했는지 여부
 }

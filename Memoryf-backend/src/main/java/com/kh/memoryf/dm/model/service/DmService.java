@@ -3,6 +3,7 @@ package com.kh.memoryf.dm.model.service;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.kh.memoryf.dm.model.dao.DmRoomRequest;
 import com.kh.memoryf.dm.model.vo.DmMessage;
 import com.kh.memoryf.dm.model.vo.DmRoom;
 
@@ -32,5 +33,11 @@ public interface DmService {
     
     // 미읽은 메시지 개수 조회
     int getUnreadMessageCount(Map<String, Object> map);
+
+    // 참여자 존재 여부 확인
+    int checkParticipantExists(Map<String, Object> map);
+
+    // DM 방 생성 및 참여자 추가 (중복 방지)
+    int createDmRoom(DmRoomRequest request);
 
 }

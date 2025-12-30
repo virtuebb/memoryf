@@ -254,10 +254,32 @@ function ActivitySection() {
                 <div className="loading-state">로딩 중...</div>
               ) : items.length > 0 ? (
                 items.map(feed => {
-                  const imageUrl = feed.feedFiles && feed.feedFiles.length > 0
-                    ? `http://localhost:8006/memoryf/feed_upfiles/${feed.feedFiles[0].changeName}`
-                    : 'https://via.placeholder.com/300?text=No+Image';
+                  // 이미지 URL 추출 (FeedItem 로직과 동일)
+                  const getImageUrl = () => {
+                    if (!feed.feedFiles || feed.feedFiles.length === 0) {
+                      return 'https://via.placeholder.com/300?text=No+Image';
+                    }
+                    
+                    const filePath = feed.feedFiles[0].filePath;
+                    
+                    // 절대 URL이면 그대로 사용
+                    if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+                      return filePath;
+                    }
+                    
+                    // 상대 경로면 백엔드 서버 URL과 결합
+                    if (filePath.startsWith('/')) {
+                      return `http://localhost:8006/memoryf${filePath}`;
+                    }
+                    
+                    // 그 외의 경우 그대로 사용
+                    return filePath;
+                  };
                   
+                  const imageUrl = getImageUrl();
+                  const isVideo = ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(
+                    imageUrl.split('.').pop()?.toLowerCase()
+                  );
                   const isSelected = selectedItems.has(feed.feedNo);
 
                   return (
@@ -266,7 +288,26 @@ function ActivitySection() {
                       className={`activity-item ${isSelected ? 'selected' : ''}`}
                       onClick={() => handleItemClick(feed)}
                     >
-                      <img src={imageUrl} alt="feed" />
+                      {isVideo ? (
+                        <>
+                          <video 
+                            src={`${imageUrl}#t=1.0`} 
+                            className="activity-video-blur" 
+                            muted 
+                            loop 
+                            preload="metadata"
+                          />
+                          <video 
+                            src={`${imageUrl}#t=1.0`} 
+                            className="activity-video" 
+                            muted 
+                            loop 
+                            preload="metadata"
+                          />
+                        </>
+                      ) : (
+                        <img src={imageUrl} alt="feed" />
+                      )}
                       {isSelectionMode && (
                         <div className={`selection-overlay ${isSelected ? 'active' : ''}`}>
                           <div className="check-circle">

@@ -66,6 +66,12 @@
 		ORDER BY LAST_SEND_DATE DESC
 	</select>
 
+	<!-- 참여자 존재 여부 확인 쿼리 -->
+    <select id="checkParticipantExists" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM TB_DM_PARTICIPANT 
+        WHERE ROOM_NO = #{roomNo} AND MEMBER_ID = #{memberId}
+    </select>
+
 	<!-- 새로운 DM 방 생성용 쿼리 -->
 	<!-- selectKey로 시퀀스 값을 먼저 가져와 parameter의 roomNo에 설정하고 그걸 반환할 수 있음-->
 	<insert id="insertRoom" parameterType="map" useGeneratedKeys="false">
