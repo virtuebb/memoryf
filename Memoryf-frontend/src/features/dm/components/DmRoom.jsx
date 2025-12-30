@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDm } from '../context/DmContext';
+import React from 'react';
 import '../css/DmRoom.css';
 import { selectDmMessages } from '../api/dmApi.js';
 
@@ -22,7 +23,7 @@ function SendIcon() {
   );
 }
 
-export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, themeClass = 'light', hideHeader = false }) {
+function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, themeClass = 'light', hideHeader = false }) {
   // 📍 페이지 이동용 navigate
   const navigate = useNavigate();
   
@@ -63,9 +64,8 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
   // 🔌 백엔드 연동: 채팅방의 메시지 목록 불러오기
   // ============================================
   useEffect(() => {
-    // pending(대기) 상태이거나 id가 서버의 roomNo가 아닌 경우 메시지 조회를 건너뜁니다.
+    // 채팅방의 메시지 목록 불러오기
     if (!chat) return;
-    if (chat.isPending) return;
     const numericId = Number(chat.id);
     if (Number.isNaN(numericId)) return;
 
@@ -103,6 +103,50 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
+  }, [chat.messages]);
+
+  // ============================================
+  // 📅 날짜 구분자 생성
+  // ============================================
+  const formatDateLabel = (date) => {
+    if (!date) return '';
+    const now = new Date();
+    const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffDays = Math.round((today - target) / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return '오늘';
+    if (diffDays === 1) return '어제';
+    return new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
+  };
+
+  const parseMessageDate = (message) => {
+    // 우선 표준 타임스탬프 필드들 사용
+    const ts = message.createdAt || message.sentAt || message.timestamp || message.isoTime;
+    if (ts) {
+      const d = new Date(ts);
+      if (!Number.isNaN(d.getTime())) return d;
+    }
+    // fallback: 메시지에 이미 Date 객체가 들어있는 경우
+    if (message.date instanceof Date) return message.date;
+    return null;
+  };
+
+  // messagesWithSeparators: 날짜 구분자 항목과 메시지 항목이 섞여있는 배열
+  const messagesWithSeparators = useMemo(() => {
+    const out = [];
+    if (!chat || !Array.isArray(chat.messages)) return out;
+    let lastDateKey = null;
+    for (let i = 0; i < chat.messages.length; i++) {
+      const msg = chat.messages[i];
+      const d = parseMessageDate(msg);
+      const dateKey = d ? d.toDateString() : null;
+      if (dateKey && dateKey !== lastDateKey) {
+        out.push({ type: 'separator', id: `sep-${dateKey}-${i}`, date: d, label: formatDateLabel(d) });
+        lastDateKey = dateKey;
+      }
+      out.push({ type: 'message', message: msg });
+    }
+    return out;
   }, [chat.messages]);
 
   /**
@@ -169,43 +213,53 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
           </div>
         ) : (
           <div className="chat-room-message-list">
-            {/* 🔄 각 메시지를 하나씩 그리기 */}
-            {chat.messages.map((message, index) => (
-              <div
-                key={message.id}
-                className={`chat-message-row ${message.isMine ? 'mine' : 'theirs'}`}
-              >
-                {/* 💙 내 메시지: 오른쪽 정렬, 파란 배경 */}
-                {message.isMine ? (
-                  <div className="chat-message-wrapper">
-                    {/* 읽음 표시 + 시간 */}
-                    <div className="chat-message-meta">
-                      {/* 👀 읽음 표시: 상대방이 안 읽었으면 "1" 표시 */}
-                      {!message.isRead && (
-                        <span className="chat-message-unread">1</span>
-                      )}
+            {/* 🔄 각 메시지를 하나씩 그리기 (날짜 구분자 포함) */}
+            {messagesWithSeparators.map((item) => {
+              if (item.type === 'separator') {
+                return (
+                  <div key={item.id} className={`chat-date-separator ${themeClass}`}>
+                    <span className="chat-date-separator-label">{item.label}</span>
+                  </div>
+                );
+              }
+              const message = item.message;
+              return (
+                <div
+                  key={message.id}
+                  className={`chat-message-row ${message.isMine ? 'mine' : 'theirs'}`}
+                >
+                  {/* 💙 내 메시지: 오른쪽 정렬, 파란 배경 */}
+                  {message.isMine ? (
+                    <div className="chat-message-wrapper">
+                      {/* 읽음 표시 + 시간 */}
+                      <div className="chat-message-meta">
+                        {/* 👀 읽음 표시: 상대방이 안 읽었으면 "1" 표시 */}
+                        {!message.isRead && (
+                          <span className="chat-message-unread">1</span>
+                        )}
+                        <span className={`chat-message-time ${themeClass}`}>
+                          {message.time}
+                        </span>
+                      </div>
+                      <div className="chat-message-bubble mine">
+                        {message.text}
+                      </div>
+                    </div>
+                  ) : (
+                    /* 🤍 상대방 메시지: 왼쪽 정렬, 흰 배경 */
+                    <div className="chat-message-wrapper">
+                      {/* 메시지 먼저, 그 다음 시간 */}
+                      <div className={`chat-message-bubble theirs ${themeClass}`}>
+                        {message.text}
+                      </div>
                       <span className={`chat-message-time ${themeClass}`}>
                         {message.time}
                       </span>
                     </div>
-                    <div className="chat-message-bubble mine">
-                      {message.text}
-                    </div>
-                  </div>
-                ) : (
-                  /* 🤍 상대방 메시지: 왼쪽 정렬, 흰 배경 */
-                  <div className="chat-message-wrapper">
-                    {/* 메시지 먼저, 그 다음 시간 */}
-                    <div className={`chat-message-bubble theirs ${themeClass}`}>
-                      {message.text}
-                    </div>
-                    <span className={`chat-message-time ${themeClass}`}>
-                      {message.time}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -238,3 +292,5 @@ export default function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, th
     </div>
   );
 }
+
+export default React.memo(ChatRoom);

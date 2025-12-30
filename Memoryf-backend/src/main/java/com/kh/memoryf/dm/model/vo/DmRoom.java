@@ -15,18 +15,15 @@ import lombok.ToString;
 @Getter
 @ToString
 public class DmRoom {
-    private int roomNo;         // ROOM_NO	NUMBER
-    private String roomType;    // ROOM_TYPE	VARCHAR2(10 BYTE)
-    private String roomName;    // ROOM_NAME	VARCHAR2(100 BYTE)
-    private Date createDate;    // CREATE_DATE	DATE
-    private Date lastSendDate;  // LAST_SEND_DATE	DATE
-    private String isDel;       // IS_DEL	CHAR(1 BYTE)
-    private int memberNo;      // 현재 사용자 번호 (나)
-    private String memberId;   // 현재 사용자 ID (나)
-    private String memberName; // 현재 사용자 이름 (나)
-
-    private String targetUserId;
-    private String targetUserName;
-    private String lastMessage;
-    private int unreadCount;
+    private int roomNo;              // ROOM_NO (채팅방 ID)
+    private String roomName;         // ROOM_NAME
+    private Date createDate;         // CREATE_DATE
+    
+    // 🔽 채팅 목록 조회용 필드들 (selectDmRoomList)
+    private String targetUserId;     // 상대방 사용자 ID
+    private String targetUserName;   // 상대방 사용자 이름
+    private String lastMessage;      // 마지막 메시지 (요약)
+    private String lastSendDate;       // 마지막 메시지 시간
+    private int unreadCount;         // 읽지 않은 메시지 수
+    private String avatar;           // 상대방 프로필 이미지 URL
 }

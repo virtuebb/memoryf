@@ -189,7 +189,7 @@ public class FeedController {
 			// 파일이 없으면 에러
 			if (files == null || files.isEmpty() || files.get(0).isEmpty()) {
 				response.put("success", false);
-				response.put("message", "최소 1개 이상의 이미지를 업로드해주세요.");
+				response.put("message", "최소 1개 이상의 파일을 업로드해주세요.");
 				return response;
 			}
 			
@@ -493,6 +493,52 @@ public class FeedController {
 			response.put("message", "좋아요 처리 실패: " + e.getMessage());
 		}
 		
+		return response;
+	}
+
+	/**
+	 * 내가 좋아요한 피드 목록 조회
+	 */
+	@GetMapping("/liked")
+	public HashMap<String, Object> selectLikedFeedList(
+			@RequestParam(value = "memberNo") Integer memberNo,
+			@RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+			@RequestParam(value = "startDate", required = false) String startDate,
+			@RequestParam(value = "endDate", required = false) String endDate) {
+		
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("memberNo", memberNo);
+		map.put("sortBy", sortBy);
+		map.put("startDate", startDate);
+		map.put("endDate", endDate);
+		
+		List<Feed> list = feedService.selectLikedFeedList(map);
+		
+		HashMap<String, Object> response = new HashMap<>();
+		response.put("list", list);
+		return response;
+	}
+
+	/**
+	 * 내가 댓글 단 목록 조회
+	 */
+	@GetMapping("/commented")
+	public HashMap<String, Object> selectCommentedFeedList(
+			@RequestParam(value = "memberNo") Integer memberNo,
+			@RequestParam(value = "sortBy", defaultValue = "recent") String sortBy,
+			@RequestParam(value = "startDate", required = false) String startDate,
+			@RequestParam(value = "endDate", required = false) String endDate) {
+		
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("memberNo", memberNo);
+		map.put("sortBy", sortBy);
+		map.put("startDate", startDate);
+		map.put("endDate", endDate);
+		
+		List<com.kh.memoryf.comment.model.vo.Comment> list = feedService.selectCommentedFeedList(map);
+		
+		HashMap<String, Object> response = new HashMap<>();
+		response.put("list", list);
 		return response;
 	}
 }

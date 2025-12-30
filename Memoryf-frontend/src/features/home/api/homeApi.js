@@ -80,11 +80,16 @@ export const getHomeByMemberNick = async (memberNick, currentMemberNo = null) =>
  * 홈 번호로 방명록 목록 조회 (RESTful: GET /home/{homeNo}/guestbook)
  * @param {number} homeNo - 홈 번호
  * @param {number} currentMemberNo - 현재 로그인한 회원 번호 (옵션)
+ * @param {number} offset - 페이징 시작 위치 (기본값: 0)
+ * @param {number} limit - 가져올 개수 (기본값: 3)
  * @returns {Promise} 방명록 목록
  */
-export const getGuestbookList = async (homeNo, currentMemberNo = null) => {
+export const getGuestbookList = async (homeNo, currentMemberNo = null, offset = 0, limit = 3) => {
   try {
-    const params = currentMemberNo ? { currentMemberNo } : {};
+    const params = { offset, limit };
+    if (currentMemberNo) {
+      params.currentMemberNo = currentMemberNo;
+    }
     const response = await homeApi.get(`/${homeNo}/guestbook`, { params });
     
     if (response.data && response.data.success) {

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { getHomeByMemberNo, uploadProfileImage } from "../api/homeApi";
 import { getMemberNoFromToken } from "../../../utils/jwt";
+import { emitFollowChange, onFollowChange } from "../../../utils/followEvents";
 import {
   followMember,
   getFollowersList,
@@ -23,6 +24,8 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
   const [uploading, setUploading] = useState(false);
   const [followActionLoading, setFollowActionLoading] = useState(false);
   const [imageTimestamp, setImageTimestamp] = useState(Date.now());
+
+  const [isCancelRequestModalOpen, setIsCancelRequestModalOpen] = useState(false);
 
   const [isFollowModalOpen, setIsFollowModalOpen] = useState(false);
   const [followModalType, setFollowModalType] = useState(null); // 'followers' | 'following'
@@ -76,6 +79,44 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
     fetchHomeData();
   }, [currentMemberNo, navigate, resolvedMemberNo]);
 
+  // 다른 화면(피드 상세 모달 등)에서 팔로우 상태가 바뀌어도
+  // 프로필 카드가 새로고침 없이 즉시 반영되도록 이벤트로 동기화
+  useEffect(() => {
+    if (!currentMemberNo || !resolvedMemberNo) return;
+
+    return onFollowChange(({ targetMemberNo, actorMemberNo, status }) => {
+      if (!targetMemberNo || !actorMemberNo) return;
+      if (Number(actorMemberNo) !== Number(currentMemberNo)) return;
+      if (Number(targetMemberNo) !== Number(resolvedMemberNo)) return;
+
+      setHome((prev) => {
+        if (!prev) return prev;
+
+        const nextStatus = status ?? null; // 'Y' | 'P' | null
+        const nextIsFollowing = nextStatus === 'Y' || nextStatus === 'P';
+
+        if ((prev.followStatus ?? null) === nextStatus && Boolean(prev.isFollowing) === nextIsFollowing) {
+          return prev;
+        }
+
+        const prevCount = Number(prev.followerCount ?? 0);
+        let nextCount = prevCount;
+        if (prev.followStatus === 'Y' && nextStatus !== 'Y') {
+          nextCount = Math.max(0, prevCount - 1);
+        } else if (prev.followStatus !== 'Y' && nextStatus === 'Y') {
+          nextCount = prevCount + 1;
+        }
+
+        return {
+          ...prev,
+          isFollowing: nextIsFollowing,
+          followStatus: nextStatus,
+          followerCount: nextCount,
+        };
+      });
+    });
+  }, [currentMemberNo, resolvedMemberNo]);
+
   /* =========================
      핸들러
   ========================= */
@@ -92,7 +133,15 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
     if (resolvedMemberNo === currentMemberNo) return;
     if (followActionLoading) return;
 
-    const currentlyFollowing = Boolean(home?.isFollowing);
+    const currentStatus = home?.followStatus;
+    const currentlyFollowing = currentStatus === 'Y' || currentStatus === 'P';
+
+    // 비공개 계정 팔로우 요청 대기 상태('P')일 때는
+    // 바로 취소하지 않고 확인 모달을 띄운다.
+    if (currentStatus === 'P') {
+      setIsCancelRequestModalOpen(true);
+      return;
+    }
 
     try {
       setFollowActionLoading(true);
@@ -105,22 +154,83 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
         return;
       }
 
-      const nextFollowing =
-        typeof result?.isFollowing === "boolean" ? result.isFollowing : !currentlyFollowing;
+      const nextStatus = result.status; // 'Y', 'P', or null
+      const nextIsFollowing = nextStatus === 'Y' || nextStatus === 'P';
 
       setHome((prev) => {
         if (!prev) return prev;
+        
         const prevCount = Number(prev.followerCount ?? 0);
-        const nextCount = Math.max(0, prevCount + (nextFollowing ? 1 : -1));
+        let nextCount = prevCount;
+        
+        // 팔로잉 상태 변화에 따른 카운트 조정
+        // 'Y' -> 'N'(null): 감소
+        // 'N'(null) -> 'Y': 증가
+        // 'P'는 카운트에 포함되지 않는다고 가정 (또는 포함된다면 로직 수정 필요)
+        if (prev.followStatus === 'Y' && nextStatus !== 'Y') {
+             nextCount = Math.max(0, prevCount - 1);
+        } else if (prev.followStatus !== 'Y' && nextStatus === 'Y') {
+             nextCount = prevCount + 1;
+        }
+
         return {
           ...prev,
-          isFollowing: nextFollowing,
+          isFollowing: nextIsFollowing,
+          followStatus: nextStatus,
           followerCount: nextCount,
         };
       });
+
+      emitFollowChange({
+        targetMemberNo: resolvedMemberNo,
+        actorMemberNo: currentMemberNo,
+        status: nextStatus ?? null,
+      });
+
+      if (nextStatus === 'P') {
+        alert("팔로우 요청을 보냈습니다.");
+      }
+
     } catch (e) {
       console.error("팔로우 처리 실패:", e);
       alert("팔로우 처리에 실패했습니다.");
+    } finally {
+      setFollowActionLoading(false);
+    }
+  };
+
+  const handleCancelFollowRequest = async () => {
+    if (!resolvedMemberNo || !currentMemberNo) return;
+    if (followActionLoading) return;
+
+    try {
+      setFollowActionLoading(true);
+
+      const result = await unfollowMember(resolvedMemberNo, currentMemberNo);
+      if (result?.success === false) {
+        alert(result?.message || "요청 취소에 실패했습니다.");
+        return;
+      }
+
+      setHome((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          isFollowing: false,
+          followStatus: null,
+        };
+      });
+
+      emitFollowChange({
+        targetMemberNo: resolvedMemberNo,
+        actorMemberNo: currentMemberNo,
+        status: null,
+      });
+
+      setIsCancelRequestModalOpen(false);
+    } catch (e) {
+      console.error("요청 취소 실패:", e);
+      alert("요청 취소에 실패했습니다.");
     } finally {
       setFollowActionLoading(false);
     }
@@ -131,6 +241,7 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
     return data.map((u) => ({
       ...u,
       isFollowing: Boolean(u?.isFollowing ?? u?.following),
+      followStatus: u?.followStatus ?? null,
     }));
   };
 
@@ -277,7 +388,8 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
     if (targetMemberNo === currentMemberNo) return;
 
     const target = followList.find((u) => u.memberNo === targetMemberNo);
-    const currentlyFollowing = Boolean(target?.isFollowing);
+    const currentStatus = target?.followStatus ?? (target?.isFollowing ? 'Y' : null);
+    const currentlyFollowing = currentStatus === 'Y' || currentStatus === 'P';
 
     try {
       const result = currentlyFollowing
@@ -285,12 +397,21 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
         : await followMember(targetMemberNo, currentMemberNo);
 
       if (result?.success) {
-        const nextFollowing = Boolean(result.isFollowing);
+        const nextStatus = result?.status ?? null; // 'Y' | 'P' | null
+        const nextFollowing = nextStatus === 'Y' || nextStatus === 'P';
         setFollowList((prev) =>
           prev.map((u) =>
-            u.memberNo === targetMemberNo ? { ...u, isFollowing: nextFollowing } : u
+            u.memberNo === targetMemberNo
+              ? { ...u, isFollowing: nextFollowing, followStatus: nextStatus }
+              : u
           )
         );
+
+        emitFollowChange({
+          targetMemberNo,
+          actorMemberNo: currentMemberNo,
+          status: nextStatus,
+        });
       } else {
         alert(result?.message || "팔로우 처리에 실패했습니다.");
       }
@@ -420,10 +541,14 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
                     {!isMe && (
                       <button
                         type="button"
-                        className={`follow-modal-follow-btn ${u.isFollowing ? "following" : ""}`}
+                        className={`follow-modal-follow-btn ${((u.followStatus ?? (u.isFollowing ? 'Y' : null)) ? "following" : "")}`}
                         onClick={() => handleToggleFollowInList(u.memberNo)}
                       >
-                        {u.isFollowing ? "팔로잉" : "팔로우"}
+                        {(u.followStatus ?? (u.isFollowing ? 'Y' : null)) === 'Y'
+                          ? "팔로잉"
+                          : (u.followStatus ?? null) === 'P'
+                            ? "요청됨"
+                            : "팔로우"}
                       </button>
                     )}
                   </li>
@@ -502,11 +627,21 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
 
             {!isOwner && (
               <button
-                className={`btn ${home?.isFollowing ? "secondary" : "primary"}`}
+                className={`btn ${
+                  home?.followStatus === 'Y' 
+                    ? "secondary" 
+                    : home?.followStatus === 'P' 
+                      ? "secondary" 
+                      : "primary"
+                }`}
                 onClick={handleToggleFollow}
                 disabled={followActionLoading || loading || !home}
               >
-                {home?.isFollowing ? "팔로잉" : "팔로우"}
+                {home?.followStatus === 'Y' 
+                  ? "팔로잉" 
+                  : home?.followStatus === 'P' 
+                    ? "요청됨" 
+                    : "팔로우"}
               </button>
             )}
 
@@ -519,6 +654,43 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
 
       {isFollowModalOpen && typeof document !== "undefined"
         ? createPortal(followModal, document.body)
+        : null}
+
+      {isCancelRequestModalOpen && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="follow-modal-overlay"
+              role="presentation"
+              onClick={() => setIsCancelRequestModalOpen(false)}
+            >
+              <div
+                className="follow-modal request-cancel-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-label="팔로우 요청 취소"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="request-cancel-actions">
+                  <button
+                    type="button"
+                    className="request-cancel-btn danger"
+                    onClick={handleCancelFollowRequest}
+                    disabled={followActionLoading}
+                  >
+                    팔로우 취소
+                  </button>
+                  <button
+                    type="button"
+                    className="request-cancel-btn"
+                    onClick={() => setIsCancelRequestModalOpen(false)}
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
         : null}
     </section>
   );

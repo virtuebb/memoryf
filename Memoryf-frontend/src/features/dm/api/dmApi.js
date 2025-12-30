@@ -33,7 +33,7 @@ const selectDmRoomList = async () => {
     }
 };
 
-
+// 방 생성 
 export const createDmRoom = async (targetUserId) => {
     console.log("보내는 targetUserId:", targetUserId);
     console.log("타입:", typeof targetUserId);
@@ -59,7 +59,7 @@ export const createDmRoom = async (targetUserId) => {
 
     console.log('응답:', response.data);
 
-    alert(response.data);
+    // alert(response.data);
 
     return response.data;
 };
@@ -68,17 +68,18 @@ export const createDmRoom = async (targetUserId) => {
  * 채팅방의 메시지 목록 조회
  * GET /messages/rooms/{roomId}/messages
  */
-const selectDmMessages = async (roomId) => {
+const selectDmMessages = async (roomNo) => {
     try {
         const token = getAccessToken();
-        const url = `${API_BASE}/messages/${roomId}/select`;
+        const url = `${API_BASE}/messages/${roomNo}/select`;
         const userId = getUserIdFromToken();
 
 
+        // 서버 컨트롤러는 request body에서 'roomId' 키를 기대합니다.
         const response = await axios({
             url,
             method: 'POST',
-            data: {roomId: Number(roomId), senderId: userId},
+            data: { roomNo: Number(roomNo), senderId: userId },
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -97,22 +98,20 @@ const selectDmMessages = async (roomId) => {
  * 채팅 메시지 저장
  * POST /messages/rooms/{roomId}/messages
  */
-const insertDmMessage = async (roomId, senderId, content) => {
+const insertDmMessage = async (roomNo, senderId, content) => {
     try {
         const token = getAccessToken();
-        const url = `${API_BASE}/messages/${roomId}/insert`;
+        const url = `${API_BASE}/messages/${roomNo}/insert`;
 
         const response = await axios({
             url,
             method: 'POST',
-            data: { roomId: Number(roomId), senderId: senderId, content },
+            data: { roomNo: Number(roomNo), senderId: senderId, content },
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
         });
-
-
 
         console.log('✅ 메시지 저장 성공:', response.data);
         return response.data;
@@ -123,4 +122,59 @@ const insertDmMessage = async (roomId, senderId, content) => {
     }
 };
 
-export { selectDmRoomList, insertDmMessage, selectDmMessages };
+/**
+ * 읽음 처리 - 마지막으로 읽은 시간 저장
+ * POST /messages/{roomNo}/markAsRead
+ */
+const markMessageAsRead = async (roomNo, senderId) => {
+    try {
+        const token = getAccessToken();
+        const url = `${API_BASE}/messages/${roomNo}/markAsRead`;
+
+        const response = await axios({
+            url,
+            method: 'POST',
+            data: { roomNo: Number(roomNo), senderId: senderId },
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('✅ 읽음 처리 성공:', response.data);
+        return response.data;
+
+    } catch (error) {
+        console.error('❌ 읽음 처리 실패:', error);
+        throw error;
+    }
+};
+
+/**
+ * 미읽은 메시지 개수 조회
+ * GET /messages/{roomNo}/unreadCount/{senderId}
+ */
+const getUnreadCount = async (roomNo, senderId) => {
+    try {
+        const token = getAccessToken();
+        const url = `${API_BASE}/messages/${roomNo}/unreadCount/${senderId}`;
+
+        const response = await axios({
+            url,
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('✅ 미읽은 메시지 조회 성공:', response.data);
+        return response.data;
+
+    } catch (error) {
+        console.error('❌ 미읽은 메시지 조회 실패:', error);
+        throw error;
+    }
+};
+
+export { selectDmRoomList, insertDmMessage, selectDmMessages, markMessageAsRead, getUnreadCount };

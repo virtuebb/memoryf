@@ -33,10 +33,12 @@ public class HomeDao {
 	 * @param currentMemberNo 현재 로그인한 회원 번호 (좋아요 여부 확인용)
 	 * @return ArrayList<Guestbook>
 	 */
-	public ArrayList<Guestbook> selectGuestbookList(SqlSessionTemplate sqlSession, int homeNo, Integer currentMemberNo) {
+	public ArrayList<Guestbook> selectGuestbookList(SqlSessionTemplate sqlSession, int homeNo, Integer currentMemberNo, int offset, int limit) {
 		HashMap<String, Object> params = new HashMap<>();
 		params.put("homeNo", homeNo);
 		params.put("currentMemberNo", currentMemberNo);
+		params.put("offset", offset);
+		params.put("limit", limit);
 		return new ArrayList<>(sqlSession.selectList("homeMapper.selectGuestbookList", params));
 	}
 	
@@ -120,5 +122,15 @@ public class HomeDao {
 	 */
 	public int updateStatusMsg(SqlSessionTemplate sqlSession, Home home) {
 		return sqlSession.update("homeMapper.updateStatusMsg", home);
+	}
+
+	/**
+	 * 계정 공개 범위 업데이트
+	 * @param sqlSession
+	 * @param home
+	 * @return int
+	 */
+	public int updatePrivacy(SqlSessionTemplate sqlSession, Home home) {
+		return sqlSession.update("homeMapper.updatePrivacy", home);
 	}
 }

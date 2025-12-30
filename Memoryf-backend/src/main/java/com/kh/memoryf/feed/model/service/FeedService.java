@@ -83,4 +83,18 @@ public interface FeedService {
 	 * @return 성공 여부
 	 */
 	int deleteFeed(int feedNo);
+
+	/**
+	 * 내가 좋아요한 피드 목록 조회
+	 * @param map 검색 조건 (memberNo, sortBy, startDate, endDate)
+	 * @return 피드 목록
+	 */
+	ArrayList<Feed> selectLikedFeedList(java.util.HashMap<String, Object> map);
+
+	/**
+	 * 내가 댓글 단 목록 조회
+	 * @param map 검색 조건 (memberNo, sortBy, startDate, endDate)
+	 * @return 댓글 목록
+	 */
+	ArrayList<com.kh.memoryf.comment.model.vo.Comment> selectCommentedFeedList(java.util.HashMap<String, Object> map);
 }

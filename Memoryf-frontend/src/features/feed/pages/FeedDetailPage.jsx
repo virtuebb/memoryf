@@ -15,6 +15,7 @@ import {
   toggleCommentLike 
 } from '../api/feedApi';
 import { getMemberNoFromToken } from '../../../utils/jwt';
+import { emitFollowChange } from '../../../utils/followEvents';
 import { getHomeByMemberNo } from '../../home/api/homeApi';
 import { followMember, unfollowMember } from '../../follow/api/followApi';
 import './FeedDetailPage.css';
@@ -58,7 +59,8 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
   const [isLiked, setIsLiked] = useState(false); // 좋아요 상태
   const [likeCount, setLikeCount] = useState(0); // 좋아요 수
   const [isBookmarked, setIsBookmarked] = useState(false); // 북마크 상태
-  const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
+  const [followStatus, setFollowStatus] = useState('N'); // 팔로우 상태 ('Y', 'P', 'N')
+  const [isCancelRequestModalOpen, setIsCancelRequestModalOpen] = useState(false); // 팔로우 요청 취소 모달
 
   // 미니 지도 미리보기 state
   const [showMap, setShowMap] = useState(false);
@@ -89,13 +91,13 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
       const me = getMemberNoFromToken();
       if (me && data?.memberNo && data.memberNo !== me) {
         const homeData = await getHomeByMemberNo(data.memberNo, me);
-        setIsFollowingAuthor(Boolean(homeData?.isFollowing ?? homeData?.following));
+        setFollowStatus(homeData?.followStatus || (homeData?.isFollowing ? 'Y' : 'N'));
       } else {
-        setIsFollowingAuthor(false);
+        setFollowStatus('N');
       }
     } catch (e) {
       console.error('작성자 팔로우 상태 조회 실패:', e);
-      setIsFollowingAuthor(false);
+      setFollowStatus('N');
     }
       } catch (err) {
         console.error('피드 상세 조회 오류:', err);
@@ -182,19 +184,58 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
     const targetMemberNo = feed?.memberNo;
     if (!me || !targetMemberNo || me === targetMemberNo) return;
 
+    // 요청됨 상태일 경우 모달 오픈
+    if (followStatus === 'P') {
+      setIsCancelRequestModalOpen(true);
+      return;
+    }
+
     try {
-      const result = isFollowingAuthor
-        ? await unfollowMember(targetMemberNo, me)
-        : await followMember(targetMemberNo, me);
+      let result;
+      if (followStatus === 'Y') {
+        result = await unfollowMember(targetMemberNo, me);
+      } else {
+        result = await followMember(targetMemberNo, me);
+      }
 
       if (result?.success) {
-        setIsFollowingAuthor(Boolean(result.isFollowing));
+        const nextStatus = result.status ?? null;
+        setFollowStatus(nextStatus || 'N');
+        emitFollowChange({
+          targetMemberNo,
+          actorMemberNo: me,
+          status: nextStatus,
+        });
       } else {
         alert(result?.message || '팔로우 처리에 실패했습니다.');
       }
     } catch (e) {
       console.error('팔로우 처리 실패:', e);
       alert('팔로우 처리에 실패했습니다.');
+    }
+  };
+
+  const handleCancelFollowRequest = async () => {
+    const me = getMemberNoFromToken();
+    const targetMemberNo = feed?.memberNo;
+    if (!me || !targetMemberNo) return;
+
+    try {
+      const result = await unfollowMember(targetMemberNo, me);
+      if (result?.success) {
+        setFollowStatus('N');
+        setIsCancelRequestModalOpen(false);
+        emitFollowChange({
+          targetMemberNo,
+          actorMemberNo: me,
+          status: null,
+        });
+      } else {
+        alert(result?.message || '요청 취소에 실패했습니다.');
+      }
+    } catch (e) {
+      console.error('요청 취소 실패:', e);
+      alert('요청 취소에 실패했습니다.');
     }
   };
 
@@ -460,13 +501,29 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                   </button>
                 )}
                 
-                {/* 현재 이미지 */}
+                {/* 현재 이미지/동영상 */}
                 <div className="carousel-image-wrapper">
-                  <img 
-                    src={getImageUrl(feedFiles[currentImageIndex]?.filePath)} 
-                    alt={feed.content || `피드 이미지 ${currentImageIndex + 1}`}
-                    className="carousel-image"
-                  />
+                  {(() => {
+                    const fileUrl = getImageUrl(feedFiles[currentImageIndex]?.filePath);
+                    const isVideo = ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(fileUrl.split('.').pop().toLowerCase());
+                    
+                    return isVideo ? (
+                      <video
+                        src={fileUrl}
+                        className="carousel-image"
+                        controls
+                        autoPlay
+                        muted
+                        loop
+                      />
+                    ) : (
+                      <img 
+                        src={fileUrl} 
+                        alt={feed.content || `피드 이미지 ${currentImageIndex + 1}`}
+                        className="carousel-image"
+                      />
+                    );
+                  })()}
                 </div>
                 
                 {/* 다음 버튼 */}
@@ -528,7 +585,7 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                     className="follow-text-btn"
                     onClick={handleToggleFollowAuthor}
                   >
-                    {isFollowingAuthor ? '팔로잉' : '팔로우'}
+                    {followStatus === 'Y' ? '팔로잉' : followStatus === 'P' ? '요청됨' : '팔로우'}
                   </button>
                 )}
               </div>
@@ -874,6 +931,47 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
         )}
 
       </div>
+
+      {/* 팔로우 요청 취소 모달 */}
+      {isCancelRequestModalOpen && (
+        <div
+          className="more-menu-overlay"
+          onClick={() => setIsCancelRequestModalOpen(false)}
+          style={{ zIndex: 2000 }}
+        >
+          <div
+            className="more-menu-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="more-menu-header" style={{ padding: '20px', textAlign: 'center', borderBottom: '1px solid #dbdbdb', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {feed?.profileImage && (
+                <img 
+                  src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
+                  alt="프로필"
+                  style={{ width: '60px', height: '60px', borderRadius: '50%', marginBottom: '15px', objectFit: 'cover' }}
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              )}
+              <div style={{ fontWeight: '600', fontSize: '16px' }}>팔로우 요청을 취소하시겠습니까?</div>
+            </div>
+            <button
+              type="button"
+              className="more-menu-item more-menu-danger"
+              onClick={handleCancelFollowRequest}
+              style={{ fontWeight: 'bold' }}
+            >
+              팔로우 요청 취소
+            </button>
+            <button
+              type="button"
+              className="more-menu-item more-menu-cancel"
+              onClick={() => setIsCancelRequestModalOpen(false)}
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

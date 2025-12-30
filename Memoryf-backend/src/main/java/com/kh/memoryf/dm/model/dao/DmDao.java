@@ -24,12 +24,26 @@ public class DmDao {
 
     public int insertRoom(SqlSessionTemplate sqlSession, String targetUserId, String userId) {
 
-        Map<String, String> map = new HashMap<String,String>();
+        Map<String, Object> map = new HashMap<String,Object>();
 
         map.put("targetUserId", targetUserId);
         map.put("userId", userId);
 
-        return sqlSession.insert("dmMapper.insertRoom", map);
+        int rows = sqlSession.insert("dmMapper.insertRoom", map);
+
+        // selectKey로 채번된 값이 parameter map의 "roomNo"에 설정되어 돌아옵니다.
+        Object rn = map.get("roomNo");
+        if (rn instanceof Number) {
+            return ((Number) rn).intValue();
+        } else if (rn != null) {
+            try {
+                return Integer.parseInt(rn.toString());
+            } catch (NumberFormatException e) {
+                // fallback
+            }
+        }
+
+        return rows;
 
     }
 
@@ -45,6 +59,44 @@ public class DmDao {
     
     }
 
+    // 채팅방 발신자 정보 삽입용 
+    public int insertParticipantSender(SqlSessionTemplate sqlSession, int roomNo, String targetUserId, String userId) {
+        
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        map.put("roomNo", roomNo);
+        map.put("targetUserId", targetUserId);
+        map.put("userId", userId);
+
+        return sqlSession.insert("dmMapper.insertParticipantSender", map);
+
+    }
+
+    // 채팅방 수신자 정보 삽입용 
+    public int insertParticipantReciever(SqlSessionTemplate sqlSession, int roomNo, String targetUserId, String userId) {
+
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        map.put("roomNo", roomNo);
+        map.put("targetUserId", targetUserId);
+        map.put("userId", userId);
+
+        return sqlSession.insert("dmMapper.insertParticipantReciever", map);
+
+    }
+    
+    // 읽음 처리 - 마지막으로 읽은 메시지 번호 업데이트
+    public int updateReadStatus(SqlSessionTemplate sqlSession, Map<String, Object> map) {
+        return sqlSession.update("dmMapper.updateReadStatus", map);
+    }
+    
+    // 미읽은 메시지 개수 조회
+    public int getUnreadMessageCount(SqlSessionTemplate sqlSession, Map<String, Object> map) {
+        Integer result = sqlSession.selectOne("dmMapper.getUnreadMessageCount", map);
+        return result != null ? result : 0;
+    }
+
     
 
 }
+

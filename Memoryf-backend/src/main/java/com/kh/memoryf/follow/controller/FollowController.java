@@ -42,10 +42,25 @@ public class FollowController {
 			}
 
 			int memberNo = (Integer) memberNoObj;
-			boolean isFollowing = followService.follow(memberNo, targetMemberNo);
+			
+			// 팔로우 로직 수행
+			followService.follow(memberNo, targetMemberNo);
+			
+			// 현재 상태 확인
+			String status = followService.checkFollowStatus(memberNo, targetMemberNo);
+			boolean isFollowing = "Y".equals(status);
+			
 			response.put("success", true);
 			response.put("isFollowing", isFollowing);
-			response.put("message", "팔로우했습니다.");
+			response.put("status", status);
+			
+			if ("Y".equals(status)) {
+				response.put("message", "팔로우했습니다.");
+			} else if ("P".equals(status)) {
+				response.put("message", "팔로우 요청을 보냈습니다.");
+			} else {
+				response.put("message", "언팔로우했습니다.");
+			}
 		} catch (Exception e) {
 			response.put("success", false);
 			response.put("message", "팔로우 실패: " + e.getMessage());
@@ -72,9 +87,11 @@ public class FollowController {
 			}
 
 			int memberNo = (Integer) memberNoObj;
-			boolean isFollowing = followService.unfollow(memberNo, targetMemberNo);
+			followService.unfollow(memberNo, targetMemberNo);
+			
 			response.put("success", true);
-			response.put("isFollowing", isFollowing);
+			response.put("isFollowing", false);
+			response.put("status", null);
 			response.put("message", "언팔로우했습니다.");
 		} catch (Exception e) {
 			response.put("success", false);
@@ -139,6 +156,62 @@ public class FollowController {
 		} catch (Exception e) {
 			response.put("success", false);
 			response.put("message", "팔로잉 목록 조회 실패: " + e.getMessage());
+		}
+		return response;
+	}
+
+	/**
+	 * 팔로우 요청 수락 (POST /follow/accept/{requesterNo})
+	 * 요청 본문: { memberNo: number } (나)
+	 */
+	@PostMapping("/accept/{requesterNo}")
+	public HashMap<String, Object> acceptFollow(
+			@PathVariable("requesterNo") int requesterNo,
+			@RequestBody HashMap<String, Object> body) {
+
+		HashMap<String, Object> response = new HashMap<>();
+		try {
+			int memberNo = (Integer) body.get("memberNo");
+			boolean result = followService.acceptFollowRequest(memberNo, requesterNo);
+			
+			if (result) {
+				response.put("success", true);
+				response.put("message", "팔로우 요청을 수락했습니다.");
+			} else {
+				response.put("success", false);
+				response.put("message", "팔로우 요청 수락 실패");
+			}
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "오류 발생: " + e.getMessage());
+		}
+		return response;
+	}
+
+	/**
+	 * 팔로우 요청 거절 (POST /follow/reject/{requesterNo})
+	 * 요청 본문: { memberNo: number } (나)
+	 */
+	@PostMapping("/reject/{requesterNo}")
+	public HashMap<String, Object> rejectFollow(
+			@PathVariable("requesterNo") int requesterNo,
+			@RequestBody HashMap<String, Object> body) {
+
+		HashMap<String, Object> response = new HashMap<>();
+		try {
+			int memberNo = (Integer) body.get("memberNo");
+			boolean result = followService.rejectFollowRequest(memberNo, requesterNo);
+			
+			if (result) {
+				response.put("success", true);
+				response.put("message", "팔로우 요청을 거절했습니다.");
+			} else {
+				response.put("success", false);
+				response.put("message", "팔로우 요청 거절 실패");
+			}
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "오류 발생: " + e.getMessage());
 		}
 		return response;
 	}

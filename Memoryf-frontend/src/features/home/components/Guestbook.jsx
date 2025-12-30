@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import {
@@ -15,6 +15,12 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
   const [message, setMessage] = useState("");
   const [guestbook, setGuestbook] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+  const [isFetching, setIsFetching] = useState(false);
+  const observerTarget = useRef(null);
+  const listRef = useRef(null);
+  const ITEMS_PER_PAGE = 3;
 
   const currentMemberNo = getMemberNoFromToken();
   const isMyHome =
@@ -22,24 +28,80 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
     homeOwnerMemberNo != null &&
     currentMemberNo === homeOwnerMemberNo;
 
-  const fetchGuestbookList = async () => {
-    if (!homeNo) return;
+  const fetchGuestbookList = useCallback(async (pageNum = 0, append = false) => {
+    if (!homeNo || isFetching) return;
+    
     try {
-      setLoading(true);
-      const data = await getGuestbookList(homeNo, currentMemberNo);
-      setGuestbook(Array.isArray(data) ? data : []);
+      setIsFetching(true);
+      if (!append) {
+        setLoading(true);
+      }
+      
+      const offset = pageNum * ITEMS_PER_PAGE;
+      const data = await getGuestbookList(homeNo, currentMemberNo, offset, ITEMS_PER_PAGE);
+      const dataArray = Array.isArray(data) ? data : [];
+      
+      if (append) {
+        setGuestbook(prev => [...prev, ...dataArray]);
+      } else {
+        setGuestbook(dataArray);
+      }
+      
+      // 더 이상 데이터가 없으면 hasMore를 false로 설정
+      if (dataArray.length < ITEMS_PER_PAGE) {
+        setHasMore(false);
+      }
     } catch (error) {
       console.error("방명록 조회 실패:", error);
-      setGuestbook([]);
+      if (!append) {
+        setGuestbook([]);
+      }
     } finally {
       setLoading(false);
+      setIsFetching(false);
     }
-  };
+  }, [homeNo, currentMemberNo, isFetching]);
 
+  // 초기 로드
   useEffect(() => {
-    fetchGuestbookList();
+    setGuestbook([]);
+    setPage(0);
+    setHasMore(true);
+    fetchGuestbookList(0, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [homeNo]);
+
+  // 무한 스크롤 IntersectionObserver
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetching && !loading) {
+          const nextPage = page + 1;
+          setPage(nextPage);
+          fetchGuestbookList(nextPage, true);
+        }
+      },
+      {
+        root: listRef.current,
+        threshold: 0.1,
+        rootMargin: "0px 0px 80px 0px",
+      }
+    );
+
+    const currentTarget = observerTarget.current;
+    const rootEl = listRef.current;
+
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+      observer.disconnect();
+    };
+  }, [hasMore, isFetching, loading, page, fetchGuestbookList]);
 
   const handleSubmit = async () => {
     const trimmed = message.trim();
@@ -54,7 +116,11 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
       const result = await createGuestbook(homeNo, trimmed, currentMemberNo);
       if (result?.success) {
         setMessage("");
-        fetchGuestbookList();
+        // 방명록 새로고침 - 처음부터 다시 로드
+        setGuestbook([]);
+        setPage(0);
+        setHasMore(true);
+        fetchGuestbookList(0, false);
       } else {
         alert(result?.message || "방명록 등록에 실패했습니다.");
       }
@@ -69,7 +135,11 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
     try {
       const result = await deleteGuestbook(homeNo, guestbookNo);
       if (result?.success) {
-        fetchGuestbookList();
+        // 방명록 새로고침 - 처음부터 다시 로드
+        setGuestbook([]);
+        setPage(0);
+        setHasMore(true);
+        fetchGuestbookList(0, false);
       } else {
         alert(result?.message || "방명록 삭제에 실패했습니다.");
       }
@@ -87,7 +157,11 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
     try {
       const result = await toggleGuestbookLike(homeNo, guestbookNo, currentMemberNo);
       if (result?.success) {
-        fetchGuestbookList();
+        // 방명록 새로고침 - 처음부터 다시 로드
+        setGuestbook([]);
+        setPage(0);
+        setHasMore(true);
+        fetchGuestbookList(0, false);
       }
     } catch (error) {
       console.error("좋아요 처리 실패:", error);
@@ -150,7 +224,7 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
   return (
     <section className="guestbook card">
       <div className="guestbook-header">
-        <h3>💌 Guestbook</h3>
+        <h3>💌 방명록 </h3>
         <span className="count">{guestbook.length}</span>
       </div>
 
@@ -164,7 +238,7 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
         <button onClick={handleSubmit}>등록</button>
       </div>
 
-      <ul className="guestbook-list">
+      <ul className="guestbook-list" ref={listRef}>
         {guestbook.map((item) => (
           <li key={item.guestbookNo ?? `${item.memberNo}-${item.createDate}`}
           >
@@ -228,6 +302,16 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
             <p className="guestbook-content">{item.guestbookContent}</p>
           </li>
         ))}
+        
+        {/* 무한 스크롤 관찰자 타겟 */}
+        {hasMore && !loading && (
+          <div ref={observerTarget} className="scroll-observer" style={{ height: "20px" }} />
+        )}
+
+        {/* 로딩 중 표시 (추가 페이지) */}
+        {isFetching && !loading && (
+          <li className="loading-more">더 불러오는 중...</li>
+        )}
       </ul>
     </section>
   );

@@ -17,6 +17,7 @@ public class DmRoomRequest {
 
     // 메세지 저장
     private int roomId;
+    private int roomNo;
     private String senderId;
     private String content;
 

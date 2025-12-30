@@ -1,0 +1,77 @@
+/* History List Styles */
+.history-list {
+  padding: 0 24px;
+}
+
+.history-item {
+  display: flex;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--color-border-card);
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.history-icon {
+  font-size: 20px;
+}
+
+.history-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-sidebar-link);
+}
+
+.history-desc {
+  font-size: 14px;
+  color: var(--color-sidebar-link);
+}
+
+.history-date {
+  font-size: 12px;
+  color: #737373;
+  margin-top: 4px;
+}
+
+.activity-content-header {
+  padding: 24px 24px 12px;
+  text-align: center;
+}
+
+.activity-content-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.activity-desc {
+  font-size: 14px;
+  color: #737373;
+  margin-bottom: 24px;
+}
+
+.activity-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}

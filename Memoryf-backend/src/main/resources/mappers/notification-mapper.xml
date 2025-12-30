@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="notificationMapper">
+
+    <resultMap type="notification" id="notificationResultMap">
+        <id property="notificationNo" column="NOTIFICATION_NO"/>
+        <result property="receiverNo" column="RECEIVER_NO"/>
+        <result property="senderNo" column="SENDER_NO"/>
+        <result property="type" column="TYPE"/>
+        <result property="targetId" column="TARGET_ID"/>
+        <result property="isRead" column="IS_READ"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="senderNick" column="SENDER_NICK"/>
+        <result property="senderProfile" column="SENDER_PROFILE"/>
+        <result property="feedImage" column="FEED_IMAGE"/>
+    </resultMap>
+
+    <insert id="insertNotification" parameterType="notification">
+        INSERT INTO TB_NOTIFICATION (
+            NOTIFICATION_NO,
+            RECEIVER_NO,
+            SENDER_NO,
+            TYPE,
+            TARGET_ID,
+            IS_READ,
+            CREATE_DATE
+        ) VALUES (
+            SEQ_NOTIFICATION_NO.NEXTVAL,
+            #{receiverNo},
+            #{senderNo},
+            #{type},
+            #{targetId},
+            'N',
+            SYSDATE
+        )
+    </insert>
+
+    <select id="selectNotificationList" parameterType="_int" resultMap="notificationResultMap">
+        SELECT 
+            N.NOTIFICATION_NO,
+            N.RECEIVER_NO,
+            N.SENDER_NO,
+            N.TYPE,
+            N.TARGET_ID,
+            N.IS_READ,
+            N.CREATE_DATE,
+            M.MEMBER_NICK AS SENDER_NICK,
+            H.PROFILE_CHANGE_NAME AS SENDER_PROFILE,
+            (SELECT CHANGE_NAME FROM TB_FEED_FILE WHERE FEED_NO = N.TARGET_ID AND ROWNUM = 1) AS FEED_IMAGE
+        FROM TB_NOTIFICATION N
+        JOIN TB_MEMBER M ON N.SENDER_NO = M.MEMBER_NO
+        JOIN TB_MEMBER_HOME H ON M.MEMBER_NO = H.MEMBER_NO
+        WHERE N.RECEIVER_NO = #{memberNo}
+        ORDER BY N.CREATE_DATE DESC
+    </select>
+
+    <update id="updateReadStatus" parameterType="_int">
+        UPDATE TB_NOTIFICATION
+        SET IS_READ = 'Y'
+        WHERE NOTIFICATION_NO = #{notificationNo}
+    </update>
+
+    <delete id="deleteNotification" parameterType="_int">
+        DELETE FROM TB_NOTIFICATION
+        WHERE NOTIFICATION_NO = #{notificationNo}
+    </delete>
+
+    <delete id="deleteFollowRequestNotifications" parameterType="map">
+        DELETE FROM TB_NOTIFICATION
+        WHERE RECEIVER_NO = #{receiverNo}
+          AND SENDER_NO = #{senderNo}
+          AND TYPE = 'FOLLOW_REQUEST'
+    </delete>
+
+    <select id="getUnreadCount" parameterType="_int" resultType="_int">
+        SELECT COUNT(*)
+        FROM TB_NOTIFICATION
+        WHERE RECEIVER_NO = #{memberNo}
+        AND IS_READ = 'N'
+    </select>
+
+</mapper>

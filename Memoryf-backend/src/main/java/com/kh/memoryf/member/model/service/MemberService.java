@@ -1,7 +1,10 @@
 package com.kh.memoryf.member.model.service;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+import com.kh.memoryf.member.model.vo.AccountHistory;
 import com.kh.memoryf.member.model.vo.Member;
 
 public interface MemberService {
@@ -12,14 +15,29 @@ public interface MemberService {
 	// 회원 상세 조회용 서비스
 	Member selectMember(String memberId);
 	
+	// 회원 상세 조회 (번호로)
+	Member selectMember(int memberNo);
+	
 	// 회원 정보 수정용 서비스
 	int updateMember(Member m);
 	
 	// 회원 탈퇴용 서비스
-	int deleteMember(String memberId);
+	int deleteMember(int memberNo, String memberPwd);
 	
 	// 회원 비밀번호 변경 서비스
-	int updatePwd(Member m);
+	int updatePwd(int memberNo, String oldPwd, String newPwd);
+	
+	// 이메일 변경
+	int updateEmail(int memberNo, String email);
+	
+	// 전화번호 변경
+	int updatePhone(int memberNo, String phone);
+	
+	// 계정 내역 추가
+	int insertAccountHistory(AccountHistory history);
+	
+	// 계정 내역 조회
+	List<AccountHistory> selectAccountHistoryList(Map<String, Object> params);
 	
 	// 내 댓글 조회 서비스
 	

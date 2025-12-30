@@ -203,15 +203,28 @@
 
 /* 읽지 않은 메시지 뱃지 */
 .chat-unread-badge {
-  margin-left: 0.5rem;
-  width: 1.25rem;
-  height: 1.25rem;
+  margin-left: 0.75rem;
+  min-width: 1.5rem;
+  height: 1.5rem;
   border-radius: 9999px;
-  background-color: #ef4444; /* red-500 */
+  background: linear-gradient(135deg, #ff4757, #ff6b7a);
   color: #ffffff;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  padding: 0 0.5rem;
+  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+  animation: pulse-badge 2s infinite;
 }
+
+/* 배지 펄스 애니메이션 */
+@keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+  }
+  50% {
+    box-shadow: 0 2px 12px rgba(255, 71, 87, 0.6);
+  }

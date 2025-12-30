@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kh.memoryf.auth.model.dao.SignupDao;
 import com.kh.memoryf.auth.model.vo.Signup;
+import com.kh.memoryf.member.model.service.MemberService;
+import com.kh.memoryf.member.model.vo.AccountHistory;
 
 @Service
 public class SignupServiceImpl implements SignupService {
@@ -20,6 +22,9 @@ public class SignupServiceImpl implements SignupService {
 	
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	@Autowired
+	private MemberService memberService;
 
 	// 회원추가
 	@Override
@@ -66,6 +71,13 @@ public class SignupServiceImpl implements SignupService {
 		if(result > 0) {
 			// 홈 생성
 			signupDao.insertHome(sqlSession, signup);
+			
+			// 계정 생성 이력 저장
+			AccountHistory history = new AccountHistory();
+			history.setMemberNo(signup.getMemberNo());
+			history.setEventType("CREATE");
+			history.setEventDesc("계정을 생성했습니다.");
+			memberService.insertAccountHistory(history);
 		}
 		
 		return result;

@@ -88,18 +88,20 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    // 이미지 파일만 허용
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    // 이미지 및 동영상 파일 허용
+    const validFiles = files.filter(file => 
+      file.type.startsWith('image/') || file.type.startsWith('video/')
+    );
     
-    if (imageFiles.length === 0) {
-      alert('이미지 파일만 업로드 가능합니다.');
+    if (validFiles.length === 0) {
+      alert('이미지 또는 동영상 파일만 업로드 가능합니다.');
       return;
     }
 
-    setSelectedFiles(imageFiles);
+    setSelectedFiles(validFiles);
     
     // 미리보기 생성
-    const previewPromises = imageFiles.map(file => {
+    const previewPromises = validFiles.map(file => {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target.result);
@@ -297,7 +299,7 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
             // 1단계: 사진 선택 (수정 모드에서는 건너뛰기)
             <div className="upload-step-1">
               <div className="upload-icon">📷</div>
-              <h3>사진을 여기에 끌어다 놓으세요</h3>
+              <h3>사진과 동영상을 여기에 끌어다 놓으세요</h3>
               <button className="select-photos-btn" onClick={handleSelectClick}>
                 컴퓨터에서 선택
               </button>
@@ -305,11 +307,11 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/*"
+                accept="image/*,video/*"
                 onChange={handleFileSelect}
                 style={{ display: 'none' }}
               />
-              <p className="upload-hint">최소 1개 이상의 이미지를 선택해주세요</p>
+              <p className="upload-hint">최소 1개 이상의 파일을 선택해주세요</p>
             </div>
           ) : (
             // 2단계: 글 작성
@@ -327,13 +329,25 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
                     </button>
                   )}
                   
-                  {/* 현재 이미지 */}
+                  {/* 현재 이미지/동영상 */}
                   <div className="carousel-image-wrapper">
-                    <img 
-                      src={previews[currentImageIndex]} 
-                      alt={`미리보기 ${currentImageIndex + 1}`} 
-                      className="carousel-image"
-                    />
+                    {(previews[currentImageIndex]?.startsWith('data:video') || 
+                      ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(previews[currentImageIndex]?.split('.').pop().toLowerCase())) ? (
+                      <video
+                        src={previews[currentImageIndex]}
+                        className="carousel-image"
+                        controls
+                        autoPlay
+                        muted
+                        loop
+                      />
+                    ) : (
+                      <img 
+                        src={previews[currentImageIndex]} 
+                        alt={`미리보기 ${currentImageIndex + 1}`} 
+                        className="carousel-image"
+                      />
+                    )}
                     {/* 수정 모드에서는 이미지 삭제 불가 */}
                     {previews.length > 1 && !isEditMode && (
                       <button

@@ -18,6 +18,9 @@ function SettingsPage() {
   const tabs = ['edit', 'security', 'activity', 'payment', 'preferences'];
   const activeTab = tabs.includes(currentPath) ? currentPath : 'edit';
 
+  // 로그아웃 모달 상태
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
   useEffect(() => {
     // /settings 로 직접 접근 시 /settings/edit 으로 리다이렉트
     if (location.pathname === '/settings' || location.pathname === '/settings/') {
@@ -25,10 +28,20 @@ function SettingsPage() {
     }
   }, [location, navigate]);
 
-  // onClick - 로그아웃 함수
-  const handleLogout = () => {
+  // 로그아웃 버튼 클릭 핸들러 (모달 열기)
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true);
+  };
+
+  // 실제 로그아웃 처리
+  const confirmLogout = () => {
     localStorage.removeItem("accessToken");
     navigate("/login", {replace : true});
+  };
+
+  // 모달 닫기
+  const closeLogoutModal = () => {
+    setIsLogoutModalOpen(false);
   };
 
   const handleTabClick = (tab) => {
@@ -71,11 +84,11 @@ function SettingsPage() {
             </button>
 
             <button className={activeTab === "preferences" ? "active" : ""} onClick={() => handleTabClick("preferences")}>
-              환경 설정
+              계정 공개 범위
             </button>
 
             {/* 로그아웃 버튼 추가 */}
-            <button type="button" onClick={handleLogout}>로그아웃</button>
+            <button type="button" onClick={handleLogoutClick}>로그아웃</button>
           </div>
         </aside>
 
@@ -90,6 +103,26 @@ function SettingsPage() {
           </Routes>
         </section>
       </div>
+
+      {/* 로그아웃 확인 모달 */}
+      {isLogoutModalOpen && (
+        <div className="logout-modal-overlay" onClick={closeLogoutModal}>
+          <div className="logout-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="logout-modal-header">
+              <h3>로그아웃 하시겠습니까?</h3>
+              <p>로그아웃하면 다시 로그인해야 합니다.</p>
+            </div>
+            <div className="logout-modal-actions">
+              <button className="logout-modal-btn confirm" onClick={confirmLogout}>
+                로그아웃
+              </button>
+              <button className="logout-modal-btn cancel" onClick={closeLogoutModal}>
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -21,7 +21,7 @@ public interface HomeService {
 	 * @param currentMemberNo 현재 로그인한 회원 번호
 	 * @return ArrayList<Guestbook>
 	 */
-	ArrayList<Guestbook> getGuestbookList(int homeNo, Integer currentMemberNo);
+	ArrayList<Guestbook> getGuestbookList(int homeNo, Integer currentMemberNo, int offset, int limit);
 	
 	/**
 	 * 방명록 생성
@@ -58,4 +58,11 @@ public interface HomeService {
 	 * @return int
 	 */
 	int updateStatusMsg(Home home);
+
+	/**
+	 * 계정 공개 범위 업데이트
+	 * @param home
+	 * @return int
+	 */
+	int updatePrivacy(Home home);
 }
