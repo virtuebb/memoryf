@@ -120,6 +120,7 @@ function App() {
     <ThemeProvider>
       <DmProvider>
       <div className="app-root">
+       <div className="app-scroll">
         <div className={`main-layout ${isSettings ? "settings-mode" : ""}`}>
           {/* ✅ Settings 아닐 때만 사이드바 -> Settings일 때도 사이드바 표시 */}
           {/* {!isSettings && ( */}
@@ -194,6 +195,7 @@ function App() {
                 </Routes>
               )}
             </main>
+          </div>
         </div>
 
         <Footer />
