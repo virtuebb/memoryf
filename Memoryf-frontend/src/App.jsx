@@ -3,12 +3,14 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { isAuthenticated } from './utils/jwt';
+import { getMemberNoFromToken } from './utils/jwt';
 
 // 공통
 import BgmPlayer from './shared/components/BgmPlayer.jsx';
 import Visitors from './shared/components/Visitors.jsx';
 import SkinButton from './shared/components/SkinButton.jsx';
 import { ThemeProvider } from './shared/components/ThemeContext.jsx';
+import { getVisitorStats } from './shared/api/visitorApi';
 
 // 레이아웃
 import Header from './shared/components/Header.jsx';
@@ -58,6 +60,8 @@ function App() {
   const isAdmin = false;
 
 
+  const [visitorStats, setVisitorStats] = useState({ today: 0, total: 0 });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFeed, setEditingFeed] = useState(null); // 수정할 피드 데이터
   const [feedReloadKey, setFeedReloadKey] = useState(0);
@@ -67,6 +71,36 @@ function App() {
   const backgroundLocation = location.state?.backgroundLocation;
   const isAdminRoute = location.pathname.startsWith('/admin');
   
+  const currentMemberNo = getMemberNoFromToken();
+
+  const homeMemberNo = (() => {
+      if (location.pathname.startsWith('/home/')) {
+        return Number(location.pathname.split('/')[2]);
+      }
+      if (location.pathname === '/home') {
+        return currentMemberNo;
+      }
+      return null;
+  })();
+
+   useEffect(() => {
+    if (!homeMemberNo) {
+      setVisitorStats({ today: 0, total: 0 });
+      return;
+    }
+
+    getVisitorStats(homeMemberNo)
+      .then(res => {
+        setVisitorStats({
+          today: res.data?.today ?? 0,
+          total: res.data?.total ?? 0,
+        });
+      })
+      .catch(() => {
+        setVisitorStats({ today: 0, total: 0 });
+      });
+  }, [homeMemberNo, location.pathname]);
+
   // 설정 페이지 여부
   const isSettings = location.pathname.startsWith('/settings');
 
@@ -138,7 +172,10 @@ function App() {
 
             {/* 4. 방문자 */}
             <div className="sidebar-section card">
-              <Visitors />
+              <Visitors
+                today={visitorStats.today}
+                total={visitorStats.total}
+              />
             </div>
 
             {/* 5. 테마 버튼 */}
