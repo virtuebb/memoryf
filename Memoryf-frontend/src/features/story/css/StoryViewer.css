@@ -103,17 +103,22 @@
 }
 
 .progress-seg {
+  position: relative; /* 추가 */
   flex: 1;
-  height: 2px; /* 얇게 수정 */
+  height: 2px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
-  overflow: hidden;
+  overflow: hidden; /* 이게 중요! */
 }
 
 .progress-fill {
+  position: absolute; /* 추가 */
+  top: 0;
+  left: 0;
   height: 100%;
   width: 0%;
   background: #fff;
+  z-index: 1; /* 추가 */
 }
 
 .progress-fill.done {
