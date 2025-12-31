@@ -69,6 +69,7 @@ public class SecurityConfig {
 					.requestMatchers("/login/**", "/signup/**").permitAll() // 로그인, 회원가입 요청 허용 - @RequestMapping
 					.requestMatchers("/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers("/messages/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
+					.requestMatchers(HttpMethod.GET, "/bgm/**", "/memoryf/bgm/**").permitAll() // 멜론 차트 공개 조회 허용
 					
 					// Story
 					.requestMatchers(HttpMethod.GET, "/story/**", "/memoryf/story/**").permitAll()

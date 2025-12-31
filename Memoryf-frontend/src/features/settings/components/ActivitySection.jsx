@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getLikedFeeds, getCommentedFeeds, toggleLike } from '../api/activityApi';
-import { getAccountHistory } from '../api/historyApi';
-import { deleteComment } from '../../feed/api/feedApi';
+import { getLikedFeeds, getCommentedFeeds, toggleLike, getAccountHistory } from '../api/activityApi';
 import { getMemberNoFromToken } from '../../../utils/jwt';
 import '../css/ActivitySection.css';
-import '../css/HistoryStyles.css';
 
 function ActivitySection() {
   const navigate = useNavigate();
@@ -37,7 +34,8 @@ function ActivitySection() {
     endYear: '', endMonth: '', endDay: ''
   });
 
-  const memberNo = getMemberNoFromToken();
+  const tokenMemberNo = getMemberNoFromToken();
+  const memberNo = tokenMemberNo || localStorage.getItem('memberNo');
 
   const sidebarItems = [
     {
@@ -66,15 +64,18 @@ function ActivitySection() {
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
   useEffect(() => {
-    if (memberNo) {
-      if (activeSidebar === 'interactions') {
-        fetchItems();
-        // 탭 변경 시 선택 모드 초기화
-        setIsSelectionMode(false);
-        setSelectedItems(new Set());
-      } else if (activeSidebar === 'history') {
-        fetchHistory();
-      }
+    if (!memberNo) {
+      console.warn('회원 정보를 찾을 수 없어 활동/계정 내역을 불러오지 않습니다.');
+      return;
+    }
+
+    if (activeSidebar === 'interactions') {
+      fetchItems();
+      // 탭 변경 시 선택 모드 초기화
+      setIsSelectionMode(false);
+      setSelectedItems(new Set());
+    } else if (activeSidebar === 'history') {
+      fetchHistory();
     }
   }, [activeSidebar, activeTab, filter, memberNo]);
 
@@ -103,6 +104,7 @@ function ActivitySection() {
   };
 
   const fetchHistory = async () => {
+    if (!memberNo) return;
     setLoading(true);
     try {
       const params = {
