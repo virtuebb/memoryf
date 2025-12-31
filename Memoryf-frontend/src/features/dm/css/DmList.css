@@ -129,6 +129,17 @@
   flex-shrink: 0;
 }
 
+.chat-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+
+.chat-avatar-placeholder {
+  font-size: 1.5rem;
+}
+
 /* 채팅 정보 */
 .chat-info {
   flex: 1;

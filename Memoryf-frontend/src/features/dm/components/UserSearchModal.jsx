@@ -26,6 +26,7 @@ import { useState, useEffect } from 'react';
 import { useDm } from '../context/DmContext';
 import { getFollowingList } from '../../follow/api/followApi';
 import { getMemberNoFromToken } from '../../../utils/jwt.js';
+import defaultProfileImg from '../../../assets/images/profiles/default-profile.svg';
 import '../css/UserSearchModal.css';
 
 function CloseIcon() {
@@ -91,12 +92,14 @@ export default function UserSearchModal({ onClose, onAddUser, existingUserIds })
         // API 응답 형식에 맞게 조정. 예: response.data.content 또는 response.data
         const users = response.data?.content || response.data || response || [];
         console.log('사용자 목록:', users);
-        // 사용자 객체를 { userId, userName } 형식으로 변환
+        // 사용자 객체를 { userId, userName, profileImg } 형식으로 변환
         const formattedUsers = users.map(user => {
           console.log('개별 사용자:', user);
           return {
             userId: user.memberId || String(user.memberNo || ''),
-            userName: user.memberNick || user.memberName || user.userName || user.name || user.username || user.userId || ''
+            userName: user.memberName || '',
+            userNick: user.memberNick,
+            profileImg: user.profileChangeName
           };
         });
         console.log('포맷된 사용자 목록:', formattedUsers);
@@ -219,13 +222,16 @@ export default function UserSearchModal({ onClose, onAddUser, existingUserIds })
               >
                 {/* 👤 프로필 사진 */}
                 <div className="user-search-modal-avatar">
-                  👤
-                  {/* 🔌 백엔드 연동 시: <img src={user.avatarUrl} /> */}
+                  <img
+                    src={user.profileImg ? `http://localhost:8006/memoryf/profile_images/${user.profileImg}` : defaultProfileImg}
+                    alt={user.userName}
+                    onError={(e) => { e.target.src = defaultProfileImg; }}
+                  />
                 </div>
                 
                 {/* 사용자 정보 */}
                 <div className="user-search-modal-user-info">
-                  <h3 className="user-search-modal-user-name">{user.userName}</h3>
+                  <h3 className="user-search-modal-user-name">{user.userName}({user.userNick})</h3>
                   <p className="user-search-modal-user-id">@{user.userId}</p>
                 </div>
               </div>

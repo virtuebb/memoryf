@@ -43,6 +43,7 @@ export default function DmRoutes() {
     handleMarkAsRead,
     handleAddUser,
     handleSendMessage,
+    handleDeleteChat,
     openSearchModal,
     closeSearchModal,
   } = useDm();
@@ -92,6 +93,7 @@ export default function DmRoutes() {
             themeClass={themeClass}
             openSearch={openSearchModal}
             navigateToChat={(chatId) => navigate(`/messages/${chatId}`)}
+            onDeleteChat={handleDeleteChat}
           />
         }
       />
@@ -133,7 +135,7 @@ export default function DmRoutes() {
 /**
  * 📋 채팅방 목록 페이지 컴포넌트
  */
-function DmRoomListPage({ allChats, themeClass, openSearch, navigateToChat }) {
+function DmRoomListPage({ allChats, themeClass, openSearch, navigateToChat, onDeleteChat }) {
   return (
     <div className="dm-room-list-page">
       {/* 채팅방 목록 */}
@@ -141,6 +143,7 @@ function DmRoomListPage({ allChats, themeClass, openSearch, navigateToChat }) {
         chats={allChats}
         onSelectChat={navigateToChat}
         onOpenSearch={openSearch}
+        onDeleteChat={onDeleteChat}
         themeClass={themeClass}
       />
       {/* 테마 선택 버튼들 - 전역 ThemeContext 사용 */}
