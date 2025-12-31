@@ -12,4 +12,7 @@ public interface AdminService {
     // 회원 탈퇴
     int deleteUser(String userId);
 
+    // 회원 전체 수 조회
+    int selectUserCount();
+
 }

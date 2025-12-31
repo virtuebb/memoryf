@@ -20,4 +20,9 @@ public class AdminDao {
         return sqlSession.update("adminMapper.deleteUser", userId);
     }
 
+    // 회원 전체 수 조회
+    public int selectUserCount(SqlSessionTemplate sqlSession) {
+        return sqlSession.selectOne("adminMapper.selectUserCount");
+    }
+
 }

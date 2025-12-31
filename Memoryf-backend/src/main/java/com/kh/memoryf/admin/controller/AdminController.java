@@ -25,7 +25,7 @@ public class AdminController {
         
         ArrayList<Member> list = adminService.selectUsers();
 
-        System.out.println(list);
+        // System.out.println(list);
 
         return list;
     }
@@ -36,8 +36,22 @@ public class AdminController {
     
         int result = adminService.deleteUser(userId);
     
-        return (result > 0) ? "회원 탈퇴 성공" : "회원 탈퇴 실패"; // 
+        return (result > 0) ? "회원 탈퇴 성공" : "회원 탈퇴 실패";
 
     }
+
+    // 회원 전체 수 조회
+    @GetMapping("selectUserCount")
+    public int selectUserCount() {
+
+        System.out.println("----------------------");
+
+        int result =  adminService.selectUserCount();
+
+        System.out.println(result);
+
+        return result;
+    }
+
 
 }

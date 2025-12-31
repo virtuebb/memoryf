@@ -95,10 +95,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // Authorization 헤더에서 Bearer 토큰 추출
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         
-        System.out.println("[JWT] path = " + path);
-        System.out.println("[JWT] authHeader = " + authHeader);
-        System.out.println("[JWT] before auth = " 
-            + SecurityContextHolder.getContext().getAuthentication());
+        // System.out.println("[JWT] path = " + path);
+        // System.out.println("[JWT] authHeader = " + authHeader);
+        // System.out.println("[JWT] before auth = " 
+            // + SecurityContextHolder.getContext().getAuthentication());
         
         // 토큰이 없으면 그냥 통과 (SecurityConfig에서 authenticated가 막아줌)
         if (!StringUtils.hasText(authHeader) || !authHeader.startsWith("Bearer ")) {
@@ -152,7 +152,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 // SecurityContext에 인증 등록 (=> authenticated 통과)
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                System.out.println("[JWT] after auth = " + SecurityContextHolder.getContext().getAuthentication());
+                // System.out.println("[JWT] after auth = " + SecurityContextHolder.getContext().getAuthentication());
                 
             }
 

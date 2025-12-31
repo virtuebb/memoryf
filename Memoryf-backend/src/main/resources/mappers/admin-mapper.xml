@@ -40,5 +40,13 @@
 		 WHERE MEMBER_ID = #{userId}
 	</update>
 
+	<!-- 회원 전체 수 조회 -->
+	<select id="selectUserCount" resultType="_int">
+		SELECT COUNT(*)
+		  FROM TB_MEMBER
+		 WHERE MEMBER_ID != 'admin'
+	</select>
+
+
 
 </mapper>

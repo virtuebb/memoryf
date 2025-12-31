@@ -35,10 +35,10 @@ public class SecurityConfig {
 
 		// 명시적 Origin 지정
 		config.addAllowedOrigin("http://localhost:5173");
-		config.addAllowedOrigin("http://192.168.150.10:5173");
+		config.addAllowedOrigin("http://192.168.150.10:5173/*");
 		config.addAllowedOrigin("http://192.168.150.183:5173");
 		// 개발 환경에서 IP가 바뀔 수 있으므로 패턴도 허용
-		// config.addAllowedOriginPattern("http://192.168.*.*:5173");
+		config.addAllowedOriginPattern("http://192.168.*.*:5173");
 
 		config.addAllowedHeader("*");
 		config.addAllowedMethod("*");

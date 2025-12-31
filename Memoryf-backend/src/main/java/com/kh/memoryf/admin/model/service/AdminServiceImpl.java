@@ -32,4 +32,10 @@ public class AdminServiceImpl implements AdminService {
         return adminDao.deleteUser(sqlSession, userId);
     }
 
+    // 회원 전체 수 조회
+    @Override
+    public int selectUserCount() {
+        return adminDao.selectUserCount(sqlSession);
+    }
+
 }

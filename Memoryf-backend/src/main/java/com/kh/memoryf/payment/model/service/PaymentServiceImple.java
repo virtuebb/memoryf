@@ -18,6 +18,7 @@ import com.kh.memoryf.payment.model.vo.PointCharge;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 @Slf4j
@@ -25,8 +26,13 @@ import org.springframework.beans.factory.annotation.Value;
 @RequiredArgsConstructor
 public class PaymentServiceImple implements PaymentService {
 	
+	@Autowired
 	private final SqlSession sqlSession;
+
+	@Autowired
 	private final PaymentDao paymentDao;
+
+	@Autowired
 	private final WebClient.Builder webClientBuilder;
 	
 	@Value("${portone.api.key}")

@@ -51,7 +51,39 @@ const UserManagementPage = () => {
 
   useEffect(() => {
     fetchUsers();
+
+    selectUserCount();
   }, []);
+
+  const [userCount, setUserCount] = useState(0);
+
+  const selectUserCount = async () => {
+
+    const url = `http://localhost:8006/memoryf/admin/selectUserCount`;
+    const method = "GET";
+
+    try {
+
+      const response = await axios({
+        url,
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+
+      console.log(response.data);
+      setUserCount(response.data); 
+
+    } catch {
+
+      console.log("회원 수 조회 실패")
+
+    }
+
+    console.log("회원 수 : " + userCount);
+
+  };
 
   const fetchUsers = async () => {
     const url = "http://localhost:8006/memoryf/admin/selectUsers";
@@ -220,6 +252,8 @@ const UserManagementPage = () => {
       )
     }
   ];
+
+  
 
   return (
     <div>
