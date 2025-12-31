@@ -66,6 +66,13 @@ function Sidebar({ onCreateClick }) {
           </Link>
         </li>
 
+        <li className={isActive('/payment/bgm') ? 'active' : ''}>
+          <Link to="/payment/bgm">
+            <span className="icon">🎵</span>
+            Store
+          </Link>
+        </li>
+
         <li className={location.pathname.startsWith('/messages') ? 'active' : ''}>
           <Link to="/messages">
             <span className="icon">💬</span>

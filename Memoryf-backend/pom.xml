@@ -139,8 +139,19 @@
 		    <artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 		
-		
-		
+		<!-- HTTP 클라이언트 (포트원 API 호출용) -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+
+		<!-- Jsoup (웹 크롤링용) -->
+		<dependency>
+		    <groupId>org.jsoup</groupId>
+		    <artifactId>jsoup</artifactId>
+		    <version>1.17.2</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -36,6 +36,9 @@ import NotificationPage from './features/notification/pages/NotificationPage';
 // 스토리
 import StoryUploadPage from "./features/story/pages/StoryUploadPage";
 
+// 결제 (포인트 충전, BGM 구매)
+import PointChargePage from './features/payment/pages/PointChargePage';
+import BgmStorePage from './features/payment/pages/BgmStorePage';
 
 // 로그인, 회원가입
 import LoginPage from './features/auth/pages/LoginPage';
@@ -217,6 +220,11 @@ useEffect(() => {
               <Route path="/settings/*" element={<SettingsPage />} />
               <Route path="/diary" element={<DiaryPage />} />
               <Route path="/notifications" element={<NotificationPage />} />
+              
+              {/* 결제 */}
+              <Route path="/payment/charge" element={<PointChargePage />} />
+              <Route path="/payment/bgm" element={<BgmStorePage />} />
+              
               <Route path="*" element={<Navigate to="/home" replace />} />
               
               {/* 스토리 */}

@@ -27,6 +27,7 @@ public class Member {
 	private Date birthday;
 	private Date createDate;
 	private String status;
+	private int point; // 포인트 (BGM 구매용)
 	
 	// 조인용 필드
 	private String profileImage;
