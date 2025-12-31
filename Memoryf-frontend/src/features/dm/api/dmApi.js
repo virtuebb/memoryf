@@ -215,7 +215,7 @@ const deleteDmRoom = async (roomNo) => {
                 'Content-Type': 'application/json'
             }
         });
-        console.log(response.date + " / 삭제된 채팅방 : " + roomNo);
+        console.log(response.data + " / 삭제된 채팅방 : " + roomNo);
 
         return response.date;
     } catch {

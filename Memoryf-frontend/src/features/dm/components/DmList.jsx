@@ -28,7 +28,8 @@
  *    ]
  */
 
-import { deleteDmRoom } from '../api/dmApi';
+import { API_BASE_URL } from '../../feed/api/feedApi';
+import defaultProfileImg from '../../../assets/images/profiles/default-profile.svg';
 import '../css/DmList.css';
 
 function PlusIcon() {
@@ -89,10 +90,12 @@ export default function ChatList({ chats, onSelectChat, onOpenSearch, onDeleteCh
           >
             {/* 👤 프로필 사진 */}
             <div className="chat-avatar">
-              {chat.avatar}
-              ${chat.userId}
-              {/* 🔌 백엔드 연동 시 이미지 URL로 변경: */}
-              {/* <img src={chat.avatarUrl} alt={chat.userName} /> */}
+              <img
+                src={chat.avatar ? `${API_BASE_URL}/profile_images/${chat.avatar}` : defaultProfileImg}
+                alt={chat.userName}
+                className="chat-avatar-img"
+                onError={(e) => { e.target.src = defaultProfileImg; }}
+              />
             </div>
 
             {/* 📝 채팅 정보 */}
@@ -123,7 +126,7 @@ export default function ChatList({ chats, onSelectChat, onOpenSearch, onDeleteCh
               onClick={(e) => {
                 e.stopPropagation(); // 채팅방 선택 이벤트 방지
                 if (window.confirm(`${chat.userName}과의 채팅방을 삭제하시겠습니까?`)) {
-                  deleteDmRoom(chat.id);
+                  onDeleteChat(chat.id);
                 }
               }}
               className={`chat-item-delete-btn ${themeClass}`}

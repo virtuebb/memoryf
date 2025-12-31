@@ -4,6 +4,8 @@ import { useDm } from '../context/DmContext';
 import React from 'react';
 import '../css/DmRoom.css';
 import { deleteMessage, selectDmMessages } from '../api/dmApi.js';
+import { API_BASE_URL } from '../../feed/api/feedApi.js';
+import defaultProfileImg from '../../../assets/images/profiles/default-profile.svg';
 
 function ArrowLeftIcon() {
   return (
@@ -212,8 +214,12 @@ function ChatRoom({ chat, onBack, onSendMessage, onMarkAsRead, themeClass = 'lig
           
           {/* 👤 상대방 프로필 */}
           <div className="chat-room-avatar">
-            {chat.avatar}
-            {/* 🔌 백엔드 연동 시: <img src={chat.avatarUrl} /> */}
+            <img
+              src={chat.avatar ? `${API_BASE_URL}/profile_images/${chat.avatar}` : defaultProfileImg}
+              alt={chat.userName}
+              className="chat-room-avatar-img"
+              onError={(e) => { e.target.src = defaultProfileImg; }}
+            />
           </div>
           
           {/* 상대방 이름 */}

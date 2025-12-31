@@ -71,6 +71,7 @@
 				TM.MEMBER_NO AS "memberNo",
 				TM.MEMBER_ID AS "memberId",
 				TM.MEMBER_NICK AS "memberNick",
+				TM.MEMBER_NAME as "memberName",
 				TH.PROFILE_CHANGE_NAME AS "profileChangeName"
 				<if test="currentMemberNo != null">
 					, CASE WHEN CF.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS "isFollowing"
