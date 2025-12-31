@@ -69,10 +69,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         // OPTIONS(프리플라이트) 요청은 통과
+        // if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        //     filterChain.doFilter(request, response);
+        //     return;
+        // }
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            filterChain.doFilter(request, response);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
+
         
         // 🔓 방명록 조회(GET)는 JWT 검사 안 함 (⭐ 여기!)
         if (path.startsWith("/guestbook")

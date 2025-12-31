@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="adminMapper">
+
+	<resultMap id="memberResultSet" type="member">
+		<id column="MEMBER_NO" property="memberNo" />
+		<result column="MEMBER_ID" property="memberId" />
+		<result column="MEMBER_PWD" property="memberPwd" />
+		<result column="MEMBER_NAME" property="memberName" />
+		<result column="MEMBER_NICK" property="memberNick" />
+		<result column="EMAIL" property="email" />
+		<result column="PHONE" property="phone" />
+		<result column="GENDER" property="gender" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="STATUS" property="status" />
+	</resultMap>
+	
+	<!-- 회원 전체 조회 -->
+	<select id="selectUsers" resultMap="memberResultSet">
+		SELECT MEMBER_ID
+			 , MEMBER_NAME
+			 , MEMBER_NICK
+			 , EMAIL
+		 	 , PHONE
+			 , CREATE_DATE
+			 , STATUS
+		  FROM TB_MEMBER
+		 WHERE MEMBER_ID != 'admin'
+		 ORDER BY MEMBER_NO DESC
+	</select>
+
+	<!-- 회원 탈퇴 -->
+	<update id="deleteUser" parameterType="string">
+		UPDATE TB_MEMBER
+		   SET STATUS = 'Y'
+		 WHERE MEMBER_ID = #{userId}
+	</update>
+
+
+</mapper>

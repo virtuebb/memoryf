@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '../components/DataTable';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
+import { getAccessToken } from '../../../utils/jwt';
 
 /**
  * UserManagementPage - 회원 관리 페이지
@@ -35,16 +37,45 @@ const UserManagementPage = () => {
 
   // 로딩 상태 (실제로는 React Query의 isLoading 사용)
   const [isLoading] = useState(false);
+  const [userList, setUserList] = useState([]);
 
   // 더미 데이터 (실제로는 API에서 가져와요)
   // TODO: const { data, isLoading } = useQuery(['users', currentPage], () => adminApi.getUsers(currentPage));
-  const users = [
-    { id: 1, nickname: 'user001', email: 'user001@example.com', joinDate: '2024-01-15', status: '정상' },
-    { id: 2, nickname: 'user002', email: 'user002@example.com', joinDate: '2024-01-20', status: '정상' },
-    { id: 3, nickname: 'user003', email: 'user003@example.com', joinDate: '2024-02-01', status: '정지' },
-    { id: 4, nickname: 'user004', email: 'user004@example.com', joinDate: '2024-02-10', status: '정상' },
-    { id: 5, nickname: 'user005', email: 'user005@example.com', joinDate: '2024-02-15', status: '정상' },
-  ];
+  // const users = [
+  //   { id: 1, nickname: 'user001', email: 'user001@example.com', joinDate: '2024-01-15', status: '정상' },
+  //   { id: 2, nickname: 'user002', email: 'user002@example.com', joinDate: '2024-01-20', status: '정상' },
+  //   { id: 3, nickname: 'user003', email: 'user003@example.com', joinDate: '2024-02-01', status: '정지' },
+  //   { id: 4, nickname: 'user004', email: 'user004@example.com', joinDate: '2024-02-10', status: '정상' },
+  //   { id: 5, nickname: 'user005', email: 'user005@example.com', joinDate: '2024-02-15', status: '정상' },
+  // ];
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    const url = "http://localhost:8006/memoryf/admin/selectUsers";
+
+    try {
+      const response = await axios({
+        url,
+        method: "GET",
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`
+        }
+      });
+
+      console.log("회원 정보 조회 성공");
+      console.log(response.data);
+
+      setUserList(response.data);
+    } catch (error) {
+      console.error("회원 정보 조회 실패", error);
+      return null;
+    }
+  };
+ 
 
   // 회원 상세 페이지로 이동
   const handleViewDetail = (userId) => {
@@ -62,12 +93,31 @@ const UserManagementPage = () => {
 
   // 탈퇴 확인
   const handleDeleteConfirm = async () => {
-    // TODO: 실제 API 호출
-    // await adminApi.deleteUser(deleteModal.userId);
-    // queryClient.invalidateQueries(['users']);
     
-    console.log('회원 탈퇴:', deleteModal.userId);
-    alert(`${deleteModal.userName} 회원이 탈퇴 처리되었습니다.`);
+    const url = `http://localhost:8006/memoryf/admin/deleteUser/${deleteModal.userId}`;
+    const method = "POST";
+
+    try {
+
+      const response = await axios({
+        url,
+        method,
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`
+        }
+      });
+
+      console.log(response.data);
+      alert(`${deleteModal.userName} 회원이 탈퇴 처리되었습니다.`);
+
+
+    } catch(e) {
+
+      console.error("회원 탈퇴 실패 : " + e);
+      return null;
+
+    }
+
     
     setDeleteModal({ isOpen: false, userId: null, userName: null });
   };
@@ -80,12 +130,16 @@ const UserManagementPage = () => {
   // 테이블 컬럼 정의
   const columns = [
     {
-      key: 'id',
+      key: 'memberId',
       label: '회원 ID',
       align: 'center'
     },
     {
-      key: 'nickname',
+      key: 'memberName',
+      label: '회원 이름'
+    },
+    {
+      key: 'memberNick',
       label: '닉네임'
     },
     {
@@ -93,7 +147,7 @@ const UserManagementPage = () => {
       label: '이메일'
     },
     {
-      key: 'joinDate',
+      key: 'createDate',
       label: '가입일',
       align: 'center'
     },
@@ -107,8 +161,8 @@ const UserManagementPage = () => {
           borderRadius: '12px',
           fontSize: '12px',
           fontWeight: '500',
-          backgroundColor: row.status === '정상' ? '#d1fae5' : '#fee2e2',
-          color: row.status === '정상' ? '#065f46' : '#991b1b'
+          backgroundColor: row.status === 'Y' ? '#fee2e2' : '#d1fae5',
+          color: row.status === 'Y' ? '#991b1b' : '#065f46'
         }}>
           {row.status}
         </span>
@@ -120,7 +174,7 @@ const UserManagementPage = () => {
       align: 'center',
       render: (row) => (
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-          <button
+          {/* <button
             onClick={() => handleViewDetail(row.id)}
             style={{
               padding: '6px 12px',
@@ -140,9 +194,9 @@ const UserManagementPage = () => {
             }}
           >
             상세
-          </button>
+          </button> */}
           <button
-            onClick={() => handleDeleteClick(row.id, row.nickname)}
+            onClick={() => handleDeleteClick(row.memberId, row.memberName)}
             style={{
               padding: '6px 12px',
               backgroundColor: '#ef4444',
@@ -242,7 +296,7 @@ const UserManagementPage = () => {
       {/* 회원 목록 테이블 */}
       <DataTable
         columns={columns}
-        data={users}
+        data={userList}
         isLoading={isLoading}
         emptyMessage="등록된 회원이 없습니다."
       />
@@ -270,4 +324,3 @@ const UserManagementPage = () => {
 };
 
 export default UserManagementPage;
-

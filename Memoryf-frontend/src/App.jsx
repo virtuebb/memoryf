@@ -2,7 +2,7 @@ import './App.css';
 
 import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { isAuthenticated } from './utils/jwt';
+import { getAccessToken, getUserIdFromToken, isAuthenticated } from './utils/jwt';
 import { getMemberNoFromToken } from './utils/jwt';
 
 // 공통
@@ -57,7 +57,8 @@ import MapTestPage from './features/map/pages/MapTestPage';
 
 function App() {
   const isLoggedIn = isAuthenticated();
-  const isAdmin = false;
+  const isAdmin = getUserIdFromToken();
+  // console.log(isAdmin);
 
 
   const [visitorStats, setVisitorStats] = useState({ today: 0, total: 0 });
@@ -145,7 +146,7 @@ useEffect(() => {
   }
 
   // 관리자
-  if (isAdminRoute && isAdmin) {
+  if (isLoggedIn && (isAdmin === 'admin')) {
     return (
       <Routes>
         <Route path="/admin" element={<AdminLayout />}>

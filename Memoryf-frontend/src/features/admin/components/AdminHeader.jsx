@@ -14,14 +14,10 @@ import { useNavigate } from 'react-router-dom';
 const AdminHeader = () => {
   const navigate = useNavigate();
 
-  // 로그아웃 함수 (실제로는 API 호출 후 로그아웃 처리)
-  const handleLogout = () => {
-    if (window.confirm('로그아웃 하시겠습니까?')) {
-      // TODO: 실제 로그아웃 API 호출
-      // await adminApi.logout();
-      // localStorage.removeItem('adminToken');
-      navigate('/login');
-    }
+    // 실제 로그아웃 처리
+  const confirmLogout = () => {
+    localStorage.removeItem("accessToken");
+    navigate("/login", {replace : true});
   };
 
   return (
@@ -77,14 +73,14 @@ const AdminHeader = () => {
               관리자
             </div>
             <div style={{ fontSize: '12px', color: '#6b7280' }}>
-              admin@example.com
+              admin@memoryf.com
             </div>
           </div>
         </div>
 
         {/* 로그아웃 버튼 */}
         <button
-          onClick={handleLogout}
+          onClick={confirmLogout}
           style={{
             padding: '8px 16px',
             backgroundColor: '#ef4444',

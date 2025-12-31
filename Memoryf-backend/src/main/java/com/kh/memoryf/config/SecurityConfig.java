@@ -38,7 +38,7 @@ public class SecurityConfig {
 		config.addAllowedOrigin("http://192.168.150.10:5173");
 		config.addAllowedOrigin("http://192.168.150.183:5173");
 		// 개발 환경에서 IP가 바뀔 수 있으므로 패턴도 허용
-		config.addAllowedOriginPattern("http://192.168.*.*:5173");
+		// config.addAllowedOriginPattern("http://192.168.*.*:5173");
 
 		config.addAllowedHeader("*");
 		config.addAllowedMethod("*");
@@ -56,7 +56,7 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 			http
-			.cors(Customizer.withDefaults())   // ⭐ 반드시 필요
+			.cors(Customizer.withDefaults())   
 			.csrf(csrf -> csrf.disable())
 			.sessionManagement(session -> session.sessionCreationPolicy(
 					org.springframework.security.config.http.SessionCreationPolicy.STATELESS)) // JWT 인증방식임 - 세션 아님
@@ -89,6 +89,9 @@ public class SecurityConfig {
 				    .requestMatchers(HttpMethod.PUT,    "/diaries/**", "/memoryf/diaries/**").authenticated()
 				    .requestMatchers(HttpMethod.DELETE, "/diaries/**", "/memoryf/diaries/**").authenticated()
 
+					// admin
+					.requestMatchers("/admin/**", "/memoryf/admin/**").authenticated()
+
 				    
 					// server.servlet.context-path=/memoryf 환경을 고려해 두 패턴을 모두 허용
 					.requestMatchers(
@@ -98,7 +101,8 @@ public class SecurityConfig {
 							"/css/**", "/memoryf/css/**",
 							"/js/**", "/memoryf/js/**",
 							"/feed_upfiles/**", "/memoryf/feed_upfiles/**",
-							"/profile_images/**", "/memoryf/profile_images/**"
+							"/profile_images/**", "/memoryf/profile_images/**",
+							"/admin/**", "/memoryf/admin/**"
 					).permitAll() // 정적 리소스 및 업로드 이미지 모두 허용
 					.requestMatchers("/login/**", "/memoryf/login/**", "/signup/**", "/memoryf/signup/**", "/find/**", "/memoryf/find/**").permitAll() // 로그인/회원가입 요청 허용
 					.requestMatchers("/ws/**", "/memoryf/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)

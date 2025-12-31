@@ -2,9 +2,8 @@ package com.kh.memoryf.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import java.util.Objects;
-
 import org.springframework.lang.NonNull;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,10 +17,15 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(@NonNull InterceptorRegistry registry) {
         // Apply to all admin paths
-        Objects.requireNonNull(adminInterceptor, "adminInterceptor must not be null");
-        registry.addInterceptor(adminInterceptor)
-                .addPathPatterns("/admin/**");
+        // Objects.requireNonNull(adminInterceptor, "adminInterceptor must not be null");
+        // registry.addInterceptor(adminInterceptor)
+        //         .addPathPatterns("/admin/**");
+        // SecurityConfig에서 JWT 인증을 처리하므로, 세션 기반의 AdminInterceptor는 비활성화합니다.
+        // Objects.requireNonNull(adminInterceptor, "adminInterceptor must not be null");
+        // registry.addInterceptor(adminInterceptor)
+        //         .addPathPatterns("/admin/**");
     }
+
     
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {

@@ -8,6 +8,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+// SecurityConfig에서 CORS를 이미 처리하고 있으므로 중복 설정을 방지하기 위해 비활성화합니다.
 @Configuration
 public class CorsConfig {
 
@@ -52,4 +53,3 @@ public class CorsConfig {
         return bean;
     }
 }
-
