@@ -29,4 +29,6 @@ public class Comment {
 	private boolean isLiked;      // 현재 사용자가 좋아요 했는지 여부
 	
 	private String feedImage;     // 피드 썸네일 이미지 (내 활동 - 댓글 목록용)
+	private boolean hasStory;     // 작성자의 유효한 스토리 존재 여부
+	private boolean hasUnreadStory; // 작성자의 읽지 않은 스토리 존재 여부
 }

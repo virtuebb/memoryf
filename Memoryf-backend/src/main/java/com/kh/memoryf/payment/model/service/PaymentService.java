@@ -17,7 +17,7 @@ public interface PaymentService {
 	List<Bgm> getPurchasedBgmList(int memberNo);
 	
 	// BGM 구매
-	boolean purchaseBgm(int memberNo, int bgmNo);
+	boolean purchaseBgm(int memberNo, com.kh.memoryf.payment.model.dto.BgmPurchaseRequestDto request);
 	
 	// 회원 포인트 조회
 	int getMemberPoint(int memberNo);

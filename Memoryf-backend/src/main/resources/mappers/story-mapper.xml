@@ -14,6 +14,7 @@
     <result property="isDel" column="IS_DEL"/>
     <result property="memberNick" column="MEMBER_NICK"/>
     <result property="profileImg" column="PROFILE_CHANGE_NAME"/> 
+    <result property="isRead" column="IS_READ"/>
   </resultMap>
 
   <resultMap id="storyDetailResultMap" type="storyDetail">
@@ -50,7 +51,9 @@
     JOIN TB_MEMBER M ON (S.MEMBER_NO = M.MEMBER_NO)
     LEFT JOIN TB_MEMBER_HOME H ON (S.MEMBER_NO = H.MEMBER_NO)
     LEFT JOIN TB_STORY_ITEM I ON (I.STORY_NO = S.STORY_NO AND I.IS_DEL = 'N')
-    WHERE S.STORY_NO = #{value} AND S.IS_DEL = 'N'
+    WHERE S.STORY_NO = #{value} 
+      AND S.IS_DEL = 'N'
+      AND S.EXPIRE_DATE > SYSDATE
     ORDER BY I.ITEM_ORDER
   </select>
   
@@ -118,11 +121,13 @@
 	      S.EXPIRE_DATE,
 	      S.IS_DEL,
 	      M.MEMBER_NICK,
-	      H.PROFILE_CHANGE_NAME
+	      H.PROFILE_CHANGE_NAME,
+	      CASE WHEN EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{value}) THEN 1 ELSE 0 END AS IS_READ
 	    FROM TB_STORY S
 	    JOIN TB_MEMBER M ON (S.MEMBER_NO = M.MEMBER_NO)
 	    LEFT JOIN TB_MEMBER_HOME H ON (S.MEMBER_NO = H.MEMBER_NO)
 	    WHERE S.IS_DEL = 'N'
+	      AND S.EXPIRE_DATE > SYSDATE
 	      AND (
 	        S.MEMBER_NO = #{value}
 	        OR 
@@ -150,5 +155,23 @@
 	
 	
 	
+  
+	<select id="selectStoryListByMember" parameterType="int" resultMap="storyResultSet">
+	    SELECT
+	      S.STORY_NO,
+	      S.MEMBER_NO,
+	      S.CREATE_DATE,
+	      S.EXPIRE_DATE,
+	      S.IS_DEL,
+	      M.MEMBER_NICK,
+	      H.PROFILE_CHANGE_NAME
+	    FROM TB_STORY S
+	    JOIN TB_MEMBER M ON (S.MEMBER_NO = M.MEMBER_NO)
+	    LEFT JOIN TB_MEMBER_HOME H ON (S.MEMBER_NO = H.MEMBER_NO)
+	    WHERE S.IS_DEL = 'N'
+	      AND S.EXPIRE_DATE > SYSDATE
+	      AND S.MEMBER_NO = #{value}
+	    ORDER BY S.STORY_NO DESC
+	</select>
   
 </mapper>

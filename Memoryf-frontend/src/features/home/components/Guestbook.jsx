@@ -245,25 +245,34 @@ function Guestbook({ homeNo, homeOwnerMemberNo }) {
             <div className="guestbook-item-header">
               <div className="guestbook-author">
                 <div className="guestbook-author-profile">
-                  {item.profileChangeName && item.status !== 'Y' ? (
-                    <img
-                      src={`http://localhost:8006/memoryf/profile_images/${item.profileChangeName}`}
-                      alt="프로필"
-                      className="guestbook-avatar-img"
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                        if (e.target.nextSibling) {
-                          e.target.nextSibling.style.display = "flex";
-                        }
-                      }}
-                    />
-                  ) : null}
-                  <div
-                    className="guestbook-avatar"
-                    style={{ display: (item.profileChangeName && item.status !== 'Y') ? "none" : "flex" }}
-                  >
-                    👤
-                  </div>
+                  {(() => {
+                    const hasStory = item.hasStory;
+                    const hasUnreadStory = item.hasUnreadStory;
+                    const content = (
+                      <>
+                        {item.profileChangeName && item.status !== 'Y' ? (
+                          <img
+                            src={`http://localhost:8006/memoryf/profile_images/${item.profileChangeName}`}
+                            alt="프로필"
+                            className="guestbook-avatar-img"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                              if (e.target.nextSibling) {
+                                e.target.nextSibling.style.display = "flex";
+                              }
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className="guestbook-avatar"
+                          style={{ display: (item.profileChangeName && item.status !== 'Y') ? "none" : "flex" }}
+                        >
+                          👤
+                        </div>
+                      </>
+                    );
+                    return hasStory ? <div className={`story-ring-container ${hasUnreadStory ? '' : 'read'}`}>{content}</div> : content;
+                  })()}
                 </div>
 
                 <div className="guestbook-author-meta">

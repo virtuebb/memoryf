@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { chargePoint, fetchMemberPoint } from '../api/paymentApi';
+import { getMemberNoFromToken } from '../../../utils/jwt';
 import './PointChargePage.css';
 
 const PointChargePage = () => {
@@ -7,8 +8,8 @@ const PointChargePage = () => {
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 임시 회원 번호 (실제로는 로그인한 회원 정보에서 가져와야 함)
-  const memberNo = localStorage.getItem('memberNo') || 1;
+  // 로그인 정보에서 회원 번호 가져오기
+  const memberNo = getMemberNoFromToken();
 
   // 충전 금액 옵션
   const chargeAmounts = [

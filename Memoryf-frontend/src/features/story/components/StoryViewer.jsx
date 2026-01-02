@@ -1,16 +1,14 @@
-import { createPortal } from "react-dom";
+﻿import { createPortal } from "react-dom";
 import "../css/StoryViewer.css";
 import { useEffect, useState, useCallback } from "react";
 import storyApi from "../api/storyApi";
 
 const StoryViewer = ({ isOpen, onClose, selected }) => {
-  // 1. 초기 렌더링 방어
   if (!isOpen || !selected) return null;
 
-  const story = selected?.story;
+  const owner = selected?.story || selected?.owner;
   const items = selected?.items || [];
 
-  // ✅ [수정] 하드코딩된 1 대신 실제 localStorage의 로그인 정보 사용
   const getLoginMemberNo = () => {
     const storageData = localStorage.getItem("loginMember");
     if (!storageData) return null;
@@ -23,32 +21,31 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
   };
 
   const loginUserNo = getLoginMemberNo();
-  const isOwner = story && Number(story.memberNo) === Number(loginUserNo);
+  const isOwner = owner && Number(owner.memberNo) === Number(loginUserNo);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [tick, setTick] = useState(0);
 
-  // ✅ [수정] 프로필 이미지와 스토리 아이템 이미지가 저장되는 경로가 다를 수 있음을 고려
   const hostname = window.location.hostname;
-  const profileBaseURL = `http://${hostname}:8006/memoryf/profile_images`; // WebConfig 설정 경로
-  const contentBaseURL = `http://${hostname}:8006/memoryf`; // 아이템 파일 경로 (filePath 포함)
+  const profileBaseURL = `http://${hostname}:8006/memoryf/profile_images`;
+  const contentBaseURL = `http://${hostname}:8006/memoryf`;
 
   const DURATION_MS = 3000;
 
-  // 2. 인덱스 이동 함수
-  const goIndex = useCallback((idx) => {
-    if (idx < 0 || idx >= items.length) return;
-    setActiveIndex(idx);
-    setTick((t) => t + 1);
-  }, [items.length]);
+  const goIndex = useCallback(
+    (idx) => {
+      if (idx < 0 || idx >= items.length) return;
+      setActiveIndex(idx);
+      setTick((t) => t + 1);
+    },
+    [items.length]
+  );
 
-  // 3. 열릴 때 초기화
   useEffect(() => {
     setActiveIndex(0);
     setTick((t) => t + 1);
   }, [selected]);
 
-  // 4. 자동 넘김 로직
   useEffect(() => {
     if (items.length === 0) return;
 
@@ -63,13 +60,20 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
     return () => clearTimeout(timer);
   }, [activeIndex, items.length, onClose, goIndex]);
 
-  // 5. 삭제 핸들러
   const handleDelete = async (e) => {
     e.stopPropagation();
+    const active = items[activeIndex];
+    const activeStoryNo = active?._storyNo || owner?.storyNo;
+
+    if (!activeStoryNo) {
+      alert("삭제할 스토리를 찾을 수 없습니다.");
+      return;
+    }
+
     if (!window.confirm("이 스토리를 삭제하시겠습니까? (복구할 수 없습니다.)")) return;
 
     try {
-      await storyApi.deleteStory(story.storyNo);
+      await storyApi.deleteStory(activeStoryNo);
       alert("삭제되었습니다.");
       window.dispatchEvent(new Event("storyChanged"));
       onClose();
@@ -84,8 +88,6 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
   return createPortal(
     <div className="storyviewer-overlay" onClick={onClose}>
       <div className="storyviewer-modal" onClick={(e) => e.stopPropagation()}>
-        
-        {/* 우상단 버튼 그룹 */}
         <div className="storyviewer-actions">
           {isOwner && (
             <button className="storyviewer-delete" onClick={handleDelete} title="삭제">
@@ -97,27 +99,25 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
           </button>
         </div>
 
-        {/* ✅ 상단 헤더: 프로필 이미지 및 닉네임 */}
         <div className="storyviewer-header">
           <div className="storyviewer-avatar">
-            {story?.profileImg ? (
-              <img 
-                src={`${profileBaseURL}/${story.profileImg}`} 
-                alt={story.memberNick} 
-                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+            {owner?.profileImg ? (
+              <img
+                src={`${profileBaseURL}/${owner.profileImg}`}
+                alt={owner.memberNick}
+                style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
               />
             ) : (
               <span className="initial-text">
-                {story?.memberNick ? story.memberNick.charAt(0) : 'S'}
+                {owner?.memberNick ? owner.memberNick.charAt(0) : "S"}
               </span>
             )}
           </div>
           <div className="storyviewer-name">
-            {story?.memberNick || `story#${story?.storyNo}`}
+            {owner?.memberNick || `story#${owner?.storyNo || ""}`}
           </div>
         </div>
 
-        {/* 상단 진행 바 */}
         <div className="storyviewer-progress">
           {items.map((_, idx) => (
             <div className="progress-seg" key={idx}>
@@ -133,7 +133,6 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
           ))}
         </div>
 
-        {/* 메인 콘텐츠 영역 */}
         <div className="storyviewer-content">
           {items.length === 0 ? (
             <div className="storyviewer-empty">등록된 콘텐츠가 없습니다.</div>
@@ -150,7 +149,9 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
                     src={`${contentBaseURL}${active.filePath}/${active.changeName}`}
                     alt=""
                     className="storyviewer-mainimg"
-                    onError={(e) => { e.target.src = "/fallback-image.png"; }}
+                    onError={(e) => {
+                      e.target.src = "/fallback-image.png";
+                    }}
                   />
                 )}
                 {active?.storyText && (
@@ -158,7 +159,6 @@ const StoryViewer = ({ isOpen, onClose, selected }) => {
                 )}
               </div>
 
-              {/* 하단 썸네일 바 */}
               <div className="storyviewer-thumbs">
                 {items.map((it, idx) => (
                   <button

@@ -38,6 +38,17 @@ public class PaymentDao {
 		return sqlSession.selectOne("paymentMapper.selectBgmByNo", bgmNo);
 	}
 	
+	// BGM 조회 (제목, 가수)
+	public Bgm selectBgmByTitleAndArtist(SqlSession sqlSession, String title, String artist) {
+		return sqlSession.selectOne("paymentMapper.selectBgmByTitleAndArtist", 
+			java.util.Map.of("title", title, "artist", artist));
+	}
+	
+	// BGM 등록
+	public int insertBgm(SqlSession sqlSession, Bgm bgm) {
+		return sqlSession.insert("paymentMapper.insertBgm", bgm);
+	}
+	
 	// 구매 여부 확인
 	public int checkPurchased(SqlSession sqlSession, int memberNo, int bgmNo) {
 		return sqlSession.selectOne("paymentMapper.checkPurchased", 

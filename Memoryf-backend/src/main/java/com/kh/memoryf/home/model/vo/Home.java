@@ -33,4 +33,6 @@ public class Home {
 	private int followingCount;         // 팔로잉 수
 	private boolean isFollowing;        // 현재 사용자가 팔로우 했는지 여부
 	private String followStatus;        // 팔로우 상태 (Y: 팔로우 중, P: 요청 중, N: 팔로우 안함)
+	private boolean hasStory;           // 유효한 스토리 존재 여부
+	private boolean hasUnreadStory;     // 읽지 않은 스토리 존재 여부
 }

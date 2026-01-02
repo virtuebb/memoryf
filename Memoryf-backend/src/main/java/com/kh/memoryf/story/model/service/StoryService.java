@@ -28,6 +28,9 @@ public interface StoryService {
     // ✅ 스토리 목록 (회원 기준)
     ArrayList<Story> selectStoryList(int memberNo);
 
+    // ✅ 특정 회원의 스토리 목록
+    ArrayList<Story> selectStoryListByMember(int memberNo);
+
     // ✅ 스토리 방문 기록
     int insertStoryVisitor(StoryVisitor storyVisitor);	
 	

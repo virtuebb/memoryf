@@ -13,4 +13,8 @@ import lombok.ToString;
 @ToString
 public class BgmPurchaseRequestDto {
 	private int bgmNo;
+	private String title;
+	private String artist;
+	private String videoId;
+	private String thumbnail;
 }

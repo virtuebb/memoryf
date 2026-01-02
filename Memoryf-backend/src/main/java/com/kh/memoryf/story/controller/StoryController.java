@@ -66,6 +66,12 @@ public class StoryController {
         return storyService.selectStoryList(memberNo);
     }
 
+    // ✅ 특정 회원의 스토리 목록 (프로필/피드 클릭 시)
+    @GetMapping("/member/{memberNo}")
+    public ArrayList<Story> selectStoryListByMember(@PathVariable int memberNo) {
+        return storyService.selectStoryListByMember(memberNo);
+    }
+
     // ✅ 스토리 방문기록 저장 (중복이면 무시/0 처리 등은 서비스에서)
     @PostMapping("/visit")
     public int insertStoryVisitor(@RequestBody StoryVisitor storyVisitor) {

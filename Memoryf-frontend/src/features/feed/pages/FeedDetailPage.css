@@ -775,3 +775,31 @@ video.carousel-image {
 .feed-location:hover{
   text-decoration: underline;
 }
+
+.story-ring-container {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
+  margin-right: 8px; 
+}
+.story-ring-container.read {
+  background: linear-gradient(45deg, #cfcfcf 0%, #b0b0b0 100%);
+}
+.story-ring-container .author-avatar-img,
+.story-ring-container .comment-avatar-img,
+.story-ring-container .author-avatar,
+.story-ring-container .comment-avatar {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: #fff;
+  display: block;
+  object-fit: cover;
+}
+

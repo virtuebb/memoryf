@@ -98,6 +98,11 @@ public class StoryServiceImpl implements StoryService {
 		return storyDao.selectStoryList(sqlSession, memberNo);
 	}
 
+	@Override
+	public ArrayList<Story> selectStoryListByMember(int memberNo) {
+		return storyDao.selectStoryListByMember(sqlSession, memberNo);
+	}
+
 
 	@Override
 	@Transactional

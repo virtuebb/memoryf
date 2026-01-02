@@ -122,7 +122,7 @@ public class PaymentController {
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-			boolean result = paymentService.purchaseBgm(memberNo, purchaseRequest.getBgmNo());
+			boolean result = paymentService.purchaseBgm(memberNo, purchaseRequest);
 			
 			if (result) {
 				int currentPoint = paymentService.getMemberPoint(memberNo);

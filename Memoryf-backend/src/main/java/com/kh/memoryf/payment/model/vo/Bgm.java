@@ -21,6 +21,9 @@ public class Bgm {
 	private String artist;
 	private int price;
 	private Date regDate;
+	private String videoId;
+	// private String thumbnail; // DB 컬럼 없음
+	private String thumbnail; // DTO용
 	
 	// 조인용 필드 (구매 여부)
 	private boolean purchased;

@@ -36,4 +36,6 @@ public class Feed {
 	private List<FeedFile> feedFiles; // 피드 파일 리스트
 	private boolean isLiked;          // 현재 사용자가 좋아요 했는지 여부
 	private boolean isBookmarked;     // 현재 사용자가 북마크 했는지 여부
+	private boolean hasStory;         // 작성자의 유효한 스토리 존재 여부
+	private boolean hasUnreadStory;   // 작성자의 읽지 않은 스토리 존재 여부
 }

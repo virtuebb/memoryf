@@ -25,4 +25,6 @@ public class Story {
     // ✅ 추가: JOIN 결과를 담기 위한 필드
     private String memberNick;  // 닉네임
     private String profileImg;  // 프로필 이미지 경로
+    
+    private Boolean isRead;     // 읽음 여부
 }

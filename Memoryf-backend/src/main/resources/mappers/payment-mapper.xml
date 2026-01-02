@@ -26,7 +26,8 @@
 			FILE_PATH,
 			ARTIST,
 			PRICE,
-			REG_DATE
+			REG_DATE,
+			FILE_PATH as videoId
 		FROM TB_BGM
 		ORDER BY REG_DATE DESC
 	</select>
@@ -39,7 +40,8 @@
 			B.FILE_PATH,
 			B.ARTIST,
 			B.PRICE,
-			B.REG_DATE
+			B.REG_DATE,
+			B.FILE_PATH as videoId
 		FROM TB_BGM B
 		JOIN TB_PAYMENT P ON B.BGM_NO = P.BGM_NO
 		WHERE P.MEMBER_NO = #{memberNo}
@@ -55,10 +57,38 @@
 			FILE_PATH,
 			ARTIST,
 			PRICE,
-			REG_DATE
+			REG_DATE,
+			FILE_PATH as videoId
 		FROM TB_BGM
 		WHERE BGM_NO = #{bgmNo}
 	</select>
+	
+	<!-- BGM 조회 (제목, 가수) -->
+	<select id="selectBgmByTitleAndArtist" resultType="bgm">
+		SELECT 
+			BGM_NO,
+			BGM_TITLE,
+			FILE_PATH,
+			ARTIST,
+			PRICE,
+			REG_DATE,
+			FILE_PATH as videoId
+		FROM TB_BGM
+		WHERE BGM_TITLE = #{title}
+		  AND ARTIST = #{artist}
+	</select>
+	
+	<!-- BGM 등록 -->
+	<insert id="insertBgm">
+		<selectKey keyProperty="bgmNo" resultType="int" order="BEFORE">
+			SELECT SEQ_BGM_NO.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO TB_BGM (
+			BGM_NO, BGM_TITLE, ARTIST, PRICE, REG_DATE, FILE_PATH
+		) VALUES (
+			#{bgmNo}, #{bgmTitle}, #{artist}, #{price}, SYSDATE, #{videoId}
+		)
+	</insert>
 	
 	<!-- 구매 여부 확인 -->
 	<select id="checkPurchased" resultType="int">

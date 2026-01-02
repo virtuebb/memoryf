@@ -18,6 +18,8 @@ import { getMemberNoFromToken } from '../../../utils/jwt';
 import { emitFollowChange } from '../../../utils/followEvents';
 import { getHomeByMemberNo } from '../../home/api/homeApi';
 import { followMember, unfollowMember } from '../../follow/api/followApi';
+import StoryViewer from '../../story/components/StoryViewer';
+import storyApi from '../../story/api/storyApi';
 import './FeedDetailPage.css';
 
 
@@ -67,6 +69,79 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
   const mapElRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
+
+  /* =========================
+     스토리 뷰어 로직
+  ========================= */
+  const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
+  const [selectedStory, setSelectedStory] = useState(null);
+
+  const openStoryViewer = async (targetMemberNo) => {
+    try {
+      const currentMemberNo = getMemberNoFromToken();
+      if (!currentMemberNo) {
+        alert("로그인이 필요합니다.");
+        return;
+      }
+
+      // 1. 해당 멤버의 스토리 목록 조회
+      const res = await storyApi.selectStoryListByMember(targetMemberNo);
+      const stories = res.data || [];
+      
+      if (stories.length === 0) {
+        alert("유효한 스토리가 없습니다.");
+        return;
+      }
+
+      // 2. 방문 기록 저장
+      await Promise.all(
+        stories.map((story) =>
+          storyApi.insertStoryVisitor(currentMemberNo, story.storyNo).catch(() => {})
+        )
+      );
+
+      // 3. 상세 정보 조회 (아이템 등)
+      const storyDetails = await Promise.all(
+        stories.map((story) =>
+          storyApi
+            .selectStoryDetail(story.storyNo)
+            .then((res) => res.data)
+            .catch((err) => {
+              console.error("스토리 상세 로드 실패:", err);
+              return null;
+            })
+        )
+      );
+
+      const validDetails = storyDetails.filter(Boolean);
+      if (!validDetails.length) return;
+
+      // 4. 아이템 병합 및 정렬
+      const mergedItems = validDetails
+        .sort((a, b) => new Date(a.story.createDate || 0) - new Date(b.story.createDate || 0))
+        .flatMap((detail) =>
+          (detail.items || []).map((item) => ({
+            ...item,
+            _storyNo: detail.story.storyNo,
+            _storyCreateDate: detail.story.createDate,
+          }))
+        );
+
+      // 5. 뷰어 데이터 설정
+      setSelectedStory({
+        owner: {
+          memberNo: stories[0].memberNo,
+          memberNick: stories[0].memberNick,
+          profileImg: stories[0].profileImg,
+        },
+        items: mergedItems,
+      });
+      setIsStoryViewerOpen(true);
+
+    } catch (e) {
+      console.error("스토리 뷰어 열기 실패:", e);
+    }
+  };
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -123,6 +198,10 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
           setIsLiked(Boolean(data?.isLiked ?? data?.liked));
           setLikeCount(data.likeCount || 0);
           setIsBookmarked(Boolean(data?.isBookmarked ?? data?.bookmarked));
+
+          // 댓글 목록도 갱신 (스토리 읽음 상태 반영 등)
+          const commentsData = await getComments(feedNo);
+          setComments(commentsData || []);
         } catch (err) {
           console.error('피드 갱신 오류:', err);
         }
@@ -577,24 +656,36 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
               <div className="feed-detail-author-row">
                 <div 
                   className="feed-detail-author clickable"
-                  onClick={() => feed?.memberNick && feed?.memberStatus !== 'Y' && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                  onClick={() => {
+                    if (feed?.memberStatus === 'Y') return;
+                    if (feed?.hasStory) {
+                      openStoryViewer(feed.memberNo);
+                    } else if (feed?.memberNick) {
+                      navigate(`/${encodeURIComponent(feed.memberNick)}`);
+                    }
+                  }}
                   style={{ cursor: feed?.memberStatus === 'Y' ? 'default' : 'pointer' }}
                 >
-                  {feed?.memberStatus === 'Y' ? (
-                    <div className="author-avatar" style={{ display: 'flex' }}>👤</div>
-                  ) : feed?.profileImage ? (
-                    <>
-                      <img 
-                        src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
-                        alt="프로필"
-                        className="author-avatar-img"
-                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                      />
-                      <div className="author-avatar" style={{ display: 'none' }}>👤</div>
-                    </>
-                  ) : (
-                    <div className="author-avatar" style={{ display: 'flex' }}>👤</div>
-                  )}
+                  {(() => {
+                    const hasStory = feed?.hasStory;
+                    const hasUnreadStory = feed?.hasUnreadStory;
+                    const content = feed?.memberStatus === 'Y' ? (
+                      <div className="author-avatar" style={{ display: 'flex' }}>👤</div>
+                    ) : feed?.profileImage ? (
+                      <>
+                        <img 
+                          src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
+                          alt="프로필"
+                          className="author-avatar-img"
+                          onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                        />
+                        <div className="author-avatar" style={{ display: 'none' }}>👤</div>
+                      </>
+                    ) : (
+                      <div className="author-avatar" style={{ display: 'flex' }}>👤</div>
+                    );
+                    return hasStory ? <div className={`story-ring-container ${hasUnreadStory ? '' : 'read'}`}>{content}</div> : content;
+                  })()}
                   <span className="author-nick">{feed?.memberStatus === 'Y' ? 'deletedUser' : (feed?.memberNick || '익명')}</span>
                 </div>
 
@@ -626,24 +717,36 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
               <div className="feed-detail-content-item">
                 <div 
                   className="comment-author-profile clickable"
-                  onClick={() => feed?.memberNick && feed?.memberStatus !== 'Y' && navigate(`/${encodeURIComponent(feed.memberNick)}`)}
+                  onClick={() => {
+                    if (feed?.memberStatus === 'Y') return;
+                    if (feed?.hasStory) {
+                      openStoryViewer(feed.memberNo);
+                    } else if (feed?.memberNick) {
+                      navigate(`/${encodeURIComponent(feed.memberNick)}`);
+                    }
+                  }}
                   style={{ cursor: feed?.memberStatus === 'Y' ? 'default' : 'pointer' }}
                 >
-                  {feed?.memberStatus === 'Y' ? (
-                    <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
-                  ) : feed?.profileImage ? (
-                    <>
-                      <img 
-                        src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
-                        alt="프로필"
-                        className="comment-avatar-img"
-                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                      />
-                      <div className="comment-avatar" style={{ display: 'none' }}>👤</div>
-                    </>
-                  ) : (
-                    <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
-                  )}
+                  {(() => {
+                    const hasStory = feed?.hasStory;
+                    const hasUnreadStory = feed?.hasUnreadStory;
+                    const content = feed?.memberStatus === 'Y' ? (
+                      <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
+                    ) : feed?.profileImage ? (
+                      <>
+                        <img 
+                          src={`http://localhost:8006/memoryf/profile_images/${feed.profileImage}`}
+                          alt="프로필"
+                          className="comment-avatar-img"
+                          onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                        />
+                        <div className="comment-avatar" style={{ display: 'none' }}>👤</div>
+                      </>
+                    ) : (
+                      <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
+                    );
+                    return hasStory ? <div className={`story-ring-container ${hasUnreadStory ? '' : 'read'}`}>{content}</div> : content;
+                  })()}
                 </div>
                 <div className="comment-content-wrapper">
                   <div className="feed-main-text">
@@ -725,24 +828,36 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
                     <div key={comment.commentNo} className="feed-detail-content-item comment-item">
                       <div 
                         className="comment-author-profile clickable"
-                        onClick={() => comment?.writerNick && comment?.writerStatus !== 'Y' && navigate(`/${encodeURIComponent(comment.writerNick)}`)}
+                        onClick={() => {
+                          if (comment?.writerStatus === 'Y') return;
+                          if (comment?.hasStory) {
+                            openStoryViewer(comment.writer);
+                          } else if (comment?.writerNick) {
+                            navigate(`/${encodeURIComponent(comment.writerNick)}`);
+                          }
+                        }}
                         style={{ cursor: comment?.writerStatus === 'Y' ? 'default' : 'pointer' }}
                       >
-                        {comment?.writerStatus === 'Y' ? (
-                          <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
-                        ) : comment.writerProfileImage ? (
-                          <>
-                            <img 
-                              src={`http://localhost:8006/memoryf/profile_images/${comment.writerProfileImage}`}
-                              alt="프로필"
-                              className="comment-avatar-img"
-                              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                            />
-                            <div className="comment-avatar" style={{ display: 'none' }}>👤</div>
-                          </>
-                        ) : (
-                          <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
-                        )}
+                        {(() => {
+                          const hasStory = comment?.hasStory;
+                          const hasUnreadStory = comment?.hasUnreadStory;
+                          const content = comment?.writerStatus === 'Y' ? (
+                            <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
+                          ) : comment.writerProfileImage ? (
+                            <>
+                              <img 
+                                src={`http://localhost:8006/memoryf/profile_images/${comment.writerProfileImage}`}
+                                alt="프로필"
+                                className="comment-avatar-img"
+                                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                              />
+                              <div className="comment-avatar" style={{ display: 'none' }}>👤</div>
+                            </>
+                          ) : (
+                            <div className="comment-avatar" style={{ display: 'flex' }}>👤</div>
+                          );
+                          return hasStory ? <div className={`story-ring-container ${hasUnreadStory ? '' : 'read'}`}>{content}</div> : content;
+                        })()}
                       </div>
                       <div className="comment-content-wrapper">
                         <div className="feed-main-text">
@@ -1006,6 +1121,17 @@ function FeedDetailPage({ isModal = false, onEditFeed }) {
             </button>
           </div>
         </div>
+      )}
+
+      {isStoryViewerOpen && (
+        <StoryViewer
+          isOpen={isStoryViewerOpen}
+          onClose={() => {
+            setIsStoryViewerOpen(false);
+            window.dispatchEvent(new Event('feedChanged'));
+          }}
+          selected={selectedStory}
+        />
       )}
     </div>
   );

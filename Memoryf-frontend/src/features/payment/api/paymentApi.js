@@ -42,10 +42,14 @@ export const fetchPurchasedBgmList = async (memberNo) => {
 /**
  * BGM 구매
  */
-export const purchaseBgm = async (memberNo, bgmNo) => {
+export const purchaseBgm = async (memberNo, bgmData) => {
   try {
     const response = await axios.post(`/payment/bgm/purchase?memberNo=${memberNo}`, {
-      bgmNo: bgmNo
+      bgmNo: bgmData.bgmNo,
+      title: bgmData.title || bgmData.bgmTitle,
+      artist: bgmData.artist,
+      videoId: bgmData.videoId,
+      thumbnail: bgmData.thumbnail
     });
     return response.data;
   } catch (error) {

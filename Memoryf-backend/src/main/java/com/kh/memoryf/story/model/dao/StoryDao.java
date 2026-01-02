@@ -50,6 +50,10 @@ public class StoryDao {
 		return (ArrayList)sqlSession.selectList("storyMapper.selectStoryList", memberNo);
 	}
 
+	public ArrayList<Story> selectStoryListByMember(SqlSessionTemplate sqlSession, int memberNo) {
+		return (ArrayList)sqlSession.selectList("storyMapper.selectStoryListByMember", memberNo);
+	}
+
 	public int insertStoryVisitor(SqlSessionTemplate sqlSession, StoryVisitor storyVisitor) {
 		
 		return sqlSession.insert("storyMapper.insertStoryVisitor", storyVisitor);

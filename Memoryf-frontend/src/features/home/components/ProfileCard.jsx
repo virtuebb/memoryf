@@ -10,6 +10,8 @@ import {
   getFollowingList,
   unfollowMember,
 } from "../../follow/api/followApi";
+import StoryViewer from "../../story/components/StoryViewer";
+import storyApi from "../../story/api/storyApi";
 import defaultProfileImg from "../../../assets/images/profiles/default-profile.svg";
 import "../css/ProfileCard.css";
 
@@ -421,9 +423,84 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
     }
   };
 
+  /* =========================
+     스토리 뷰어 로직
+  ========================= */
+  const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
+  const [selectedStory, setSelectedStory] = useState(null);
+
+  const openStoryViewer = async (targetMemberNo) => {
+    try {
+      if (!currentMemberNo) {
+        alert("로그인이 필요합니다.");
+        return;
+      }
+
+      // 1. 해당 멤버의 스토리 목록 조회
+      const res = await storyApi.selectStoryListByMember(targetMemberNo);
+      const stories = res.data || [];
+      
+      if (stories.length === 0) {
+        alert("유효한 스토리가 없습니다.");
+        return;
+      }
+
+      // 2. 방문 기록 저장
+      await Promise.all(
+        stories.map((story) =>
+          storyApi.insertStoryVisitor(currentMemberNo, story.storyNo).catch(() => {})
+        )
+      );
+
+      // 3. 상세 정보 조회 (아이템 등)
+      const storyDetails = await Promise.all(
+        stories.map((story) =>
+          storyApi
+            .selectStoryDetail(story.storyNo)
+            .then((res) => res.data)
+            .catch((err) => {
+              console.error("스토리 상세 로드 실패:", err);
+              return null;
+            })
+        )
+      );
+
+      const validDetails = storyDetails.filter(Boolean);
+      if (!validDetails.length) return;
+
+      // 4. 아이템 병합 및 정렬
+      const mergedItems = validDetails
+        .sort((a, b) => new Date(a.story.createDate || 0) - new Date(b.story.createDate || 0))
+        .flatMap((detail) =>
+          (detail.items || []).map((item) => ({
+            ...item,
+            _storyNo: detail.story.storyNo,
+            _storyCreateDate: detail.story.createDate,
+          }))
+        );
+
+      // 5. 뷰어 데이터 설정
+      setSelectedStory({
+        owner: {
+          memberNo: stories[0].memberNo,
+          memberNick: stories[0].memberNick,
+          profileImg: stories[0].profileImg,
+        },
+        items: mergedItems,
+      });
+      setIsStoryViewerOpen(true);
+
+    } catch (e) {
+      console.error("스토리 뷰어 열기 실패:", e);
+    }
+  };
+
   const handleProfileImageClick = () => {
-    if (!isOwner) return;
-    fileInputRef.current?.click();
+    if (isOwner) {
+      fileInputRef.current?.click();
+    } else if (home?.hasStory) {
+      openStoryViewer(resolvedMemberNo);
+    }
   };
 
   const handleFileChange = async (e) => {
@@ -575,10 +652,15 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
     <section className="profile-card card">
       <div className="profile-row">
         {/* 아바타 */}
-        <div className="profile-avatar" onClick={handleProfileImageClick}>
-          <img src={profileImageUrl} alt="profile" />
-          <span className="online-dot" />
-          {uploading && <div className="upload-overlay">업로드 중...</div>}
+        <div 
+          className={`profile-avatar ${home.hasStory ? (home.hasUnreadStory ? 'has-story' : 'has-story read') : ''}`} 
+          onClick={handleProfileImageClick}
+        >
+          <div className="profile-avatar-inner">
+            <img src={profileImageUrl} alt="profile" />
+            <span className="online-dot" />
+            {uploading && <div className="upload-overlay">업로드 중...</div>}
+          </div>
           <input
             ref={fileInputRef}
             type="file"
@@ -700,6 +782,17 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
             document.body
           )
         : null}
+
+      {isStoryViewerOpen && (
+        <StoryViewer
+          isOpen={isStoryViewerOpen}
+          onClose={() => {
+            setIsStoryViewerOpen(false);
+            getHomeByMemberNo(resolvedMemberNo, currentMemberNo).then(setHome);
+          }}
+          selected={selectedStory}
+        />
+      )}
     </section>
   );
 }

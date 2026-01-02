@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchMemberPoint } from '../api/paymentApi';
+import { fetchMemberPoint, purchaseBgm, fetchPurchasedBgmList } from '../api/paymentApi';
 import { fetchMelonChart } from '../api/bgmApi';
 import { searchYouTubeMusic } from '../../../utils/youtubeApi';
 import { getMemberNoFromToken } from '../../../utils/jwt';
@@ -171,15 +171,54 @@ const BgmStorePage = () => {
     }
   };
 
-  // 로컬 스토리지에서 구매 목록 로드
-  const loadPurchasedFromStorage = () => {
+  // 로컬 스토리지에서 구매 목록 로드 (서버 데이터로 대체)
+  const loadPurchasedFromStorage = async () => {
     if (!memberNo) return;
-    const stored = localStorage.getItem(`purchasedMelonBgm_${memberNo}`);
-    if (stored) {
-      try {
+    
+    try {
+      // 1. 서버에서 구매 목록 조회
+      const response = await fetchPurchasedBgmList(memberNo);
+      if (response.success) {
+        const serverList = response.data.map(item => ({
+          ...item,
+          key: `${item.artist}-${item.bgmTitle}`,
+          // 서버에서 videoId, thumbnail을 가져오지만, 없으면 기존 로직대로 처리
+          videoId: item.videoId || null,
+          thumbnail: item.thumbnail || null
+        }));
+        
+        setPurchasedBgmList(serverList);
+        
+        // 2. 로컬 스토리지(캐시)와 병합하여 썸네일/비디오ID 보완
+        // (서버에 데이터가 없는 구버전 데이터 호환용)
+        const stored = localStorage.getItem(`purchasedMelonBgm_${memberNo}`);
+        if (stored) {
+          const localList = JSON.parse(stored);
+          // 로컬에만 있는 정보(videoId 등)를 서버 리스트에 병합
+          const merged = serverList.map(serverItem => {
+            const localItem = localList.find(l => 
+              (l.key === serverItem.key) || 
+              (l.artist === serverItem.artist && l.bgmTitle === serverItem.bgmTitle)
+            );
+            
+            if (localItem) {
+              return {
+                ...serverItem,
+                videoId: serverItem.videoId || localItem.videoId,
+                thumbnail: serverItem.thumbnail || localItem.thumbnail
+              };
+            }
+            return serverItem;
+          });
+          setPurchasedBgmList(merged);
+        }
+      }
+    } catch (e) {
+      console.error('구매 목록 조회 실패', e);
+      // 실패 시 로컬 스토리지 폴백
+      const stored = localStorage.getItem(`purchasedMelonBgm_${memberNo}`);
+      if (stored) {
         setPurchasedBgmList(JSON.parse(stored));
-      } catch (e) {
-        console.error('구매 목록 파싱 실패', e);
       }
     }
   };
@@ -219,6 +258,20 @@ const BgmStorePage = () => {
         }
       }
 
+      // 1. 서버에 구매 요청 (확보한 videoId, thumbnail 포함)
+      const purchaseData = {
+        ...bgm,
+        videoId: videoId,
+        thumbnail: thumbnail
+      };
+      
+      const purchaseResult = await purchaseBgm(memberNo, purchaseData);
+      
+      if (!purchaseResult.success) {
+        alert(purchaseResult.message || '구매 처리에 실패했습니다.');
+        return;
+      }
+
       const purchasedItem = {
         ...bgm,
         key: bgm.key || `${bgm.artist}-${bgm.bgmTitle}`,
@@ -228,10 +281,15 @@ const BgmStorePage = () => {
 
       const updated = [...purchasedBgmList.filter((item) => (item.key || `${item.artist}-${item.bgmTitle}`) !== purchasedItem.key), purchasedItem];
       setPurchasedBgmList(updated);
+      // 로컬 스토리지에도 백업 (오프라인/빠른 로딩용)
       localStorage.setItem(`purchasedMelonBgm_${memberNo}`, JSON.stringify(updated));
 
-      // 포인트 차감 (UI용, 서버 연동 시 purchase API로 대체 가능)
-      setCurrentPoint((prev) => prev - bgm.price);
+      // 포인트 차감 (서버 응답값 사용)
+      if (purchaseResult.currentPoint !== undefined) {
+        setCurrentPoint(purchaseResult.currentPoint);
+      } else {
+        setCurrentPoint((prev) => prev - bgm.price);
+      }
 
       // 결제 내역 저장 (로컬) - settings 결제내역에서 병합 표시용
       const historyItem = {
@@ -247,7 +305,9 @@ const BgmStorePage = () => {
       alert('BGM을 구매했습니다! 내 플레이리스트에서 재생하세요.');
     } catch (error) {
       console.error('BGM 구매 실패:', error);
-      alert('BGM 구매 중 오류가 발생했습니다.');
+      // 백엔드 에러 메시지 표시
+      const msg = error.response?.data?.message || 'BGM 구매 중 오류가 발생했습니다.';
+      alert(msg);
     }
   };
 

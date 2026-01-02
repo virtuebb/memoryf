@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.kh.memoryf.payment.model.dao.PaymentDao;
+import com.kh.memoryf.payment.model.dto.BgmPurchaseRequestDto;
 import com.kh.memoryf.payment.model.dto.ChargeRequestDto;
 import com.kh.memoryf.payment.model.dto.PortOneVerificationDto;
 import com.kh.memoryf.payment.model.vo.Bgm;
@@ -174,14 +175,38 @@ public class PaymentServiceImple implements PaymentService {
 	 */
 	@Override
 	@Transactional
-	public boolean purchaseBgm(int memberNo, int bgmNo) {
+	public boolean purchaseBgm(int memberNo, BgmPurchaseRequestDto request) {
 		try {
-			// 1. BGM 정보 조회
-			Bgm bgm = paymentDao.selectBgmByNo(sqlSession, bgmNo);
+			int bgmNo = request.getBgmNo();
+			Bgm bgm = null;
 			
-			if (bgm == null) {
-				log.error("BGM을 찾을 수 없습니다: bgmNo={}", bgmNo);
-				throw new RuntimeException("존재하지 않는 BGM입니다.");
+			// 1. BGM 정보 조회 (제목/가수로 먼저 조회)
+			if (request.getTitle() != null && request.getArtist() != null) {
+				bgm = paymentDao.selectBgmByTitleAndArtist(sqlSession, request.getTitle(), request.getArtist());
+				
+				// 없으면 새로 등록
+				if (bgm == null) {
+					bgm = new Bgm();
+					bgm.setBgmTitle(request.getTitle());
+					bgm.setArtist(request.getArtist());
+					bgm.setPrice(500); // 기본 가격
+					bgm.setVideoId(request.getVideoId());
+					// bgm.setThumbnail(request.getThumbnail()); // DB 컬럼 없음
+					
+					int result = paymentDao.insertBgm(sqlSession, bgm);
+					if (result <= 0) {
+						throw new RuntimeException("BGM 등록에 실패했습니다.");
+					}
+					// insert 후 selectKey로 bgmNo가 채워짐
+				}
+				bgmNo = bgm.getBgmNo();
+			} else {
+				// 기존 방식 (bgmNo로 조회)
+				bgm = paymentDao.selectBgmByNo(sqlSession, bgmNo);
+				if (bgm == null) {
+					log.error("BGM을 찾을 수 없습니다: bgmNo={}", bgmNo);
+					throw new RuntimeException("존재하지 않는 BGM입니다.");
+				}
 			}
 			
 			// 2. 이미 구매했는지 확인

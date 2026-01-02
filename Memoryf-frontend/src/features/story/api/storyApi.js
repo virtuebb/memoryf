@@ -2,6 +2,7 @@ import api from "../../auth/api/axios.js";
 
 const storyApi = {
   selectStoryList: (memberNo) => api.get(`/story/list/${memberNo}`),
+  selectStoryListByMember: (memberNo) => api.get(`/story/member/${memberNo}`),
   selectStoryDetail: (storyNo) => api.get(`/story/${storyNo}`),
   insertStoryVisitor: (memberNo, storyNo) =>
     api.post(`/story/visit`, { memberNo, storyNo }),

@@ -381,3 +381,29 @@
     transform: translateY(0);
   }
 }
+
+/* Story Ring Support */
+.story-ring-container {
+  position: relative;
+  padding: 2px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  height: fit-content;
+}
+
+.story-ring-container.read {
+  background: linear-gradient(45deg, #cfcfcf 0%, #b0b0b0 100%);
+}
+
+.story-ring-container .guestbook-avatar-img,
+.story-ring-container .guestbook-avatar {
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-sizing: border-box;
+  display: block; /* Ensure image behaves as block */
+}
+

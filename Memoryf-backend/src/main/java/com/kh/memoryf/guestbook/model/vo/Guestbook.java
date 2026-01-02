@@ -29,4 +29,6 @@ public class Guestbook {
 	private String status;             // 회원 상태 (N: 정상, Y: 탈퇴)
 	private int likeCount;             // 좋아요 수
 	private boolean isLiked;           // 현재 사용자가 좋아요 했는지 여부
+	private boolean hasStory;          // 스토리 유무
+	private boolean hasUnreadStory;    // 읽지 않은 스토리 존재 여부
 }
