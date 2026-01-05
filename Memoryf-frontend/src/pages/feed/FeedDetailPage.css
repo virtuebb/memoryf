@@ -1,0 +1,804 @@
+/* Feed Detail Page Styles */
+.feed-detail-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.feed-detail-page .loading,
+.feed-detail-page .error {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #666;
+}
+
+.feed-detail-page .error {
+  color: #d32f2f;
+}
+
+/* 모달 오버레이 및 레이아웃 */
+.feed-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  padding: 20px;
+}
+
+.feed-detail-page.modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  max-width: 1000px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  background: rgba(0,0,0,0.8);
+}
+
+/* 인스타그램 스타일 컨테이너 */
+.feed-detail-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  max-height: 90vh;
+  background: #fff;
+}
+
+/* 왼쪽: 이미지 캐러셀 */
+.feed-detail-image-section {
+  flex: 1;
+  min-width: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  aspect-ratio: 1;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.feed-image-carousel {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.carousel-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #000;
+}
+
+/* 블러 배경 동영상 */
+.carousel-image-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(20px);
+  transform: scale(1.1);
+  opacity: 0.6;
+  z-index: 0;
+}
+
+.carousel-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  z-index: 1;
+}
+
+/* 이미지는 cover로, 동영상은 contain으로 */
+img.carousel-image {
+  object-fit: cover;
+}
+
+video.carousel-image {
+  object-fit: contain;
+}
+
+/* 캐러셀 화살표 버튼 */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 28px;
+  color: #262626;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s ease;
+  user-select: none;
+  line-height: 1;
+}
+
+.carousel-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-btn-prev {
+  left: 12px;
+}
+
+.carousel-btn-next {
+  right: 12px;
+}
+
+/* 이미지 인디케이터 */
+.carousel-indicators {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.carousel-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.carousel-indicator.active {
+  background: rgba(255, 255, 255, 1);
+  width: 24px;
+  border-radius: 3px;
+}
+
+.carousel-indicator:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.feed-no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+/* 오른쪽: 댓글 및 정보 */
+.feed-detail-content-section {
+  flex: 0 0 400px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #dbdbdb;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+/* 헤더 */
+.feed-detail-header {
+  padding: 16px;
+  border-bottom: 1px solid #dbdbdb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.feed-detail-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.feed-detail-author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.follow-text-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: #0095f6;
+  font-weight: 600;
+}
+
+.follow-text-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 인스타 상단 점점점 메뉴 버튼 */
+.feed-header-menu-btn {
+  background: none;
+  border: none;
+  color: #262626;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
+.feed-header-menu-btn:hover {
+  opacity: 0.6;
+}
+
+.author-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.author-nick {
+  font-weight: 600;
+  color: #262626;
+  font-size: 14px;
+}
+
+/* 댓글 영역 */
+.feed-detail-comments {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feed-detail-content-item {
+  margin-bottom: 8px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.feed-detail-content-item.comment-item {
+  align-items: flex-start;
+}
+
+.feed-detail-content-item.comment-item > .comment-like-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+  margin-top: 0;
+  align-self: flex-start;
+}
+
+.comment-author-profile {
+  flex-shrink: 0;
+}
+
+.comment-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.comment-content-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  opacity: 0.8;
+}
+
+.comment-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.comment-author-name {
+  font-weight: 600;
+  color: #262626;
+  font-size: 14px;
+}
+
+/* 피드 본문: 닉네임 + 내용 한 줄로 표시 */
+.feed-main-text {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.comment-text-inline {
+  color: #262626;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.comment-text {
+  color: #262626;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.comment-time {
+  font-size: 12px;
+  color: #8e8e8e;
+  margin-bottom: 8px;
+}
+
+/* 태그 색상 - 인스타 스타일 블루 톤 */
+.feed-detail-tags {
+  margin-bottom: 4px;
+}
+
+.feed-tag-item {
+  color: #00376b;
+  font-size: 14px;
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+/* 본문/댓글 내 인라인 해시태그 */
+.inline-tag {
+  color: #00376b;
+  font-weight: 500;
+}
+
+/* 점점점 설정 모달 (인스타 액션 시트 스타일) */
+.more-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.more-menu-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.more-menu-item {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background: #fff;
+  font-size: 14px;
+  color: #262626;
+  cursor: pointer;
+  border-bottom: 1px solid #dbdbdb;
+}
+
+.more-menu-item:last-child {
+  border-bottom: none;
+}
+
+.more-menu-item:hover {
+  background: #fafafa;
+}
+
+.more-menu-danger {
+  color: #ed4956; /* 인스타그램 신고 색상과 유사한 레드 */
+  font-weight: 600;
+}
+
+.more-menu-cancel {
+  font-weight: 600;
+}
+
+/* 수정 모달 */
+.edit-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #262626;
+}
+
+.edit-modal-textarea,
+.edit-modal-input {
+  width: 100%;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  color: #262626;
+  resize: vertical;
+}
+
+.edit-modal-input {
+  height: 38px;
+}
+
+.edit-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.edit-cancel-btn,
+.edit-save-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.edit-cancel-btn {
+  background: #efefef;
+  color: #262626;
+}
+
+.edit-save-btn {
+  background: #0095f6;
+  color: #fff;
+  font-weight: 600;
+}
+
+.edit-save-btn:hover {
+  background: #0084d9;
+}
+
+.comments-list {
+  flex: 1;
+}
+
+.comments-placeholder {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.no-comments-bold {
+  color: #262626;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.no-comments-sub {
+  color: #8e8e8e;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* 하단 액션 영역 */
+.feed-detail-actions {
+  border-top: 1px solid #dbdbdb;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feed-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.feed-actions-icons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #262626;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  opacity: 0.6;
+}
+
+.action-btn svg {
+  stroke: #262626;
+  fill: none;
+  transition: all 0.2s;
+}
+
+/* 좋아요 버튼 활성화 상태 */
+.action-btn.like-btn.liked svg {
+  fill: #ed4956;
+  stroke: #ed4956;
+  animation: likeAnimation 0.3s ease;
+}
+
+@keyframes likeAnimation {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* 북마크 버튼 */
+.bookmark-btn {
+  padding: 8px;
+}
+
+.bookmark-btn.bookmarked svg {
+  fill: #262626;
+}
+
+.feed-stats {
+  display: flex;         /* Flexbox 활성화 */
+  flex-direction: column; /* 자식 요소들을 세로로 배치 */
+  align-items: flex-start; /* 왼쪽 정렬 보장 */
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+  text-align: left;
+  width: 100%;
+  padding: 2px 0;        /* 상하 간격 살짝 추가 */
+}
+
+.feed-like-count {
+  display: block;
+  margin-bottom: -10px;
+}
+
+.first-like-text {
+  font-size: 12px;
+  font-weight: 400;
+  color: #8e8e8e;
+  margin: 0;             /* 기존 마진 초기화 */
+  text-align: left;
+  display: block;        /* 한 줄을 꽉 차지하게 함 */
+}
+
+/* 댓글 관련 스타일 */
+.comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.comment-actions .comment-time {
+  font-size: 12px;
+  color: #8e8e8e;
+  margin-bottom: 0;
+}
+
+.comment-likes {
+  font-size: 12px;
+  color: #262626;
+  font-weight: 600;
+}
+
+.comment-like-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: #8e8e8e;
+  transition: all 0.2s;
+}
+
+.comment-like-btn svg {
+  stroke: #8e8e8e;
+  fill: none;
+}
+
+.comment-like-btn:hover {
+  opacity: 0.6;
+}
+
+.comment-like-btn.liked svg,
+.comment-like-btn.liked svg path {
+  fill: #ed4956;
+  stroke: #ed4956;
+}
+
+.comment-delete-btn {
+  background: none;
+  border: none;
+  color: #8e8e8e;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.comment-delete-btn:hover {
+  color: #262626;
+}
+
+/* 댓글 입력 */
+.comment-input-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #efefef;
+}
+
+.comment-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #262626;
+  padding: 8px 0;
+}
+
+.comment-input::placeholder {
+  color: #8e8e8e;
+}
+
+.comment-submit-btn {
+  background: none;
+  border: none;
+  color: #0095f6;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.comment-submit-btn:hover:not(:disabled) {
+  color: #0084d9;
+}
+
+.comment-submit-btn:disabled {
+  color: #b2dffc;
+  cursor: not-allowed;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .feed-detail-container {
+    flex-direction: column;
+  }
+
+  .feed-detail-image-section {
+    max-height: 50vh;
+  }
+
+  .feed-detail-content-section {
+    flex: 1;
+    max-height: 50vh;
+  }
+}
+
+/* 지도 */
+.feed-location{
+  margin-top: 6px;
+  font-size: 13px;
+  color: #666;
+}
+.feed-location:hover{
+  text-decoration: underline;
+}
+
+.story-ring-container {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
+  margin-right: 8px; 
+}
+.story-ring-container.read {
+  background: linear-gradient(45deg, #cfcfcf 0%, #b0b0b0 100%);
+}
+.story-ring-container .author-avatar-img,
+.story-ring-container .comment-avatar-img,
+.story-ring-container .author-avatar,
+.story-ring-container .comment-avatar {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: #fff;
+  display: block;
+  object-fit: cover;
+}

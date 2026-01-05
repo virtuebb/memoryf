@@ -1,0 +1,43 @@
+# ============================================
+# 📌 Backend 환경 설정 예제
+# ============================================
+# 이 파일을 복사하여 application.properties로 사용하세요
+
+spring.application.name=memoryf-backend
+
+server.servlet.context-path=/memoryf
+server.port=8006
+
+# ============================================
+# 🔒 데이터베이스 설정 (수정 필요)
+# ============================================
+spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:xe
+spring.datasource.username=YOUR_DB_USERNAME
+spring.datasource.password=YOUR_DB_PASSWORD
+
+# ============================================
+# MyBatis 설정
+# ============================================
+mybatis.config-location=classpath:mybatis-config.xml
+mybatis.mapper-locations=classpath:mappers/*.xml
+
+# ============================================
+# 파일 업로드 설정
+# ============================================
+spring.servlet.multipart.max-file-size=100MB
+spring.servlet.multipart.max-request-size=100MB
+
+# ============================================
+# 🔒 이메일 설정 (수정 필요)
+# ============================================
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email@gmail.com
+spring.mail.password=your_app_password
+
+# 이메일 프로토콜 설정
+spring.mail.properties.mail.transport.protocol=smtp
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.default-encoding=UTF-8

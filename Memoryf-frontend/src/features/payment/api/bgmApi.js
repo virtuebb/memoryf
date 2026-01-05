@@ -1,13 +1,11 @@
-import axios from 'axios';
-
-const BASE_URL = 'http://localhost:8006/memoryf';
+import { baseApi } from '../../../shared/api';
 
 /**
  * 멜론 차트 TOP 50 조회
  */
 export const fetchMelonChart = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/bgm/melon/chart`);
+    const response = await baseApi.get('/bgm/melon/chart');
     return response.data;
   } catch (error) {
     console.error('멜론 차트 조회 실패:', error);
@@ -20,7 +18,7 @@ export const fetchMelonChart = async () => {
  */
 export const fetchMelonChartByRank = async (rank) => {
   try {
-    const response = await axios.get(`${BASE_URL}/bgm/melon/chart/${rank}`);
+    const response = await baseApi.get(`/bgm/melon/chart/${rank}`);
     return response.data;
   } catch (error) {
     console.error('멜론 차트 조회 실패:', error);

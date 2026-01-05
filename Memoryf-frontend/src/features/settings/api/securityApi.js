@@ -1,55 +1,64 @@
-import axiosPrivate from '../../auth/api/axios';
+/**
+ * 🔒 Security API
+ * 
+ * 보안 설정 관련 API 호출 모듈
+ * shared/api의 baseApi를 사용하여 일관된 설정 유지
+ * 
+ * 응답 형식 (ApiResponse):
+ * { success: boolean, message: string, data: T, timestamp: string }
+ */
+import { baseApi, getApiResponseData } from '../../../shared/api';
 
-export const updatePassword = async (data) => {
-  try {
-    const response = await axiosPrivate.post('/member/password', data);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+/**
+ * 비밀번호 변경
+ * PUT /members/{memberNo}/password
+ */
+export const updatePassword = async (memberNo, data) => {
+  const response = await baseApi.put(`/members/${memberNo}/password`, data);
+	return getApiResponseData(response.data);
 };
 
-export const deleteAccount = async (data) => {
-  try {
-    const response = await axiosPrivate.post('/member/withdrawal', data);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+/**
+ * 회원 탈퇴
+ * DELETE /members/{memberNo}
+ */
+export const deleteAccount = async (memberNo, data) => {
+  const response = await baseApi.delete(`/members/${memberNo}`, { data });
+	return getApiResponseData(response.data);
 };
 
-export const updateEmail = async (data) => {
-  try {
-    const response = await axiosPrivate.post('/member/email', data);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+/**
+ * 이메일 변경
+ * PUT /members/{memberNo}/email
+ */
+export const updateEmail = async (memberNo, data) => {
+  const response = await baseApi.put(`/members/${memberNo}/email`, data);
+	return getApiResponseData(response.data);
 };
 
-export const updatePhone = async (data) => {
-  try {
-    const response = await axiosPrivate.post('/member/phone', data);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+/**
+ * 전화번호 변경
+ * PUT /members/{memberNo}/phone
+ */
+export const updatePhone = async (memberNo, data) => {
+  const response = await baseApi.put(`/members/${memberNo}/phone`, data);
+	return getApiResponseData(response.data);
 };
 
+/**
+ * 인증 코드 발송
+ * POST /auth/send-code
+ */
 export const sendVerificationCode = async (email) => {
-  try {
-    const response = await axiosPrivate.post('/signup/send-code', { email });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await baseApi.post('/auth/send-code', { email });
+	return getApiResponseData(response.data);
 };
 
+/**
+ * 인증 코드 확인
+ * POST /auth/verify-code
+ */
 export const verifyCode = async (email, code) => {
-  try {
-    const response = await axiosPrivate.post('/signup/verify-code', { email, code });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await baseApi.post('/auth/verify-code', { email, code });
+	return getApiResponseData(response.data);
 };

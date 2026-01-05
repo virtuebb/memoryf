@@ -1,42 +1,13 @@
 package com.kh.memoryf.auth.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.kh.memoryf.auth.model.service.SignupService;
-import com.kh.memoryf.auth.model.vo.Signup;
-
-@CrossOrigin(origins="http://localhost:5173")
-@RestController
-@RequestMapping("signup")
+/**
+ * @deprecated AuthController 참고
+ * ⚠️ 과거 분리된 컨트롤러입니다. 현재는 AuthController로 통합되었습니다.
+ *
+ * Spring MVC 매핑 충돌을 방지하기 위해 컨트롤러 어노테이션을 제거하고
+ * 소스 호환/참고용으로만 유지합니다.
+ */
+@Deprecated(since = "2.0", forRemoval = true)
 public class SignupController {
-	
-	@Autowired
-	private SignupService signupService;
-	
-	// 회원추가
-	@PostMapping
-	public int insertMember(@RequestBody Signup signup) {
-		
-		return signupService.insertMember(signup);
-		
-	}
-	
-	// 아이디 중복 체크
-	@PostMapping("check-id")
-	public int checkMemberId(@RequestBody String memberId) {
-		
-		return signupService.checkMemberId(memberId);
-	}
-	
-	@PostMapping("check-nick")
-	public int checkMemberNick(@RequestBody String memberNick) {
-		
-		return signupService.checkMemberNick(memberNick);
-	}
-
+	// intentionally empty
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.memoryf.common.response.ApiResponse;
 import com.kh.memoryf.notification.model.service.NotificationService;
 import com.kh.memoryf.notification.model.vo.Notification;
 
@@ -23,67 +24,49 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
     
+    /**
+     * 알림 목록 조회
+     */
     @GetMapping("/{memberNo}")
-    public HashMap<String, Object> getNotifications(@PathVariable("memberNo") int memberNo) {
-        HashMap<String, Object> response = new HashMap<>();
-        try {
-            ArrayList<Notification> list = notificationService.getNotificationList(memberNo);
-            response.put("success", true);
-            response.put("data", list);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "알림 조회 실패: " + e.getMessage());
-        }
-        return response;
+    public ApiResponse<ArrayList<Notification>> getNotifications(@PathVariable("memberNo") int memberNo) {
+        ArrayList<Notification> list = notificationService.getNotificationList(memberNo);
+        return ApiResponse.success(list);
     }
     
+    /**
+     * 앍일 알림 개수 조회
+     */
     @GetMapping("/{memberNo}/count")
-    public HashMap<String, Object> getUnreadCount(@PathVariable("memberNo") int memberNo) {
-        HashMap<String, Object> response = new HashMap<>();
-        try {
-            int count = notificationService.getUnreadCount(memberNo);
-            response.put("success", true);
-            response.put("count", count);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "알림 개수 조회 실패: " + e.getMessage());
-        }
-        return response;
+    public ApiResponse<HashMap<String, Object>> getUnreadCount(@PathVariable("memberNo") int memberNo) {
+        int count = notificationService.getUnreadCount(memberNo);
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("count", count);
+        return ApiResponse.success(data);
     }
     
+    /**
+     * 알림 읽음 처리
+     */
     @PutMapping("/{notificationNo}/read")
-    public HashMap<String, Object> markAsRead(@PathVariable("notificationNo") int notificationNo) {
-        HashMap<String, Object> response = new HashMap<>();
-        try {
-            int result = notificationService.markAsRead(notificationNo);
-            if (result > 0) {
-                response.put("success", true);
-            } else {
-                response.put("success", false);
-                response.put("message", "알림 읽음 처리 실패");
-            }
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "알림 읽음 처리 실패: " + e.getMessage());
+    public ApiResponse<Void> markAsRead(@PathVariable("notificationNo") int notificationNo) {
+        int result = notificationService.markAsRead(notificationNo);
+        if (result > 0) {
+            return ApiResponse.success("알림을 읽음 처리했습니다.", null);
+        } else {
+            return ApiResponse.error("알림 읽음 처리 실패");
         }
-        return response;
     }
     
+    /**
+     * 알림 삭제
+     */
     @DeleteMapping("/{notificationNo}")
-    public HashMap<String, Object> deleteNotification(@PathVariable("notificationNo") int notificationNo) {
-        HashMap<String, Object> response = new HashMap<>();
-        try {
-            int result = notificationService.deleteNotification(notificationNo);
-            if (result > 0) {
-                response.put("success", true);
-            } else {
-                response.put("success", false);
-                response.put("message", "알림 삭제 실패");
-            }
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "알림 삭제 실패: " + e.getMessage());
+    public ApiResponse<Void> deleteNotification(@PathVariable("notificationNo") int notificationNo) {
+        int result = notificationService.deleteNotification(notificationNo);
+        if (result > 0) {
+            return ApiResponse.success("알림이 삭제되었습니다.", null);
+        } else {
+            return ApiResponse.error("알림 삭제 실패");
         }
-        return response;
     }
 }

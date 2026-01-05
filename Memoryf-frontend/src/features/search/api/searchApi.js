@@ -1,55 +1,29 @@
-import axios from 'axios';
-import { getAccessToken } from '../../../utils/jwt';
-
-const API_BASE_URL = 'http://localhost:8006/memoryf';
-
-const searchApi = axios.create({
-  baseURL: `${API_BASE_URL}/search`,
-  timeout: 10000,
-});
-
-searchApi.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 /**
- * 회원 검색 (닉네임)
- * @param {string} keyword 
+ * 🔍 Search API
+ * 
+ * 검색 관련 API 호출 모듈
+ * shared/api의 baseApi를 사용하여 일관된 설정 유지
  */
-export const searchMembers = async (keyword) => {
-  try {
-    const response = await searchApi.get('/member', {
-      params: { keyword }
-    });
-    if (response.data && response.data.success) {
-      return response.data.data;
-    }
-    return [];
-  } catch (error) {
-    console.error('회원 검색 실패:', error);
-    return [];
-  }
-};
+import { baseApi, getApiResponseData } from '../../../shared/api';
+
+export { searchMembers } from '../../../entities/user';
 
 /**
  * 태그 검색 (피드)
+ * GET /search/feeds?tag=xxx
  * @param {string} keyword 
  */
 export const searchFeedsByTag = async (keyword) => {
   try {
-    const response = await searchApi.get('/tag', {
-      params: { keyword }
+    const response = await baseApi.get('/search/feeds', {
+      params: { tag: keyword }
     });
-    if (response.data && response.data.success) {
-      return response.data.data;
-    }
-    return [];
+    return getApiResponseData(response.data, []);
   } catch (error) {
     console.error('태그 검색 실패:', error);
     return [];
   }
 };
+
+// 기존 호환성을 위한 default export
+export default baseApi;

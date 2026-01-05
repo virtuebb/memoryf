@@ -1,46 +1,13 @@
 package com.kh.memoryf.auth.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.kh.memoryf.auth.model.service.LoginService;
-import com.kh.memoryf.auth.model.vo.Login;
-
-@CrossOrigin(origins={"http://192.168.150.10:5173", "http://localhost:5173"})
-@RestController
-@RequestMapping("login")
+/**
+ * @deprecated AuthController 참고
+ * ⚠️ 과거 분리된 컨트롤러입니다. 현재는 AuthController로 통합되었습니다.
+ *
+ * Spring MVC 매핑 충돌을 방지하기 위해 컨트롤러 어노테이션을 제거하고
+ * 소스 호환/참고용으로만 유지합니다.
+ */
+@Deprecated(since = "2.0", forRemoval = true)
 public class LoginController {
-	
-	@Autowired
-	private LoginService loginService;
-	
-	// 로그인 요청 처리
-	// React에서 전달한 JSON 형식의 아이디/비번을 VO로 변환해서 전달받음
-	// POST 방식으로 처리
-	@PostMapping()
-	public String loginMember(@RequestBody Login login) {
-		
-		
-		String jwt =  loginService.loginMember(login);
-		// Login loginUser =  loginService.loginMember(login);
-		
-		System.out.println("받은 memberId=" + login.getMemberId());
-		System.out.println("받은 memberPwd=" + login.getMemberPwd());
-		
-		// System.out.println("memberNo : " + loginUser.getMemberNo());
-		// System.out.println("memberId : " + loginUser.getMemberId());
-		// System.out.println("memberPwd : " + loginUser.getMemberPwd());
-		// System.out.println("memberName : " + loginUser.getMemberName());
-		// System.out.println("status : " + loginUser.getStatus());
-
-		return jwt;
-		
-	}
-	
-	
-
+	// intentionally empty
 }

@@ -1,0 +1,182 @@
+/* =========================
+   📓 Diary Page Wrapper
+========================= */
+.diary-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* =========================
+   ✏️ Write Card
+========================= */
+.diary-write-box {
+  background: var(--color-card-bg);
+  border-radius: 22px;
+  padding: 20px 22px;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* textarea */
+.diary-write-box textarea {
+  flex: 1;
+
+  border: none;
+  outline: none;
+  resize: none;
+
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text-main);
+
+  padding: 6px 4px;
+
+  /* 📓 종이 라인 느낌 */
+  background:
+    repeating-linear-gradient(
+      transparent,
+      transparent 30px,
+      rgba(255, 210, 140, 0.35) 31px
+    );
+}
+
+.diary-write-box textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+/* footer */
+.diary-write-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 6px; 
+  font-size: small;
+  color: rgba(0, 0, 0, 0.589);
+}
+
+/* 힌트 문구 */
+.diary-write-footer .hint {
+  font-size: 10px; 
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  opacity: 0.8;  
+}
+
+/* 저장 버튼 */
+.diary-save-btn {
+  padding: 7px 18px;       
+  border-radius: 999px;
+  border: none;
+
+  font-size: 13px;          
+  font-weight: 600;
+
+  background: var(--color-accent);
+  color: var(--color-accent-contrast, #000000af);
+
+  cursor: pointer;
+}
+
+.diary-save-btn:hover {
+  opacity: 0.9;
+}
+
+/* =========================
+   📄 Diary List
+========================= */
+.diary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* empty */
+.diary-empty {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 32px 0;
+}
+
+/* =========================
+   🧾 Diary Card
+========================= */
+.diary-card {
+  background: var(--color-card-bg);
+  border-radius: 18px;
+  padding: 16px 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.diary-date {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.diary-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text-main);
+  white-space: pre-wrap;
+}
+
+/* =========================
+   🔢 Pagination
+========================= */
+.pagination {
+  margin-top: 26px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.pagination button {
+  min-width: 30px;
+  height: 30px;
+
+  border-radius: 8px;
+  border: none;
+
+  font-size: 12px;
+  cursor: pointer;
+
+  background: transparent;
+  color: var(--color-text-main);
+}
+
+.pagination button:hover:not(.active):not(:disabled) {
+  background: var(--color-border-soft);
+}
+
+.pagination button.active {
+  background: var(--color-accent);
+  color: rgb(0, 0, 0);
+  font-weight: 800;
+}
+
+.pagination button.arrow {
+  font-weight: 700;
+}
+
+.pagination button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

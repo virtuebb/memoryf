@@ -1,0 +1,400 @@
+import { useActivitySection } from '../model';
+import { getAssetUrl, getFeedUpfileUrl, getProfileImageUrl } from '../../../shared/api';
+import '../css/ActivitySection.css';
+
+function ActivitySection() {
+	const {
+		sidebarItems,
+		tabs,
+		years,
+		months,
+		days,
+		activeSidebar,
+		setActiveSidebar,
+		activeTab,
+		setActiveTab,
+		items,
+		historyItems,
+		loading,
+		isSelectionMode,
+		selectedItems,
+		filter,
+		isModalOpen,
+		setIsModalOpen,
+		tempFilter,
+		setTempFilter,
+		dateSelection,
+		handleOpenModal,
+		handleApplyFilter,
+		handleDateSelect,
+		toggleSelectionMode,
+		handleItemClick,
+		handleActionSelected,
+	} = useActivitySection();
+
+  const renderContent = () => {
+    if (activeSidebar === 'interactions') {
+      return (
+        <>
+          <div className="activity-tabs">
+            {tabs.map(tab => (
+              <div 
+                key={tab.id} 
+                className={`activity-tab ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span style={{ marginRight: '6px' }}>{tab.icon}</span>
+                {tab.label}
+              </div>
+            ))}
+          </div>
+
+          <div className="activity-filter-bar">
+            <div className="filter-left">
+              <span className="sort-label">
+                {filter.sortBy === 'recent' ? '최신순' : '오래된 순'}
+              </span>
+              <button className="sort-btn" onClick={handleOpenModal}>정렬 및 필터</button>
+            </div>
+            <button className="select-btn" onClick={toggleSelectionMode}>
+              {isSelectionMode ? '취소' : '선택'}
+            </button>
+          </div>
+
+          {activeTab === 'likes' ? (
+            <div className="activity-grid">
+              {loading ? (
+                <div className="loading-state">로딩 중...</div>
+              ) : items.length > 0 ? (
+                items.map(feed => {
+                  // 이미지 URL 추출 (FeedItem 로직과 동일)
+                  const getImageUrl = () => {
+                    if (!feed.feedFiles || feed.feedFiles.length === 0) {
+                      return 'https://via.placeholder.com/300?text=No+Image';
+                    }
+                    
+                    const filePath = feed.feedFiles[0].filePath;
+                    
+                    return getAssetUrl(filePath) || filePath;
+                  };
+                  
+                  const imageUrl = getImageUrl();
+                  const isVideo = ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(
+                    imageUrl.split('.').pop()?.toLowerCase()
+                  );
+                  const isSelected = selectedItems.has(feed.feedNo);
+
+                  return (
+                    <div 
+                      key={feed.feedNo} 
+                      className={`activity-item ${isSelected ? 'selected' : ''}`}
+                      onClick={() => handleItemClick(feed)}
+                    >
+                      {isVideo ? (
+                        <>
+                          <video 
+                            src={`${imageUrl}#t=1.0`} 
+                            className="activity-video-blur" 
+                            muted 
+                            loop 
+                            preload="metadata"
+                          />
+                          <video 
+                            src={`${imageUrl}#t=1.0`} 
+                            className="activity-video" 
+                            muted 
+                            loop 
+                            preload="metadata"
+                          />
+                        </>
+                      ) : (
+                        <img src={imageUrl} alt="feed" />
+                      )}
+                      {isSelectionMode && (
+                        <div className={`selection-overlay ${isSelected ? 'active' : ''}`}>
+                          <div className="check-circle">
+                            {isSelected && <span className="check-mark">✓</span>}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="empty-state">
+                  <p>내역이 없습니다.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="activity-list">
+              {loading ? (
+                <div className="loading-state">로딩 중...</div>
+              ) : items.length > 0 ? (
+                items.map(comment => {
+                  const feedImageUrl = comment.feedImage
+                    ? getFeedUpfileUrl(comment.feedImage)
+                    : 'https://via.placeholder.com/100?text=No+Image';
+                  
+                  const profileUrl = comment.writerProfileImage
+                    ? getProfileImageUrl(comment.writerProfileImage)
+                    : '/assets/images/profiles/default-profile.png';
+
+                  const isSelected = selectedItems.has(comment.commentNo);
+
+                  // 날짜 포맷팅
+                  const formatDate = (dateString) => {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                  };
+
+                  return (
+                    <div 
+                      key={comment.commentNo} 
+                      className={`comment-activity-item ${isSelected ? 'selected' : ''}`}
+                      onClick={() => handleItemClick(comment)}
+                    >
+                      <div className="comment-activity-left">
+                        <img src={profileUrl} alt="profile" className="comment-profile-img" />
+                        <div className="comment-activity-info">
+                          <div className="comment-header">
+                            <span className="comment-nickname">{comment.writerNick}</span>
+                            <span className="comment-date">{formatDate(comment.createDate)}</span>
+                          </div>
+                          <div className="comment-content">{comment.content}</div>
+                        </div>
+                      </div>
+                      <div className="comment-activity-right">
+                        <img src={feedImageUrl} alt="feed" className="comment-feed-img" />
+                      </div>
+                      
+                      {isSelectionMode && (
+                        <div className={`selection-overlay-list ${isSelected ? 'active' : ''}`}>
+                           <div className="check-circle-list">
+                            {isSelected && <span className="check-mark">✓</span>}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="empty-state">
+                  <p>내역이 없습니다.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 하단 선택 작업 바 */}
+          {isSelectionMode && (
+            <div className="selection-footer">
+              <div className="selection-count">
+                <button className="close-selection-btn" onClick={toggleSelectionMode}>✕</button>
+                <span>{selectedItems.size}개 선택됨</span>
+              </div>
+              <button 
+                className={`footer-action-btn ${selectedItems.size > 0 ? 'active' : ''}`}
+                onClick={handleActionSelected}
+                disabled={selectedItems.size === 0}
+              >
+                {activeTab === 'likes' ? '좋아요 취소' : '삭제'}
+              </button>
+            </div>
+          )}
+        </>
+      );
+    } else if (activeSidebar === 'history') {
+      return (
+        <>
+          <div className="activity-content-header">
+            <h2>계정 내역 정보</h2>
+            <p className="activity-desc">계정을 만든 이후 변경한 사항을 검토해보세요.</p>
+            <div className="activity-filters">
+              <div className="sort-filter-btn" onClick={handleOpenModal}>
+                {filter.sortBy === 'recent' ? '최신순' : '오래된 순'}
+                <span className="filter-icon">⇅</span>
+              </div>
+              <button className="filter-btn" onClick={handleOpenModal}>정렬 및 필터</button>
+            </div>
+          </div>
+
+          <div className="history-list">
+            {loading ? (
+              <div className="loading-state">로딩 중...</div>
+            ) : historyItems.length > 0 ? (
+              historyItems.map((item) => {
+                const date = new Date(item.eventDate);
+                const dateStr = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+                
+                let icon = 'ℹ️';
+                let title = '정보 변경';
+                
+                switch(item.eventType) {
+                  case 'CREATE': icon = '🎉'; title = '계정 생성됨'; break;
+                  case 'PASSWORD': icon = '🔒'; title = '비밀번호 변경'; break;
+                  case 'NICKNAME': icon = '👤'; title = '닉네임 변경'; break;
+                  case 'EMAIL': icon = '📧'; title = '이메일 변경'; break;
+                  case 'BIO': icon = '📝'; title = '소개글 변경'; break;
+                  case 'PRIVACY': icon = '👁️'; title = '공개 범위 변경'; break;
+                  default: break;
+                }
+
+                return (
+                  <div key={item.historyNo} className="history-item">
+                    <div className="history-icon-wrapper">
+                      <span className="history-icon">{icon}</span>
+                    </div>
+                    <div className="history-info">
+                      <div className="history-title">{title}</div>
+                      <div className="history-desc">{item.eventDesc}</div>
+                      <div className="history-date">{dateStr}</div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="empty-state">
+                <p>계정 내역이 없습니다.</p>
+              </div>
+            )}
+          </div>
+        </>
+      );
+    }
+  };
+
+  return (
+    <div className="activity-container">
+      {/* Left Sidebar */}
+      <aside className="activity-sidebar">
+        <div className="activity-sidebar-header">내 활동</div>
+        <ul className="activity-menu">
+          {sidebarItems.map(item => (
+            <li 
+              key={item.id} 
+              className={`activity-menu-item ${activeSidebar === item.id ? 'active' : ''}`}
+              onClick={() => setActiveSidebar(item.id)}
+            >
+              <div className="activity-menu-icon">{item.icon}</div>
+              <div className="activity-menu-text">
+                <span className="activity-menu-title">{item.title}</span>
+                <span className="activity-menu-desc">{item.desc}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </aside>
+
+      {/* Right Content */}
+      <section className="activity-content">
+        {renderContent()}
+      </section>
+
+      {/* Filter Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="filter-modal" onClick={e => e.stopPropagation()}>
+            <div className="filter-modal-header">
+              <h3>정렬 및 필터</h3>
+              <button className="close-btn" onClick={() => setIsModalOpen(false)}>✕</button>
+            </div>
+            
+            <div className="filter-modal-body">
+              <div className="filter-section">
+                <label>정렬 기준</label>
+                <div className="sort-options">
+                  <div 
+                    className={`sort-radio-item ${tempFilter.sortBy === 'recent' ? 'selected' : ''}`}
+                    onClick={() => setTempFilter(prev => ({ ...prev, sortBy: 'recent' }))}
+                  >
+                    <div className="radio-circle">
+                      {tempFilter.sortBy === 'recent' && <div className="radio-inner" />}
+                    </div>
+                    <span>최신순</span>
+                  </div>
+                  <div 
+                    className={`sort-radio-item ${tempFilter.sortBy === 'oldest' ? 'selected' : ''}`}
+                    onClick={() => setTempFilter(prev => ({ ...prev, sortBy: 'oldest' }))}
+                  >
+                    <div className="radio-circle">
+                      {tempFilter.sortBy === 'oldest' && <div className="radio-inner" />}
+                    </div>
+                    <span>오래된 순</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="filter-section">
+                <label>시작 날짜</label>
+                <div className="date-selects">
+                  <select 
+                    value={dateSelection.startYear} 
+                    onChange={(e) => handleDateSelect('startYear', e.target.value)}
+                    className="date-select"
+                  >
+                    <option value="">연도</option>
+                    {years.map(y => <option key={y} value={y}>{y}년</option>)}
+                  </select>
+                  <select 
+                    value={dateSelection.startMonth} 
+                    onChange={(e) => handleDateSelect('startMonth', e.target.value)}
+                    className="date-select"
+                  >
+                    <option value="">월</option>
+                    {months.map(m => <option key={m} value={m}>{m}월</option>)}
+                  </select>
+                  <select 
+                    value={dateSelection.startDay} 
+                    onChange={(e) => handleDateSelect('startDay', e.target.value)}
+                    className="date-select"
+                  >
+                    <option value="">일</option>
+                    {days.map(d => <option key={d} value={d}>{d}일</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="filter-section">
+                <label>종료 날짜</label>
+                <div className="date-selects">
+                  <select 
+                    value={dateSelection.endYear} 
+                    onChange={(e) => handleDateSelect('endYear', e.target.value)}
+                    className="date-select"
+                  >
+                    <option value="">연도</option>
+                    {years.map(y => <option key={y} value={y}>{y}년</option>)}
+                  </select>
+                  <select 
+                    value={dateSelection.endMonth} 
+                    onChange={(e) => handleDateSelect('endMonth', e.target.value)}
+                    className="date-select"
+                  >
+                    <option value="">월</option>
+                    {months.map(m => <option key={m} value={m}>{m}월</option>)}
+                  </select>
+                  <select 
+                    value={dateSelection.endDay} 
+                    onChange={(e) => handleDateSelect('endDay', e.target.value)}
+                    className="date-select"
+                  >
+                    <option value="">일</option>
+                    {days.map(d => <option key={d} value={d}>{d}일</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="filter-modal-footer">
+              <button className="apply-btn" onClick={handleApplyFilter}>적용</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default ActivitySection;

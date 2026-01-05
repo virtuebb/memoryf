@@ -1,0 +1,124 @@
+/* Feed List Page Styles */
+.feed-list-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* 헤더 및 정렬 옵션 */
+.feed-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.feed-list-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #3a2a2a;
+  margin: 0;
+}
+
+.feed-sort-options {
+  display: flex;
+  gap: 10px;
+}
+
+.sort-btn {
+  padding: 8px 16px;
+  border: 1.5px solid rgba(184, 90, 107, 0.3);
+  border-radius: 8px;
+  background: #fff;
+  color: #b85a6b;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-btn:hover {
+  background: #ffe5de;
+  border-color: rgba(184, 90, 107, 0.5);
+}
+
+.sort-btn.active {
+  background: #b85a6b;
+  color: #fff;
+  border-color: #b85a6b;
+}
+
+/* 3*N 그리드 레이아웃 (인스타그램 스타일) */
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  width: 100%;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .feed-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .feed-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feed-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .feed-sort-options {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* 로딩 및 에러 상태 */
+.loading,
+.error {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+/* 빈 상태 스타일 */
+.feed-empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.feed-empty-state p {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.feed-empty-state p:first-child {
+  font-size: 18px;
+  font-weight: 600;
+  color: #666;
+}
+
+/* 무한 스크롤 sentinel */
+.feed-load-more {
+  width: 100%;
+  text-align: center;
+  padding: 20px 0;
+  color: #666;
+  font-size: 14px;
+}

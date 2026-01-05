@@ -2,15 +2,15 @@ package com.kh.memoryf.visitor.controller;
 
 import java.util.Map;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.kh.memoryf.common.response.ApiResponse;
 import com.kh.memoryf.visitor.model.service.VisitorService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/visitor")
+@RequestMapping("/visitors")
 public class VisitorController {
 
     private final VisitorService visitorService;
@@ -19,27 +19,31 @@ public class VisitorController {
         this.visitorService = visitorService;
     }
 
-    // 🔹 방문 기록 (JWT 기반)
+    /**
+     * 방문 기록 (JWT 기반)
+     * POST /visitors?homeNo=xxx
+     */
     @PostMapping
-    public ResponseEntity<?> recordVisit(
+    public ApiResponse<Void> recordVisit(
             @RequestParam int homeNo,
             HttpServletRequest request) {
 
         Integer memberNo = (Integer) request.getAttribute("memberNo");
         if (memberNo == null) {
-            return ResponseEntity.status(401).build();
+            return ApiResponse.error("인증이 필요합니다.");
         }
 
         visitorService.recordVisit(memberNo, homeNo);
-        return ResponseEntity.ok().build();
+        return ApiResponse.success("방문이 기록되었습니다.", null);
     }
 
-    // 🔹 방문자 수 조회
-    @GetMapping("/count")
-    public ResponseEntity<Map<String, Integer>> getVisitorStats(
-            @RequestParam int homeNo) {
-    	
-        return ResponseEntity.ok(
-            visitorService.getVisitorStats(homeNo));
+    /**
+     * 방문자 수 조회
+     * GET /visitors/stats?homeNo=xxx
+     */
+    @GetMapping("/stats")
+    public ApiResponse<Map<String, Integer>> getVisitorStats(@RequestParam int homeNo) {
+        Map<String, Integer> stats = visitorService.getVisitorStats(homeNo);
+        return ApiResponse.success(stats);
     }
 }

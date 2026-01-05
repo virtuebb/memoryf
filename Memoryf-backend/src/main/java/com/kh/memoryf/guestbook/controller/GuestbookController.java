@@ -1,10 +1,7 @@
 package com.kh.memoryf.guestbook.controller;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.memoryf.common.response.ApiResponse;
 import com.kh.memoryf.guestbook.model.service.GuestbookService;
 import com.kh.memoryf.guestbook.model.vo.Guestbook;
 
@@ -27,29 +25,30 @@ public class GuestbookController {
         this.guestbookService = guestbookService;
     }
 
-    // 방명록 조회
+    /**
+     * 방명록 조회
+     */
     @GetMapping("/{homeNo}")
-    public ResponseEntity<List<Guestbook>> getGuestbookList(
+    public ApiResponse<List<Guestbook>> getGuestbookList(
             @PathVariable int homeNo,
             @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int offset,
             @org.springframework.web.bind.annotation.RequestParam(defaultValue = "3") int limit
     ) {
-        return ResponseEntity.ok(
-            guestbookService.getGuestbookList(homeNo, offset, limit)
-        );
+        List<Guestbook> list = guestbookService.getGuestbookList(homeNo, offset, limit);
+        return ApiResponse.success(list);
     }
 
-    // 방명록 등록
+    /**
+     * 방명록 등록
+     */
     @PostMapping
-    public ResponseEntity<?> insertGuestbook(
+    public ApiResponse<Void> insertGuestbook(
             @RequestBody Guestbook guestbook,
             jakarta.servlet.http.HttpServletRequest request
     ) {
         int memberNo = (Integer) request.getAttribute("memberNo");
-
         guestbook.setMemberNo(memberNo);
-
         guestbookService.insertGuestbook(guestbook);
-        return ResponseEntity.ok(Map.of("success", true));
+        return ApiResponse.success("방명록이 등록되었습니다.", null);
     }
 }

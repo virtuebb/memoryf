@@ -1,1 +1,109 @@
+# ============================================
+# 🔒 OS 생성 파일
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# 🔒 IDE / 에디터
+# ============================================
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.iml
+*.iws
+*.ipr
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.settings/
 /.metadata/
+
+# ============================================
+# 🔒 환경 설정 파일 (민감 정보)
+# ============================================
+*.env
+*.env.local
+*.env.*.local
+.env.development
+.env.production
+application-*.properties
+!application.properties.example
+
+# ============================================
+# 🔒 Node.js (Frontend)
+# ============================================
+node_modules/
+dist/
+dist-ssr/
+build/
+*.local
+.npm
+.eslintcache
+.cache/
+*.tsbuildinfo
+
+# ============================================
+# 🔒 Logs
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+spring-boot.err.log
+spring-boot.out.log
+
+# ============================================
+# 🔒 Java / Maven (Backend)
+# ============================================
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+*.jar
+*.war
+*.ear
+*.class
+.mvn/wrapper/maven-wrapper.jar
+
+# ============================================
+# 🔒 Spring Boot
+# ============================================
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache
+HELP.md
+
+# ============================================
+# 🔒 테스트 & 커버리지
+# ============================================
+coverage/
+*.lcov
+.nyc_output/
+
+# ============================================
+# 🔒 기타
+# ============================================
+*.bak
+*.tmp
+*.temp
+package-lock.json

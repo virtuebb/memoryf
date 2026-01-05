@@ -6,105 +6,125 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.memoryf.common.response.ApiResponse;
 import com.kh.memoryf.member.model.service.MemberService;
 import com.kh.memoryf.member.model.vo.AccountHistory;
-
 import com.kh.memoryf.member.model.vo.Member;
 
 @CrossOrigin(origins="http://localhost:5173")
 @RestController
-@RequestMapping("member")
+@RequestMapping("/members")
 public class MemberController {
 
 	@Autowired
 	@SuppressWarnings("unused")
 	private MemberService memberService;
 
-	@GetMapping("info")
-	public ResponseEntity<Member> getMemberInfo(@RequestParam int memberNo) {
+	/**
+	 * 회원 정보 조회
+	 * GET /members/{memberNo}
+	 */
+	@GetMapping("/{memberNo}")
+	public ApiResponse<Member> getMemberInfo(@PathVariable int memberNo) {
 		Member member = memberService.selectMember(memberNo);
 		if (member != null) {
 			member.setMemberPwd(null);
-			return ResponseEntity.ok(member);
+			return ApiResponse.success(member);
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			return ApiResponse.error("회원 정보를 찾을 수 없습니다.");
 		}
 	}
 
-	@PostMapping("password")
-	public ResponseEntity<String> updatePwd(@RequestBody Map<String, Object> request) {
-		int memberNo = (Integer) request.get("memberNo");
+	/**
+	 * 비밀번호 변경
+	 * PUT /members/{memberNo}/password
+	 */
+	@PutMapping("/{memberNo}/password")
+	public ApiResponse<Void> updatePwd(@PathVariable int memberNo, @RequestBody Map<String, Object> request) {
 		String oldPwd = (String) request.get("oldPwd");
 		String newPwd = (String) request.get("newPwd");
 		
 		int result = memberService.updatePwd(memberNo, oldPwd, newPwd);
 		
 		if (result > 0) {
-			return ResponseEntity.ok("비밀번호가 변경되었습니다.");
+			return ApiResponse.success("비밀번호가 변경되었습니다.", null);
 		} else if (result == -1) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("현재 비밀번호가 일치하지 않습니다.");
+			return ApiResponse.error("현재 비밀번호가 일치하지 않습니다.");
 		} else {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 변경에 실패했습니다.");
+			return ApiResponse.error("비밀번호 변경에 실패했습니다.");
 		}
 	}
 
-	@PostMapping("withdrawal")
-	public ResponseEntity<String> deleteMember(@RequestBody Map<String, Object> request) {
-		int memberNo = (Integer) request.get("memberNo");
+	/**
+	 * 회원 탈퇴
+	 * DELETE /members/{memberNo}
+	 */
+	@DeleteMapping("/{memberNo}")
+	public ApiResponse<Void> deleteMember(@PathVariable int memberNo, @RequestBody Map<String, Object> request) {
 		String memberPwd = (String) request.get("memberPwd");
 		
 		int result = memberService.deleteMember(memberNo, memberPwd);
 		
 		if (result > 0) {
-			return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+			return ApiResponse.success("회원 탈퇴가 완료되었습니다.", null);
 		} else if (result == -1) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
+			return ApiResponse.error("비밀번호가 일치하지 않습니다.");
 		} else {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 탈퇴에 실패했습니다.");
+			return ApiResponse.error("회원 탈퇴에 실패했습니다.");
 		}
 	}
 
-	@PostMapping("email")
-	public ResponseEntity<String> updateEmail(@RequestBody Map<String, Object> request) {
-		int memberNo = (Integer) request.get("memberNo");
+	/**
+	 * 이메일 변경
+	 * PUT /members/{memberNo}/email
+	 */
+	@PutMapping("/{memberNo}/email")
+	public ApiResponse<Void> updateEmail(@PathVariable int memberNo, @RequestBody Map<String, Object> request) {
 		String email = (String) request.get("email");
 		
 		int result = memberService.updateEmail(memberNo, email);
 		
 		if (result > 0) {
-			return ResponseEntity.ok("이메일이 변경되었습니다.");
+			return ApiResponse.success("이메일이 변경되었습니다.", null);
 		} else {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이메일 변경에 실패했습니다.");
+			return ApiResponse.error("이메일 변경에 실패했습니다.");
 		}
 	}
 
-	@PostMapping("phone")
-	public ResponseEntity<String> updatePhone(@RequestBody Map<String, Object> request) {
-		int memberNo = (Integer) request.get("memberNo");
+	/**
+	 * 전화번호 변경
+	 * PUT /members/{memberNo}/phone
+	 */
+	@PutMapping("/{memberNo}/phone")
+	public ApiResponse<Void> updatePhone(@PathVariable int memberNo, @RequestBody Map<String, Object> request) {
 		String phone = (String) request.get("phone");
 		
 		int result = memberService.updatePhone(memberNo, phone);
 		
 		if (result > 0) {
-			return ResponseEntity.ok("전화번호가 변경되었습니다.");
+			return ApiResponse.success("전화번호가 변경되었습니다.", null);
 		} else {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("전화번호 변경에 실패했습니다.");
+			return ApiResponse.error("전화번호 변경에 실패했습니다.");
 		}
 	}
 
-	@GetMapping("history")
-	public ResponseEntity<Map<String, Object>> getAccountHistory(
-			@RequestParam int memberNo,
+	/**
+	 * 계정 활동 내역 조회
+	 * GET /members/{memberNo}/history
+	 */
+	@GetMapping("/{memberNo}/history")
+	public ApiResponse<List<AccountHistory>> getAccountHistory(
+			@PathVariable int memberNo,
 			@RequestParam(required = false) String sortBy,
 			@RequestParam(required = false) String startDate,
 			@RequestParam(required = false) String endDate) {
@@ -116,11 +136,6 @@ public class MemberController {
 		params.put("endDate", endDate);
 		
 		List<AccountHistory> list = memberService.selectAccountHistoryList(params);
-		
-		Map<String, Object> response = new HashMap<>();
-		response.put("list", list);
-		
-		return ResponseEntity.ok(response);
+		return ApiResponse.success(list);
 	}
-
 }
