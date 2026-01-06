@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
-import { fetchMelonChart, fetchMemberPoint, fetchPurchasedBgmList } from "../../api";
-import { getMemberNoFromToken } from "../../../../shared/lib";
+import { fetchMelonChart, fetchMemberPoint, fetchPurchasedBgmList } from "../api";
+import { getMemberNoFromToken } from "../../../shared/lib";
 
 /**
  * BGM 리스트 관리 Hook

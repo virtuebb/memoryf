@@ -7,7 +7,62 @@
  * 응답 형식 (ApiResponse):
  * { success: boolean, message: string, data: T, timestamp: string }
  */
-import { baseApi, uploadApi } from '../../../shared/api';
+import { baseApi, uploadApi, getApiResponseData } from '../../../shared/api';
+
+/**
+ * 스토리 데이터 정규화 (백엔드 필드명 → 프론트엔드 필드명)
+ */
+const normalizeStory = (story) => {
+	if (!story || typeof story !== "object") return story;
+	
+	return {
+		...story,
+		// 날짜 필드: createdAt → createDate
+		createDate: story.createdAt || story.createDate,
+		createdAt: story.createdAt || story.createDate,
+		expireDate: story.expiredAt || story.expireDate,
+		expiredAt: story.expiredAt || story.expireDate,
+		// 삭제 여부: isDeleted → isDel
+		isDel: story.isDeleted || story.isDel,
+		isDeleted: story.isDeleted || story.isDel,
+		// 프로필 이미지: profileSavedName → profileChangeName
+		profileChangeName: story.profileImg || story.profileSavedName || story.profileChangeName,
+		profileSavedName: story.profileImg || story.profileSavedName || story.profileChangeName,
+		profileImg: story.profileImg || story.profileSavedName || story.profileChangeName,
+	};
+};
+
+/**
+ * 스토리 상세 데이터 정규화
+ */
+const normalizeStoryDetail = (detail) => {
+	if (!detail || typeof detail !== "object") return detail;
+	
+	const normalized = {
+		...detail,
+	};
+	
+	// story 객체 정규화
+	if (detail.story) {
+		normalized.story = normalizeStory(detail.story);
+	}
+	
+	// items 배열 정규화
+	if (Array.isArray(detail.items)) {
+		normalized.items = detail.items.map((item) => ({
+			...item,
+			// savedName → changeName (호환성)
+			changeName: item.savedName || item.changeName,
+			savedName: item.savedName || item.changeName,
+			createDate: item.createdAt || item.createDate,
+			createdAt: item.createdAt || item.createDate,
+			isDel: item.isDeleted || item.isDel,
+			isDeleted: item.isDeleted || item.isDel,
+		}));
+	}
+	
+	return normalized;
+};
 
 const storyApi = {
   /**
@@ -16,7 +71,9 @@ const storyApi = {
    */
   selectStoryList: async (memberNo) => {
     const res = await baseApi.get(`/stories/members/${memberNo}`);
-		return res.data;
+		const data = getApiResponseData(res.data, []);
+		const stories = Array.isArray(data) ? data : [];
+		return { ...res.data, data: stories.map(normalizeStory) };
   },
   
   /**
@@ -25,7 +82,9 @@ const storyApi = {
    */
   selectStoryListByMember: async (memberNo) => {
     const res = await baseApi.get(`/stories/members/${memberNo}/all`);
-		return res.data;
+		const data = getApiResponseData(res.data, []);
+		const stories = Array.isArray(data) ? data : [];
+		return { ...res.data, data: stories.map(normalizeStory) };
   },
   
   /**
@@ -34,7 +93,8 @@ const storyApi = {
    */
   selectStoryDetail: async (storyNo) => {
     const res = await baseApi.get(`/stories/${storyNo}`);
-		return res.data;
+		const data = getApiResponseData(res.data, null);
+		return { ...res.data, data: data ? normalizeStoryDetail(data) : null };
   },
   
   /**

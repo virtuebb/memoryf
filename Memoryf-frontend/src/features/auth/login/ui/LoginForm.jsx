@@ -61,7 +61,12 @@ const LoginForm = () => {
           localStorage.setItem("loginMember", JSON.stringify(loginMember));
 
           console.log("로그인 성공 및 유저 정보 저장 완료");
-          navigate("/home");
+          
+          // 인증 상태 변경 이벤트 발생 (AppRouter가 리렌더링되도록)
+          window.dispatchEvent(new Event("authStateChanged"));
+          
+          // 홈으로 이동 (강제 새로고침으로 상태 초기화)
+          window.location.href = "/home";
         } else {
           alert("유효하지 않은 인증 정보입니다.");
         }

@@ -7,22 +7,23 @@
 		SELECT 
 			H.HOME_NO,
 			H.HOME_TITLE,
-			H.STATUS_MSG,
+			H.STATUS_MESSAGE,
 			H.PROFILE_ORIGIN_NAME,
-			H.PROFILE_CHANGE_NAME,
-			H.IS_PRIVATE_PROFILE,
-			H.IS_PRIVATE_VISIT,
-			H.IS_PRIVATE_FOLLOW,
+			H.PROFILE_SAVED_NAME,
+			H.IS_PROFILE_PRIVATE,
+			H.IS_VISITOR_PRIVATE,
+			H.IS_FOLLOW_PRIVATE,
 			H.MEMBER_NO,
+			M.MEMBER_ID,
 			M.MEMBER_NICK,
 			M.MEMBER_NAME,
-			M.STATUS,
+			M.ACCOUNT_STATUS,
 			NVL(FEED_CNT.FEED_COUNT, 0) AS FEED_COUNT,
 			NVL(FOLLOWER_CNT.FOLLOWER_COUNT, 0) AS FOLLOWER_COUNT,
 			NVL(FOLLOWING_CNT.FOLLOWING_COUNT, 0) AS FOLLOWING_COUNT,
-			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = H.MEMBER_NO AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
+			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = H.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
 			<if test="currentMemberNo != null">
-				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = H.MEMBER_NO AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{currentMemberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
+				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = H.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{currentMemberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
 				, CASE WHEN FLW.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_FOLLOWING
 				, FLW.STATUS AS FOLLOW_STATUS
 			</if>
@@ -31,7 +32,7 @@
 		LEFT JOIN (
 			SELECT MEMBER_NO, COUNT(*) AS FEED_COUNT
 			FROM TB_FEED
-			WHERE IS_DEL = 'N'
+			WHERE IS_DELETED = 'N'
 			GROUP BY MEMBER_NO
 		) FEED_CNT ON H.MEMBER_NO = FEED_CNT.MEMBER_NO
 		LEFT JOIN (
@@ -57,22 +58,23 @@
 		SELECT 
 			H.HOME_NO,
 			H.HOME_TITLE,
-			H.STATUS_MSG,
+			H.STATUS_MESSAGE,
 			H.PROFILE_ORIGIN_NAME,
-			H.PROFILE_CHANGE_NAME,
-			H.IS_PRIVATE_PROFILE,
-			H.IS_PRIVATE_VISIT,
-			H.IS_PRIVATE_FOLLOW,
+			H.PROFILE_SAVED_NAME,
+			H.IS_PROFILE_PRIVATE,
+			H.IS_VISITOR_PRIVATE,
+			H.IS_FOLLOW_PRIVATE,
 			H.MEMBER_NO,
+			M.MEMBER_ID,
 			M.MEMBER_NICK,
 			M.MEMBER_NAME,
-			M.STATUS,
+			M.ACCOUNT_STATUS,
 			NVL(FEED_CNT.FEED_COUNT, 0) AS FEED_COUNT,
 			NVL(FOLLOWER_CNT.FOLLOWER_COUNT, 0) AS FOLLOWER_COUNT,
 			NVL(FOLLOWING_CNT.FOLLOWING_COUNT, 0) AS FOLLOWING_COUNT,
-			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = H.MEMBER_NO AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
+			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = H.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
 			<if test="currentMemberNo != null">
-				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = H.MEMBER_NO AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{currentMemberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
+				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = H.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{currentMemberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
 				, CASE WHEN FLW.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_FOLLOWING
 				, FLW.STATUS AS FOLLOW_STATUS
 			</if>
@@ -81,7 +83,7 @@
 		LEFT JOIN (
 			SELECT MEMBER_NO, COUNT(*) AS FEED_COUNT
 			FROM TB_FEED
-			WHERE IS_DEL = 'N'
+			WHERE IS_DELETED = 'N'
 			GROUP BY MEMBER_NO
 		) FEED_CNT ON H.MEMBER_NO = FEED_CNT.MEMBER_NO
 		LEFT JOIN (
@@ -108,14 +110,14 @@
 		FROM (
 			SELECT
 				G.GUESTBOOK_NO,
-				G.GUESTBOOK_CONTENT,
-				G.CREATE_DATE,
-				G.IS_DEL,
+				G.CONTENT,
+				G.CREATED_AT,
+				G.IS_DELETED,
 				G.MEMBER_NO,
 				G.HOME_NO,
 				M.MEMBER_NICK,
-				M.STATUS,
-				H.PROFILE_CHANGE_NAME,
+				M.ACCOUNT_STATUS,
+				H.PROFILE_SAVED_NAME,
 				NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
 				<if test="currentMemberNo != null">
 					CASE WHEN GL.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED,
@@ -131,8 +133,8 @@
 					G.HOME_NO
 				FROM TB_GUESTBOOK G
 				WHERE G.HOME_NO = #{homeNo}
-				  AND G.IS_DEL = 'N'
-				ORDER BY G.CREATE_DATE DESC
+				  AND G.IS_DELETED = 'N'
+				ORDER BY G.CREATED_AT DESC
 			) G
 			LEFT JOIN TB_MEMBER M ON G.MEMBER_NO = M.MEMBER_NO
 			LEFT JOIN TB_MEMBER_HOME H ON M.MEMBER_NO = H.MEMBER_NO
@@ -153,9 +155,9 @@
 	<insert id="insertGuestbook" parameterType="guestbook">
 		INSERT INTO TB_GUESTBOOK (
 			GUESTBOOK_NO,
-			GUESTBOOK_CONTENT,
-			CREATE_DATE,
-			IS_DEL,
+			CONTENT,
+			CREATED_AT,
+			IS_DELETED,
 			MEMBER_NO,
 			HOME_NO
 		) VALUES (
@@ -171,7 +173,7 @@
 	<!-- 방명록 삭제 (IS_DEL = 'Y') -->
 	<update id="deleteGuestbook" parameterType="_int">
 		UPDATE TB_GUESTBOOK
-		SET IS_DEL = 'Y'
+		SET IS_DELETED = 'Y'
 		WHERE GUESTBOOK_NO = #{guestbookNo}
 	</update>
 
@@ -205,21 +207,21 @@
 	<update id="updateProfileImage" parameterType="home">
 		UPDATE TB_MEMBER_HOME
 		SET PROFILE_ORIGIN_NAME = #{profileOriginName},
-			PROFILE_CHANGE_NAME = #{profileChangeName}
+			PROFILE_SAVED_NAME = #{profileSavedName}
 		WHERE MEMBER_NO = #{memberNo}
 	</update>
 
 	<!-- 상태 메시지 업데이트 -->
 	<update id="updateStatusMsg" parameterType="home">
 		UPDATE TB_MEMBER_HOME
-		SET STATUS_MSG = #{statusMsg}
+		SET STATUS_MESSAGE = #{statusMessage}
 		WHERE MEMBER_NO = #{memberNo}
 	</update>
 
 	<!-- 계정 공개 범위 업데이트 -->
 	<update id="updatePrivacy" parameterType="home">
 		UPDATE TB_MEMBER_HOME
-		SET IS_PRIVATE_PROFILE = #{isPrivateProfile}
+		SET IS_PROFILE_PRIVATE = #{isProfilePrivate}
 		WHERE MEMBER_NO = #{memberNo}
 	</update>
 
@@ -227,13 +229,14 @@
 	<resultMap type="home" id="homeResultMap">
 		<id property="homeNo" column="HOME_NO"/>
 		<result property="homeTitle" column="HOME_TITLE"/>
-		<result property="statusMsg" column="STATUS_MSG"/>
+		<result property="statusMessage" column="STATUS_MESSAGE"/>
 		<result property="profileOriginName" column="PROFILE_ORIGIN_NAME"/>
-		<result property="profileChangeName" column="PROFILE_CHANGE_NAME"/>
-		<result property="isPrivateProfile" column="IS_PRIVATE_PROFILE"/>
-		<result property="isPrivateVisit" column="IS_PRIVATE_VISIT"/>
-		<result property="isPrivateFollow" column="IS_PRIVATE_FOLLOW"/>
+		<result property="profileSavedName" column="PROFILE_SAVED_NAME"/>
+		<result property="isProfilePrivate" column="IS_PROFILE_PRIVATE"/>
+		<result property="isVisitorPrivate" column="IS_VISITOR_PRIVATE"/>
+		<result property="isFollowPrivate" column="IS_FOLLOW_PRIVATE"/>
 		<result property="memberNo" column="MEMBER_NO"/>
+		<result property="memberId" column="MEMBER_ID"/>
 		<result property="memberNick" column="MEMBER_NICK"/>
 		<result property="memberName" column="MEMBER_NAME"/>
 		<result property="feedCount" column="FEED_COUNT"/>
@@ -241,18 +244,20 @@
 		<result property="followingCount" column="FOLLOWING_COUNT"/>
 		<result property="isFollowing" column="IS_FOLLOWING"/>
 		<result property="followStatus" column="FOLLOW_STATUS"/>
+		<result property="hasStory" column="HAS_STORY"/>
+		<result property="hasUnreadStory" column="HAS_UNREAD_STORY"/>
 	</resultMap>
 
 	<!-- ResultMap: Guestbook -->
 	<resultMap type="guestbook" id="guestbookResultMap">
 		<id property="guestbookNo" column="GUESTBOOK_NO"/>
-		<result property="guestbookContent" column="GUESTBOOK_CONTENT"/>
-		<result property="createDate" column="CREATE_DATE"/>
-		<result property="isDel" column="IS_DEL"/>
+		<result property="content" column="CONTENT"/>
+		<result property="createdAt" column="CREATED_AT"/>
+		<result property="isDeleted" column="IS_DELETED"/>
 		<result property="memberNo" column="MEMBER_NO"/>
 		<result property="homeNo" column="HOME_NO"/>
 		<result property="memberNick" column="MEMBER_NICK"/>
-		<result property="profileChangeName" column="PROFILE_CHANGE_NAME"/>
+		<result property="profileSavedName" column="PROFILE_SAVED_NAME"/>
 		<result property="likeCount" column="LIKE_COUNT"/>
 		<result property="isLiked" column="IS_LIKED"/>
 	</resultMap>

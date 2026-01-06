@@ -12,10 +12,10 @@
 					SELECT T.*, ROW_NUMBER() OVER (
 						<choose>
 							<when test="sortBy == 'popular'">
-								ORDER BY LIKE_COUNT DESC, CREATED_DATE DESC
+								ORDER BY LIKE_COUNT DESC, CREATED_AT DESC
 							</when>
 							<otherwise>
-								ORDER BY CREATED_DATE DESC
+								ORDER BY CREATED_AT DESC
 							</otherwise>
 						</choose>
 					) AS RN
@@ -27,16 +27,16 @@
 							F.LATITUDE,
 							F.LONGITUDE,
 							F.LOCATION_NAME,
-							F.CREATED_DATE,
-							F.IS_DEL,
+							F.CREATED_AT,
+							F.IS_DELETED,
 							F.MEMBER_NO,
 							M.MEMBER_NICK,
-							M.STATUS AS MEMBER_STATUS,
+							M.ACCOUNT_STATUS AS MEMBER_STATUS,
 							NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
 							NVL(COMMENT_CNT.COMMENT_COUNT, 0) AS COMMENT_COUNT
-							, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
+							, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
 							<if test="memberNo != null">
-								, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{memberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
+								, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{memberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
 								, CASE WHEN FL.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
 							</if>
 						FROM TB_FEED F
@@ -49,23 +49,23 @@
 						LEFT JOIN (
 							SELECT FEED_NO, COUNT(*) AS COMMENT_COUNT
 							FROM TB_COMMENT
-							WHERE IS_DEL = 'N'
+							WHERE IS_DELETED = 'N'
 							GROUP BY FEED_NO
 						) COMMENT_CNT ON F.FEED_NO = COMMENT_CNT.FEED_NO
 						<if test="memberNo != null">
 							LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{memberNo}
 						</if>
 						LEFT JOIN TB_MEMBER_HOME MH_CHECK ON F.MEMBER_NO = MH_CHECK.MEMBER_NO
-						WHERE F.IS_DEL = 'N'
+						WHERE F.IS_DELETED = 'N'
 						<if test="memberNo == null">
-							AND MH_CHECK.IS_PRIVATE_PROFILE = 'N'
+							AND MH_CHECK.IS_PROFILE_PRIVATE = 'N'
 						</if>
 						<if test="memberNo != null">
 							AND (
-								MH_CHECK.IS_PRIVATE_PROFILE = 'N'
+								MH_CHECK.IS_PROFILE_PRIVATE = 'N'
 								OR F.MEMBER_NO = #{memberNo}
 								OR (
-									MH_CHECK.IS_PRIVATE_PROFILE = 'Y'
+									MH_CHECK.IS_PROFILE_PRIVATE = 'Y'
 									AND EXISTS (
 										SELECT 1
 										FROM TB_FOLLOWS FLW
@@ -85,6 +85,7 @@
 								FROM TB_FOLLOWS FLW
 								JOIN TB_MEMBER_HOME MH ON FLW.HOME_NO = MH.HOME_NO
 								WHERE FLW.MEMBER_NO = #{memberNo}
+								AND FLW.STATUS = 'Y'
 							)
 						</if>
 					) T
@@ -100,13 +101,13 @@
 					F.LATITUDE,
 					F.LONGITUDE,
 					F.LOCATION_NAME,
-					F.CREATED_DATE,
-					F.IS_DEL,
+					F.CREATED_AT,
+					F.IS_DELETED,
 					F.MEMBER_NO,
 					M.MEMBER_NICK,
 					NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
 					NVL(COMMENT_CNT.COMMENT_COUNT, 0) AS COMMENT_COUNT,
-					CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
+					CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
 					<if test="memberNo != null">
 						, CASE WHEN FL.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
 					</if>
@@ -120,23 +121,23 @@
 				LEFT JOIN (
 					SELECT FEED_NO, COUNT(*) AS COMMENT_COUNT
 					FROM TB_COMMENT
-					WHERE IS_DEL = 'N'
+					WHERE IS_DELETED = 'N'
 					GROUP BY FEED_NO
 				) COMMENT_CNT ON F.FEED_NO = COMMENT_CNT.FEED_NO
 				<if test="memberNo != null">
 					LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{memberNo}
 				</if>
 				LEFT JOIN TB_MEMBER_HOME MH_CHECK ON F.MEMBER_NO = MH_CHECK.MEMBER_NO
-				WHERE F.IS_DEL = 'N'
+				WHERE F.IS_DELETED = 'N'
 				<if test="memberNo == null">
-					AND MH_CHECK.IS_PRIVATE_PROFILE = 'N'
+					AND MH_CHECK.IS_PROFILE_PRIVATE = 'N'
 				</if>
 				<if test="memberNo != null">
 					AND (
-						MH_CHECK.IS_PRIVATE_PROFILE = 'N'
+						MH_CHECK.IS_PROFILE_PRIVATE = 'N'
 						OR F.MEMBER_NO = #{memberNo}
 						OR (
-							MH_CHECK.IS_PRIVATE_PROFILE = 'Y'
+							MH_CHECK.IS_PROFILE_PRIVATE = 'Y'
 							AND EXISTS (
 								SELECT 1
 								FROM TB_FOLLOWS FLW
@@ -150,23 +151,24 @@
 				<if test="targetMemberNo != null">
 					AND F.MEMBER_NO = #{targetMemberNo}
 				</if>
-				<if test="sortBy == 'following' and memberNo != null">
-					AND F.MEMBER_NO IN (
-						SELECT MH.MEMBER_NO
-						FROM TB_FOLLOWS FLW
-						JOIN TB_MEMBER_HOME MH ON FLW.HOME_NO = MH.HOME_NO
-						WHERE FLW.MEMBER_NO = #{memberNo}
-					)
-				</if>
+					<if test="sortBy == 'following' and memberNo != null">
+						AND F.MEMBER_NO IN (
+							SELECT MH.MEMBER_NO
+							FROM TB_FOLLOWS FLW
+							JOIN TB_MEMBER_HOME MH ON FLW.HOME_NO = MH.HOME_NO
+							WHERE FLW.MEMBER_NO = #{memberNo}
+							AND FLW.STATUS = 'Y'
+						)
+					</if>
 				<choose>
 					<when test="sortBy == 'popular'">
-						ORDER BY LIKE_COUNT DESC, F.CREATED_DATE DESC
+						ORDER BY LIKE_COUNT DESC, F.CREATED_AT DESC
 					</when>
 					<when test="sortBy == 'following'">
-						ORDER BY F.CREATED_DATE DESC
+						ORDER BY F.CREATED_AT DESC
 					</when>
 					<otherwise>
-						ORDER BY F.CREATED_DATE DESC
+						ORDER BY F.CREATED_AT DESC
 					</otherwise>
 				</choose>
 			</otherwise>
@@ -182,17 +184,17 @@
 			F.LATITUDE,
 			F.LONGITUDE,
 			F.LOCATION_NAME,
-			F.CREATED_DATE,
-			F.IS_DEL,
+			F.CREATED_AT,
+			F.IS_DELETED,
 			F.MEMBER_NO,
 			M.MEMBER_NICK,
-			M.STATUS AS MEMBER_STATUS,
-			H.PROFILE_CHANGE_NAME AS PROFILE_IMAGE,
+			M.ACCOUNT_STATUS AS MEMBER_STATUS,
+			H.PROFILE_SAVED_NAME AS PROFILE_IMAGE,
 			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
 			NVL(COMMENT_CNT.COMMENT_COUNT, 0) AS COMMENT_COUNT,
-			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
+			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
 			<if test="memberNo != null">
-				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{memberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
+				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = F.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{memberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
 				, CASE WHEN FL.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
 				, CASE WHEN FB.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_BOOKMARKED
 			</if>
@@ -207,7 +209,7 @@
 		LEFT JOIN (
 			SELECT FEED_NO, COUNT(*) AS COMMENT_COUNT
 			FROM TB_COMMENT
-			WHERE IS_DEL = 'N'
+			WHERE IS_DELETED = 'N'
 			GROUP BY FEED_NO
 		) COMMENT_CNT ON F.FEED_NO = COMMENT_CNT.FEED_NO
 		<if test="memberNo != null">
@@ -215,23 +217,23 @@
 			LEFT JOIN TB_FEED_BOOKMARK FB ON F.FEED_NO = FB.FEED_NO AND FB.MEMBER_NO = #{memberNo}
 		</if>
 		WHERE F.FEED_NO = #{feedNo}
-		AND F.IS_DEL = 'N'
+		AND F.IS_DELETED = 'N'
 	</select>
 
 	<!-- 피드 파일 목록 조회 -->
 	<select id="selectFeedFileList" parameterType="_int" resultMap="feedFileResultMap">
 		SELECT 
-			IMAGE_NO,
+			FILE_NO,
 			ORIGIN_NAME,
-			CHANGE_NAME,
+			SAVED_NAME,
 			FILE_PATH,
-			UPLOAD_DATE,
-			IS_DEL,
+			CREATED_AT,
+			IS_DELETED,
 			FEED_NO
 		FROM TB_FEED_FILE
 		WHERE FEED_NO = #{feedNo}
-		AND (IS_DEL = 'N' OR IS_DEL IS NULL)
-		ORDER BY IMAGE_NO
+		AND (IS_DELETED = 'N' OR IS_DELETED IS NULL)
+		ORDER BY FILE_ORDER, FILE_NO
 	</select>
 
 	<!-- 피드 생성 -->
@@ -246,8 +248,8 @@
 			LATITUDE,
 			LONGITUDE,
 			LOCATION_NAME,
-			CREATED_DATE,
-			IS_DEL,
+			CREATED_AT,
+			IS_DELETED,
 			MEMBER_NO
 		) VALUES (
 			#{feedNo},
@@ -265,21 +267,25 @@
 	<!-- 피드 파일 등록 -->
 	<insert id="insertFeedFile" parameterType="feedFile">
 		INSERT INTO TB_FEED_FILE (
-			IMAGE_NO,
+			FILE_NO,
+			FEED_NO,
+			FILE_ORDER,
 			ORIGIN_NAME,
-			CHANGE_NAME,
+			SAVED_NAME,
 			FILE_PATH,
-			UPLOAD_DATE,
-			IS_DEL,
-			FEED_NO
+			FILE_TYPE,
+			IS_DELETED,
+			CREATED_AT
 		) VALUES (
-			SEQ_IMAGE_NO.NEXTVAL,
+			SEQ_FILE_NO.NEXTVAL,
+			#{feedNo},
+			#{fileOrder},
 			#{originName},
-			#{changeName},
+			#{savedName},
 			#{filePath},
-			SYSDATE,
+			#{fileType},
 			'N',
-			#{feedNo}
+			SYSDATE
 		)
 	</insert>
 
@@ -308,11 +314,18 @@
 		WHERE FEED_NO = #{feedNo}
 		AND MEMBER_NO = #{memberNo}
 	</select>
+	
+	<!-- 피드 좋아요 개수 조회 -->
+	<select id="selectFeedLikeCount" parameterType="_int" resultType="_int">
+		SELECT NVL(COUNT(*), 0)
+		FROM TB_FEED_LIKE
+		WHERE FEED_NO = #{feedNo}
+	</select>
 
 	<!-- 피드 삭제 (IS_DEL = 'Y') -->
 	<update id="deleteFeed" parameterType="_int">
 		UPDATE TB_FEED
-		SET IS_DEL = 'Y'
+		SET IS_DELETED = 'Y', DELETED_AT = SYSDATE
 		WHERE FEED_NO = #{feedNo}
 	</update>
 	
@@ -326,7 +339,7 @@
 			LONGITUDE = #{longitude},
 			LOCATION_NAME = #{locationName}
 		WHERE FEED_NO = #{feedNo}
-		AND IS_DEL = 'N'
+		AND IS_DELETED = 'N'
 	</update>
 
 	<!-- 피드 북마크 추가 -->
@@ -366,8 +379,8 @@
 			F.LATITUDE,
 			F.LONGITUDE,
 			F.LOCATION_NAME,
-			F.CREATED_DATE,
-			F.IS_DEL,
+			F.CREATED_AT,
+			F.IS_DELETED,
 			F.MEMBER_NO,
 			M.MEMBER_NICK,
 			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
@@ -385,12 +398,12 @@
 		LEFT JOIN (
 			SELECT FEED_NO, COUNT(*) AS COMMENT_COUNT
 			FROM TB_COMMENT
-			WHERE IS_DEL = 'N'
+			WHERE IS_DELETED = 'N'
 			GROUP BY FEED_NO
 		) COMMENT_CNT ON F.FEED_NO = COMMENT_CNT.FEED_NO
 		LEFT JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO AND FL.MEMBER_NO = #{value}
 		WHERE B.MEMBER_NO = #{value}
-		AND F.IS_DEL = 'N'
+		AND F.IS_DELETED = 'N'
 		ORDER BY B.BOOKMARK_NO DESC
 	</select>
 
@@ -403,31 +416,31 @@
 			F.LATITUDE,
 			F.LONGITUDE,
 			F.LOCATION_NAME,
-			F.CREATED_DATE,
-			F.IS_DEL,
+			F.CREATED_AT,
+			F.IS_DELETED,
 			F.MEMBER_NO,
 			M.MEMBER_NICK,
 			(SELECT COUNT(*) FROM TB_FEED_LIKE WHERE FEED_NO = F.FEED_NO) AS LIKE_COUNT,
-			(SELECT COUNT(*) FROM TB_COMMENT WHERE FEED_NO = F.FEED_NO AND IS_DEL = 'N') AS COMMENT_COUNT,
+			(SELECT COUNT(*) FROM TB_COMMENT WHERE FEED_NO = F.FEED_NO AND IS_DELETED = 'N') AS COMMENT_COUNT,
 			1 AS IS_LIKED,
-			(SELECT PROFILE_CHANGE_NAME FROM TB_MEMBER_HOME WHERE MEMBER_NO = F.MEMBER_NO) AS PROFILE_IMAGE
+			(SELECT PROFILE_SAVED_NAME FROM TB_MEMBER_HOME WHERE MEMBER_NO = F.MEMBER_NO) AS PROFILE_IMAGE
 		FROM TB_FEED F
 		JOIN TB_FEED_LIKE FL ON F.FEED_NO = FL.FEED_NO
 		LEFT JOIN TB_MEMBER M ON F.MEMBER_NO = M.MEMBER_NO
 		WHERE FL.MEMBER_NO = #{memberNo}
-		AND F.IS_DEL = 'N'
+		AND F.IS_DELETED = 'N'
 		<if test="startDate != null and startDate != ''">
-			AND TO_CHAR(F.CREATED_DATE, 'YYYY-MM-DD') &gt;= #{startDate}
+			AND TO_CHAR(F.CREATED_AT, 'YYYY-MM-DD') &gt;= #{startDate}
 		</if>
 		<if test="endDate != null and endDate != ''">
-			AND TO_CHAR(F.CREATED_DATE, 'YYYY-MM-DD') &lt;= #{endDate}
+			AND TO_CHAR(F.CREATED_AT, 'YYYY-MM-DD') &lt;= #{endDate}
 		</if>
 		<choose>
 			<when test="sortBy == 'oldest'">
-				ORDER BY F.CREATED_DATE ASC
+				ORDER BY F.CREATED_AT ASC
 			</when>
 			<otherwise>
-				ORDER BY F.CREATED_DATE DESC
+				ORDER BY F.CREATED_AT DESC
 			</otherwise>
 		</choose>
 	</select>
@@ -437,31 +450,36 @@
 		SELECT 
 			C.COMMENT_NO AS commentNo,
 			C.CONTENT AS content,
-			C.CREATE_DATE AS createDate,
+			C.CREATED_AT AS createdAt,
 			C.FEED_NO AS feedNo,
-			C.WRITER AS writer,
-			M.MEMBER_NICK AS writerNick,
-			MH.PROFILE_CHANGE_NAME AS writerProfileImage,
-			(SELECT CHANGE_NAME FROM TB_FEED_FILE WHERE FEED_NO = F.FEED_NO AND ROWNUM = 1) AS feedImage
+			C.MEMBER_NO AS memberNo,
+			M.MEMBER_NICK AS memberNick,
+			MH.PROFILE_SAVED_NAME AS memberProfileImage,
+			(SELECT CASE 
+				WHEN FILE_PATH IS NULL THEN SAVED_NAME
+				WHEN FILE_PATH LIKE '%/' THEN FILE_PATH || SAVED_NAME
+				ELSE FILE_PATH || '/' || SAVED_NAME
+			END
+			FROM TB_FEED_FILE WHERE FEED_NO = F.FEED_NO AND IS_DELETED = 'N' AND ROWNUM = 1) AS feedImage
 		FROM TB_COMMENT C
 		JOIN TB_FEED F ON C.FEED_NO = F.FEED_NO
-		JOIN TB_MEMBER M ON C.WRITER = M.MEMBER_NO
+		JOIN TB_MEMBER M ON C.MEMBER_NO = M.MEMBER_NO
 		LEFT JOIN TB_MEMBER_HOME MH ON M.MEMBER_NO = MH.MEMBER_NO
-		WHERE C.WRITER = #{memberNo}
-		AND C.IS_DEL = 'N'
-		AND F.IS_DEL = 'N'
+		WHERE C.MEMBER_NO = #{memberNo}
+		AND C.IS_DELETED = 'N'
+		AND F.IS_DELETED = 'N'
 		<if test="startDate != null and startDate != ''">
-			AND TO_CHAR(C.CREATE_DATE, 'YYYY-MM-DD') &gt;= #{startDate}
+			AND TO_CHAR(C.CREATED_AT, 'YYYY-MM-DD') &gt;= #{startDate}
 		</if>
 		<if test="endDate != null and endDate != ''">
-			AND TO_CHAR(C.CREATE_DATE, 'YYYY-MM-DD') &lt;= #{endDate}
+			AND TO_CHAR(C.CREATED_AT, 'YYYY-MM-DD') &lt;= #{endDate}
 		</if>
 		<choose>
 			<when test="sortBy == 'oldest'">
-				ORDER BY C.CREATE_DATE ASC
+				ORDER BY C.CREATED_AT ASC
 			</when>
 			<otherwise>
-				ORDER BY C.CREATE_DATE DESC
+				ORDER BY C.CREATED_AT DESC
 			</otherwise>
 		</choose>
 	</select>
@@ -473,8 +491,8 @@
 		<result property="tag" column="TAG"/>
 		<result property="latitude" column="LATITUDE"/>
 		<result property="longitude" column="LONGITUDE"/>
-		<result property="createdDate" column="CREATED_DATE"/>
-		<result property="isDel" column="IS_DEL"/>
+		<result property="createdAt" column="CREATED_AT"/>
+		<result property="isDeleted" column="IS_DELETED"/>
 		<result property="memberNo" column="MEMBER_NO"/>
 		<result property="memberNick" column="MEMBER_NICK"/>
 		<result property="memberStatus" column="MEMBER_STATUS"/>
@@ -493,12 +511,14 @@
 
 	<!-- ResultMap: FeedFile -->
 	<resultMap type="feedFile" id="feedFileResultMap">
-		<id property="imageNo" column="IMAGE_NO"/>
+		<id property="fileNo" column="FILE_NO"/>
+		<result property="fileOrder" column="FILE_ORDER"/>
 		<result property="originName" column="ORIGIN_NAME"/>
-		<result property="changeName" column="CHANGE_NAME"/>
+		<result property="savedName" column="SAVED_NAME"/>
 		<result property="filePath" column="FILE_PATH"/>
-		<result property="uploadDate" column="UPLOAD_DATE"/>
-		<result property="isDel" column="IS_DEL"/>
+		<result property="fileType" column="FILE_TYPE"/>
+		<result property="createdAt" column="CREATED_AT"/>
+		<result property="isDeleted" column="IS_DELETED"/>
 		<result property="feedNo" column="FEED_NO"/>
 	</resultMap>
 

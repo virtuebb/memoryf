@@ -16,8 +16,9 @@ public class Notification {
     private int notificationNo;
     private int receiverNo;
     private int senderNo;
-    private String type; // 'FOLLOW_REQUEST', 'FOLLOW_ACCEPT', 'LIKE_FEED', 'COMMENT_FEED'
-    private Integer targetId; // FEED_NO, COMMENT_NO, etc.
+    private String type; // 'FOLLOW_REQUEST', 'FOLLOW_ACCEPT', 'LIKE_FEED', 'COMMENT_FEED', 'COMMENT_REPLY', 'LIKE_COMMENT'
+    private Integer targetId; // FEED_NO, etc.
+    private Integer targetSubId; // COMMENT_NO (대댓글, 댓글좋아요 등 보조 ID)
     private String isRead;
     private Timestamp createDate;
     

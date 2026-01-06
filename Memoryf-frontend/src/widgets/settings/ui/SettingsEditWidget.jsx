@@ -46,8 +46,9 @@ function SettingsEditWidget() {
 		);
 	}
 
-	const profileImageUrl = profileData?.profileChangeName
-		? `${getProfileImageUrl(profileData.profileChangeName)}?t=${imageTimestamp}`
+	const profileImageFileName = profileData?.profileSavedName || profileData?.profileChangeName;
+	const profileImageUrl = profileImageFileName
+		? `${getProfileImageUrl(profileImageFileName)}?t=${imageTimestamp}`
 		: defaultProfileImg;
 
 	const handleImageError = (e) => {

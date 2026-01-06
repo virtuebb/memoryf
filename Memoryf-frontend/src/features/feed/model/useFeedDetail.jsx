@@ -204,8 +204,19 @@ export function useFeedDetail(feedNo) {
 		try {
 			const result = await likeFeed(feedNo, memberNo);
 			if (result?.success) {
-				setIsLiked(result.isLiked);
-				setLikeCount((prev) => (result.isLiked ? prev + 1 : prev - 1));
+				// mergeApiResponseData로 data 필드가 최상위 레벨로 병합됨
+				const isLiked = result.isLiked;
+				const likeCount = result.likeCount;
+				
+				if (isLiked !== undefined) {
+					setIsLiked(isLiked);
+				}
+				if (likeCount !== undefined) {
+					setLikeCount(likeCount);
+				} else if (isLiked !== undefined) {
+					// 호환성: 백엔드가 likeCount를 반환하지 않는 경우
+					setLikeCount((prev) => (isLiked ? prev + 1 : Math.max(0, prev - 1)));
+				}
 			}
 		} catch (err) {
 			console.error("좋아요 처리 실패:", err);

@@ -1,6 +1,6 @@
 package com.kh.memoryf.dm.model.vo;
 
-import java.sql.Date;
+import java.util.Date;
 
 import org.apache.ibatis.type.Alias;
 
@@ -9,15 +9,26 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * DM 참여자 VO
+ * 테이블: TB_DM_PARTICIPANT
+ */
 @Alias("dmParticipant")
 @NoArgsConstructor
 @Setter
 @Getter
 @ToString
 public class DmParticipant {
-    private int roomNo;             // ROOM_NO	NUMBER
-    private String memberId;        // MEMBER_ID	VARCHAR2(50 BYTE)
-    private int lastReadMessageNo;  // LAST_READ_MESSAGE_NO	NUMBER
-    private String joinDate;          // JOINED_AT	DATE
+    // === DB 컬럼 ===
+    private int roomNo;              // ROOM_NO (PK, FK)
+    private int memberNo;            // MEMBER_NO (PK, FK) - V3에서 MEMBER_ID → MEMBER_NO로 변경
+    private int lastReadMsgNo;       // LAST_READ_MSG_NO
+    private String isMuted;          // IS_MUTED ('Y', 'N')
+    private Date joinedAt;           // JOINED_AT
+    private Date leftAt;             // LEFT_AT (NULL이면 참여중)
+    
+    // === 조회용 필드 ===
+    private String memberId;         // 회원 아이디 (JOIN)
+    private String memberName;       // 회원 이름 (JOIN)
+    private String memberNick;       // 회원 닉네임 (JOIN)
 }
-

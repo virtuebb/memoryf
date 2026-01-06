@@ -8,6 +8,6 @@
 import { baseApi, getApiResponseData } from '../../../shared/api';
 
 export const getMemberInfo = async (memberNo) => {
-  const response = await baseApi.get(`/member/info?memberNo=${memberNo}`);
+  const response = await baseApi.get(`/members/${memberNo}`);
   return getApiResponseData(response.data, {});
 };

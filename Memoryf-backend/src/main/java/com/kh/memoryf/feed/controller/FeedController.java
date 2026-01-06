@@ -136,8 +136,21 @@ public class FeedController {
 		Feed feed = new Feed();
 		feed.setContent(content);
 		feed.setTag(tag);
-		feed.setLatitude(latitude);
-		feed.setLongitude(longitude);
+		// String을 Double로 변환 (null 체크 포함)
+		if (latitude != null && !latitude.trim().isEmpty()) {
+			try {
+				feed.setLatitude(Double.parseDouble(latitude));
+			} catch (NumberFormatException e) {
+				feed.setLatitude(null);
+			}
+		}
+		if (longitude != null && !longitude.trim().isEmpty()) {
+			try {
+				feed.setLongitude(Double.parseDouble(longitude));
+			} catch (NumberFormatException e) {
+				feed.setLongitude(null);
+			}
+		}
 		feed.setLocationName(locationName);
 		feed.setMemberNo(memberNo);
 		
@@ -157,7 +170,9 @@ public class FeedController {
 				
 				FeedFile feedFile = new FeedFile();
 				feedFile.setOriginName(originName);
-				feedFile.setChangeName(changeName);
+				feedFile.setSavedName(changeName);
+				feedFile.setFileOrder(feedFiles.size() + 1);
+				feedFile.setFileType("IMAGE");
 				String filePath = savePath.endsWith("/") ? savePath + changeName : savePath + "/" + changeName;
 				feedFile.setFilePath(filePath);
 				
@@ -190,10 +205,14 @@ public class FeedController {
 			@RequestBody HashMap<String, Object> request) {
 		
 		int memberNo = (Integer) request.get("memberNo");
-		boolean isLiked = feedService.toggleFeedLike(feedNo, memberNo);
+		HashMap<String, Object> result = feedService.toggleFeedLike(feedNo, memberNo);
+		
+		boolean isLiked = (Boolean) result.get("isLiked");
+		int likeCount = (Integer) result.get("likeCount");
 		
 		HashMap<String, Object> data = new HashMap<>();
 		data.put("isLiked", isLiked);
+		data.put("likeCount", likeCount);
 		return ApiResponse.success(isLiked ? "좋아요를 추가했습니다." : "좋아요를 취소했습니다.", data);
 	}
 	
@@ -267,14 +286,56 @@ public class FeedController {
 	/**
 	 * 댓글 생성 (RESTful: POST /feed/{feedNo}/comments)
 	 * @param feedNo 피드 번호
-	 * @param comment 댓글 정보
+	 * @param requestBody 요청 본문 (content, writer/memberNo)
+	 * @param request 요청 (JWT에서 memberNo 추출)
 	 * @return 생성 결과
 	 */
 	@PostMapping("/{feedNo}/comments")
 	public ApiResponse<Void> createComment(
 			@PathVariable("feedNo") int feedNo,
-			@RequestBody Comment comment) {
+			@RequestBody HashMap<String, Object> requestBody,
+			HttpServletRequest request) {
+		// JWT에서 memberNo 가져오기
+		Integer memberNo = (Integer) request.getAttribute("memberNo");
+		
+		// requestBody에서 writer 또는 memberNo 가져오기 (호환성)
+		if (memberNo == null) {
+			if (requestBody.containsKey("writer")) {
+				Object writerObj = requestBody.get("writer");
+				if (writerObj instanceof Number) {
+					memberNo = ((Number) writerObj).intValue();
+				} else if (writerObj instanceof String) {
+					try {
+						memberNo = Integer.parseInt((String) writerObj);
+					} catch (NumberFormatException e) {
+						// 무시
+					}
+				}
+			} else if (requestBody.containsKey("memberNo")) {
+				Object memberNoObj = requestBody.get("memberNo");
+				if (memberNoObj instanceof Number) {
+					memberNo = ((Number) memberNoObj).intValue();
+				}
+			}
+		}
+		
+		if (memberNo == null) {
+			return ApiResponse.error("로그인이 필요합니다.");
+		}
+		
+		Comment comment = new Comment();
 		comment.setFeedNo(feedNo);
+		comment.setMemberNo(memberNo);
+		comment.setContent((String) requestBody.get("content"));
+		
+		// parentCommentNo가 있으면 대댓글
+		if (requestBody.containsKey("parentCommentNo")) {
+			Object parentObj = requestBody.get("parentCommentNo");
+			if (parentObj instanceof Number) {
+				comment.setParentCommentNo(((Number) parentObj).intValue());
+			}
+		}
+		
 		int result = commentService.insertComment(comment);
 		if (result > 0) {
 			return ApiResponse.success("댓글이 등록되었습니다.", null);

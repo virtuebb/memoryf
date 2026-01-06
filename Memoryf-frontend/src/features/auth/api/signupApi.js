@@ -7,7 +7,7 @@
  * 응답 형식 (ApiResponse):
  * { success: boolean, message: string, data: T, timestamp: string }
  */
-import { baseApi, getApiResponseData } from '../../../shared/api';
+import { baseApi } from '../../../shared/api';
 
 /**
  * 회원가입
@@ -18,7 +18,10 @@ import { baseApi, getApiResponseData } from '../../../shared/api';
 const signupApi = async (signupData) => {
   try {
     const response = await baseApi.post('/auth/signup', signupData);
-		return getApiResponseData(response.data);
+
+		// ApiResponse.success=true 인데 data=null 일 수 있음 (회원가입은 보통 반환 데이터 없음)
+		// SignupForm은 null 여부로 성공을 판단하므로, 성공이면 true를 반환
+		return response?.data?.success === true ? true : null;
   } catch (error) {
     console.log('회원가입 ajax 통신 실패', error);
     return null;

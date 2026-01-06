@@ -10,15 +10,20 @@
 		<result column="MEMBER_ID" property="memberId" />
 		<result column="MEMBER_PWD" property="memberPwd" />
 		<result column="MEMBER_NAME" property="memberName" />
-		<result column="STATUS" property="status" />
+		<result column="ACCOUNT_STATUS" property="accountStatus" />
 	</resultMap>
 	
-	<!-- 로그인 쿼리 -->
+	<!-- 로그인 쿼리 (V3 스키마: ACCOUNT_STATUS) -->
 	<select id="loginMember" parameterType="login" resultMap="loginResultSet">
-		SELECT MEMBER_NO, MEMBER_ID, MEMBER_PWD, MEMBER_NAME, STATUS
-		  FROM TB_MEMBER
-		 WHERE MEMBER_ID = #{memberId}
-		   AND STATUS = 'N'
+		SELECT 
+			MEMBER_NO, 
+			MEMBER_ID, 
+			MEMBER_PWD, 
+			MEMBER_NAME,
+			ACCOUNT_STATUS
+		FROM TB_MEMBER
+		WHERE MEMBER_ID = #{memberId}
+		  AND ACCOUNT_STATUS = 'ACTIVE'
 	</select>
 
 </mapper>

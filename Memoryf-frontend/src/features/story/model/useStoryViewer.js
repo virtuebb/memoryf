@@ -44,28 +44,36 @@ export function useStoryViewer() {
 			const validDetails = storyDetails.filter(Boolean);
 			if (!validDetails.length) return { success: false, reason: "NO_VALID" };
 
+			// 아이템 병합 및 정렬
 			const mergedItems = validDetails
 				.sort(
 					(a, b) =>
-						new Date(a.story.createDate || 0) -
-						new Date(b.story.createDate || 0)
+						new Date(a.story.createdAt || a.story.createDate || 0) -
+						new Date(b.story.createdAt || b.story.createDate || 0)
 				)
-				.map((detail) => ({
-					storyNo: detail.story.storyNo,
-					createDate: detail.story.createDate,
-					filePath: detail.story.filePath,
-					content: detail.story.content,
-					type: detail.story.type,
-					likes: detail.likeList || [],
-					visitors: detail.visitorList || [],
-					comments: detail.commentList || [],
-				}));
+				.flatMap((detail) =>
+					(detail.items || []).map((item) => ({
+						...item,
+						// 필드명 정규화: savedName → changeName (호환성)
+						changeName: item.savedName || item.changeName,
+						savedName: item.savedName || item.changeName,
+						createDate: item.createdAt || item.createDate,
+						createdAt: item.createdAt || item.createDate,
+						isDel: item.isDeleted || item.isDel,
+						isDeleted: item.isDeleted || item.isDel,
+						_storyNo: detail.story.storyNo,
+						_storyCreateDate: detail.story.createdAt || detail.story.createDate,
+					}))
+				);
 
 			setSelectedStory({
 				owner: {
 					memberNo: stories[0].memberNo,
 					memberNick: stories[0].memberNick,
-					profileImg: stories[0].profileImg,
+					// 프로필 이미지 필드명 정규화
+					profileImg: stories[0].profileImg || stories[0].profileSavedName || stories[0].profileChangeName,
+					profileSavedName: stories[0].profileImg || stories[0].profileSavedName || stories[0].profileChangeName,
+					profileChangeName: stories[0].profileImg || stories[0].profileSavedName || stories[0].profileChangeName,
 				},
 				items: mergedItems,
 			});

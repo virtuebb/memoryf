@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pointMapper">
+
+	<!-- ===========================
+	     ResultMap 정의 (V3 스키마)
+	=========================== -->
+	
+	<resultMap id="pointWalletResultMap" type="pointWallet">
+		<id column="WALLET_NO" property="walletNo" />
+		<result column="MEMBER_NO" property="memberNo" />
+		<result column="BALANCE" property="balance" />
+		<result column="UPDATED_AT" property="updatedAt" />
+	</resultMap>
+	
+	<resultMap id="pointHistoryResultMap" type="pointHistory">
+		<id column="HISTORY_NO" property="historyNo" />
+		<result column="MEMBER_NO" property="memberNo" />
+		<result column="AMOUNT" property="amount" />
+		<result column="TRANSACTION_TYPE" property="transactionType" />
+		<result column="REFERENCE_TYPE" property="referenceType" />
+		<result column="REFERENCE_NO" property="referenceNo" />
+		<result column="BALANCE_AFTER" property="balanceAfter" />
+		<result column="DESCRIPTION" property="description" />
+		<result column="CREATED_AT" property="createdAt" />
+		<result column="MEMBER_NAME" property="memberName" />
+		<result column="MEMBER_NICK" property="memberNick" />
+	</resultMap>
+
+	<!-- ===========================
+	     포인트 지갑 관련 쿼리 (V3)
+	=========================== -->
+	
+	<!-- 포인트 지갑 조회 -->
+	<select id="selectPointWallet" parameterType="int" resultMap="pointWalletResultMap">
+		SELECT WALLET_NO, MEMBER_NO, BALANCE, UPDATED_AT
+		FROM TB_POINT_WALLET
+		WHERE MEMBER_NO = #{memberNo}
+	</select>
+	
+	<!-- 포인트 지갑 생성 -->
+	<insert id="insertPointWallet" parameterType="int">
+		INSERT INTO TB_POINT_WALLET (WALLET_NO, MEMBER_NO, BALANCE, UPDATED_AT)
+		VALUES (SEQ_WALLET_NO.NEXTVAL, #{memberNo}, 0, SYSDATE)
+	</insert>
+	
+	<!-- 포인트 잔액 조회 -->
+	<select id="selectBalance" parameterType="int" resultType="int">
+		SELECT NVL(BALANCE, 0)
+		FROM TB_POINT_WALLET
+		WHERE MEMBER_NO = #{memberNo}
+	</select>
+	
+	<!-- 포인트 적립 (잔액 증가) -->
+	<update id="earnPoints" parameterType="map">
+		UPDATE TB_POINT_WALLET
+		SET BALANCE = BALANCE + #{amount},
+		    UPDATED_AT = SYSDATE
+		WHERE MEMBER_NO = #{memberNo}
+	</update>
+	
+	<!-- 포인트 사용 (잔액 차감) -->
+	<update id="spendPoints" parameterType="map">
+		UPDATE TB_POINT_WALLET
+		SET BALANCE = BALANCE - #{amount},
+		    UPDATED_AT = SYSDATE
+		WHERE MEMBER_NO = #{memberNo}
+		  AND BALANCE >= #{amount}
+	</update>
+	
+	<!-- 포인트 환불 (잔액 복구) -->
+	<update id="refundPoints" parameterType="map">
+		UPDATE TB_POINT_WALLET
+		SET BALANCE = BALANCE + #{amount},
+		    UPDATED_AT = SYSDATE
+		WHERE MEMBER_NO = #{memberNo}
+	</update>
+
+	<!-- ===========================
+	     포인트 이력 관련 쿼리 (V3)
+	=========================== -->
+	
+	<!-- 포인트 이력 등록 -->
+	<insert id="insertPointHistory" parameterType="pointHistory">
+		<selectKey keyProperty="historyNo" resultType="int" order="BEFORE">
+			SELECT SEQ_POINT_HISTORY_NO.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO TB_POINT_HISTORY (
+			HISTORY_NO, MEMBER_NO, AMOUNT, TRANSACTION_TYPE, 
+			REFERENCE_TYPE, REFERENCE_NO, BALANCE_AFTER, DESCRIPTION, CREATED_AT
+		) VALUES (
+			#{historyNo}, #{memberNo}, #{amount}, #{transactionType},
+			#{referenceType}, #{referenceNo}, #{balanceAfter}, #{description}, SYSDATE
+		)
+	</insert>
+	
+	<!-- 포인트 이력 조회 (회원별) -->
+	<select id="selectPointHistoryList" parameterType="int" resultMap="pointHistoryResultMap">
+		SELECT HISTORY_NO, MEMBER_NO, AMOUNT, TRANSACTION_TYPE, 
+		       REFERENCE_TYPE, REFERENCE_NO, BALANCE_AFTER, DESCRIPTION, CREATED_AT
+		FROM TB_POINT_HISTORY
+		WHERE MEMBER_NO = #{memberNo}
+		ORDER BY CREATED_AT DESC
+	</select>
+	
+	<!-- 포인트 이력 조회 (페이징) -->
+	<select id="selectPointHistoryListPaged" parameterType="map" resultMap="pointHistoryResultMap">
+		SELECT * FROM (
+			SELECT ROWNUM AS RN, A.*
+			FROM (
+				SELECT HISTORY_NO, MEMBER_NO, AMOUNT, TRANSACTION_TYPE, 
+				       REFERENCE_TYPE, REFERENCE_NO, BALANCE_AFTER, DESCRIPTION, CREATED_AT
+				FROM TB_POINT_HISTORY
+				WHERE MEMBER_NO = #{memberNo}
+				ORDER BY CREATED_AT DESC
+			) A
+			WHERE ROWNUM &lt;= #{endRow}
+		)
+		WHERE RN > #{startRow}
+	</select>
+	
+	<!-- 이력 개수 조회 -->
+	<select id="countPointHistory" parameterType="int" resultType="int">
+		SELECT COUNT(*)
+		FROM TB_POINT_HISTORY
+		WHERE MEMBER_NO = #{memberNo}
+	</select>
+	
+	<!-- 최근 포인트 이력 조회 (N건) -->
+	<select id="selectRecentPointHistory" parameterType="map" resultMap="pointHistoryResultMap">
+		SELECT * FROM (
+			SELECT HISTORY_NO, MEMBER_NO, AMOUNT, TRANSACTION_TYPE, 
+			       REFERENCE_TYPE, REFERENCE_NO, BALANCE_AFTER, DESCRIPTION, CREATED_AT
+			FROM TB_POINT_HISTORY
+			WHERE MEMBER_NO = #{memberNo}
+			ORDER BY CREATED_AT DESC
+		)
+		WHERE ROWNUM &lt;= #{limit}
+	</select>
+
+	<!-- ===========================
+	     레거시 호환 쿼리 (TB_MEMBER.POINT 사용)
+	=========================== -->
+	
+	<!-- 레거시: 회원 테이블에서 포인트 조회 -->
+	<select id="selectMemberPointLegacy" parameterType="int" resultType="int">
+		SELECT NVL(POINT, 0)
+		FROM TB_MEMBER
+		WHERE MEMBER_NO = #{memberNo}
+	</select>
+	
+	<!-- 레거시: 회원 테이블 포인트 증가 -->
+	<update id="addMemberPointLegacy" parameterType="map">
+		UPDATE TB_MEMBER
+		SET POINT = NVL(POINT, 0) + #{amount}
+		WHERE MEMBER_NO = #{memberNo}
+	</update>
+	
+	<!-- 레거시: 회원 테이블 포인트 차감 -->
+	<update id="deductMemberPointLegacy" parameterType="map">
+		UPDATE TB_MEMBER
+		SET POINT = NVL(POINT, 0) - #{amount}
+		WHERE MEMBER_NO = #{memberNo}
+		  AND NVL(POINT, 0) >= #{amount}
+	</update>
+
+</mapper>

@@ -49,6 +49,8 @@ export function AuthProvider({ children }) {
     removeTokens();
     setAccessTokenState(null);
     setUser(null);
+    // AppRouter에 인증 상태 변경 알림
+    window.dispatchEvent(new Event('authStateChanged'));
   }, []);
 
   // 토큰 갱신

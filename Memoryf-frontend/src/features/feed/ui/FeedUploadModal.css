@@ -306,9 +306,13 @@
 .profile-avatar {
   width: 28px;
   height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: #efefef;
   object-fit: cover;
+  display: block;
 }
 
 .profile-name {

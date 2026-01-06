@@ -6,8 +6,8 @@
 		<id column="HISTORY_NO" property="historyNo" />
 		<result column="MEMBER_NO" property="memberNo" />
 		<result column="EVENT_TYPE" property="eventType" />
-		<result column="EVENT_DESC" property="eventDesc" />
-		<result column="EVENT_DATE" property="eventDate" />
+		<result column="EVENT_DESCRIPTION" property="eventDesc" />
+		<result column="CREATED_AT" property="eventDate" />
 	</resultMap>
 
 	<!-- 계정 내역 추가 -->
@@ -16,8 +16,8 @@
 			HISTORY_NO,
 			MEMBER_NO,
 			EVENT_TYPE,
-			EVENT_DESC,
-			EVENT_DATE
+			EVENT_DESCRIPTION,
+			CREATED_AT
 		) VALUES (
 			SEQ_HISTORY_NO.NEXTVAL,
 			#{memberNo},
@@ -33,15 +33,15 @@
 		FROM TB_ACCOUNT_HISTORY
 		WHERE MEMBER_NO = #{memberNo}
 		<if test="startDate != null and startDate != ''">
-			AND EVENT_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			AND CREATED_AT >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
 		</if>
 		<if test="endDate != null and endDate != ''">
-			AND EVENT_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+			AND CREATED_AT &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
 		</if>
 		ORDER BY 
 		<choose>
-			<when test="sortBy == 'oldest'">EVENT_DATE ASC</when>
-			<otherwise>EVENT_DATE DESC</otherwise>
+			<when test="sortBy == 'oldest'">CREATED_AT ASC</when>
+			<otherwise>CREATED_AT DESC</otherwise>
 		</choose>
 	</select>
 

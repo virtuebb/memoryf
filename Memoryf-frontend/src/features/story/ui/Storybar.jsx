@@ -27,23 +27,29 @@ function StoryBar() {
   const groupStoriesByMember = (stories = []) => {
     const grouped = stories.reduce((acc, story) => {
       if (!story?.memberNo) return acc;
+      // 필드명 정규화: createdAt → createDate, expiredAt → expireDate
+      const createDate = story.createDate || story.createdAt;
+      const expireDate = story.expireDate || story.expiredAt;
+      
       const current = acc[story.memberNo] || {
         memberNo: story.memberNo,
         memberNick: story.memberNick,
-        profileImg: story.profileImg,
+        profileImg: story.profileImg || story.profileSavedName || story.profileChangeName,
         stories: [],
-        latestCreateDate: story.createDate,
+        latestCreateDate: createDate,
       };
 
       current.stories.push({
         storyNo: story.storyNo,
-        createDate: story.createDate,
-        expireDate: story.expireDate,
+        createDate: createDate,
+        createdAt: story.createdAt || createDate,
+        expireDate: expireDate,
+        expiredAt: story.expiredAt || expireDate,
         isRead: story.isRead ?? story.read ?? false,
       });
 
-      if (story.createDate && (!current.latestCreateDate || new Date(story.createDate) > new Date(current.latestCreateDate))) {
-        current.latestCreateDate = story.createDate;
+      if (createDate && (!current.latestCreateDate || new Date(createDate) > new Date(current.latestCreateDate))) {
+        current.latestCreateDate = createDate;
       }
 
       acc[story.memberNo] = current;
@@ -133,12 +139,19 @@ function StoryBar() {
       }
 
       const mergedItems = validDetails
-        .sort((a, b) => new Date(a.story.createDate || 0) - new Date(b.story.createDate || 0))
+        .sort((a, b) => new Date(a.story.createdAt || a.story.createDate || 0) - new Date(b.story.createdAt || b.story.createDate || 0))
         .flatMap((detail) =>
           (detail.items || []).map((item) => ({
             ...item,
+            // 필드명 정규화
+            changeName: item.savedName || item.changeName,
+            savedName: item.savedName || item.changeName,
+            createDate: item.createdAt || item.createDate,
+            createdAt: item.createdAt || item.createDate,
+            isDel: item.isDeleted || item.isDel,
+            isDeleted: item.isDeleted || item.isDel,
             _storyNo: detail.story.storyNo,
-            _storyCreateDate: detail.story.createDate,
+            _storyCreateDate: detail.story.createdAt || detail.story.createDate,
           }))
         );
 
@@ -166,14 +179,9 @@ function StoryBar() {
   const closeUpload = () => setIsUploadOpen(false);
 
   const onUploadSuccess = async () => {
-    const grouped = await loadStoryList();
+    await loadStoryList();
     setIsUploadOpen(false);
-
-    const myNo = getMemberNo();
-    const myGroup = grouped.find((g) => g.memberNo === myNo);
-    if (myGroup) {
-      await openViewerForMember(myGroup);
-    }
+    // 스토리 업로드 후 자동 상세조회 제거 - 사용자가 원할 때 직접 클릭하도록
   };
 
   return (

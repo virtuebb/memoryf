@@ -9,6 +9,10 @@ const StoryUploadModal = ({ isOpen, onClose, onSuccess }) => {
 	const fileInputRef = useRef(null);
 	const [items, setItems] = useState([]);
 
+	const isVideoFile = (file) => {
+		return !!file?.type && file.type.startsWith("video/");
+	};
+
 	const handleSelectImages = () => {
 		fileInputRef.current?.click();
 	};
@@ -111,7 +115,7 @@ const StoryUploadModal = ({ isOpen, onClose, onSuccess }) => {
 					<input
 						ref={fileInputRef}
 						type="file"
-						accept="image/*"
+						accept="image/*,video/*"
 						multiple
 						onChange={onChangeFiles}
 						style={{ display: "none" }}
@@ -136,7 +140,16 @@ const StoryUploadModal = ({ isOpen, onClose, onSuccess }) => {
 								{items.map((it, idx) => (
 									<div className="story-upload-item" key={idx}>
 										<div className="preview-wrap">
-											<img className="story-upload-preview" src={it.previewUrl} alt="" />
+											{isVideoFile(it.file) ? (
+												<video
+													className="story-upload-preview"
+													src={it.previewUrl}
+													controls
+													playsInline
+												/>
+											) : (
+												<img className="story-upload-preview" src={it.previewUrl} alt="" />
+											)}
 											<button type="button" className="btn-remove" onClick={() => onRemoveItem(idx)}>
 												✕
 											</button>

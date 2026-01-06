@@ -11,8 +11,8 @@
         <result property="title" column="TITLE"/>
         <result property="content" column="CONTENT"/>
         <result property="memberNo" column="MEMBER_NO"/>
-        <result property="createDate" column="CREATE_DATE"/>
-        <result property="isDel" column="IS_DEL"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="isDeleted" column="IS_DELETED"/>
     </resultMap>
 
     <!-- ✍️ 작성 -->
@@ -21,8 +21,8 @@
             DIARY_NO,
             TITLE,
             CONTENT,
-            CREATE_DATE,
-            IS_DEL,
+            CREATED_AT,
+            IS_DELETED,
             MEMBER_NO
         ) VALUES (
             SEQ_DIARY_NO.NEXTVAL,
@@ -44,8 +44,8 @@
                 FROM TB_DIARY
                 WHERE
                     MEMBER_NO = #{memberNo}
-                    AND IS_DEL = 'N'
-                ORDER BY CREATE_DATE DESC
+                    AND IS_DELETED = 'N'
+                ORDER BY CREATED_AT DESC
             ) A
             WHERE ROWNUM <![CDATA[<=]]> #{end}
         )
@@ -55,7 +55,7 @@
     <!-- 🗑 삭제 -->
     <update id="deleteDiary" parameterType="int">
         UPDATE TB_DIARY
-        SET IS_DEL = 'Y'
+        SET IS_DELETED = 'Y'
         WHERE DIARY_NO = #{diaryNo}
     </update>
 

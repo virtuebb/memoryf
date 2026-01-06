@@ -28,7 +28,7 @@ function FeedListWidget({ reloadKey = 0 }) {
 		setSortBy,
 		hasMore,
 		fetchNextPage,
-		SORT_OPTIONS,
+		SORT_OPTIONS: HOOK_SORT_OPTIONS,
 	} = useFeedList({ enabled, pageSize: PAGE_SIZE, reloadKey, initialSortBy: SORT_OPTIONS.RECENT });
 
 	// 무한 스크롤: 하단 sentinel이 보이면 다음 페이지 로드

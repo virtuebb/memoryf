@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reportMapper">
+
+    <!-- ==================== 통합 신고 (V3 스키마) ==================== -->
+    
+    <!-- 신고 등록 -->
+    <insert id="insertFeedReport" parameterType="report">
+        <selectKey keyProperty="reportNo" resultType="int" order="BEFORE">
+            SELECT SEQ_REPORT_NO.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO TB_REPORT (
+            REPORT_NO,
+            REPORT_TYPE,
+            TARGET_NO,
+            REPORTER_NO,
+            REPORTED_MEMBER_NO,
+            REASON_CODE,
+            REASON_DETAIL,
+            PROCESS_STATUS,
+            CREATED_AT
+        ) VALUES (
+            #{reportNo},
+            'FEED',
+            #{feedNo},
+            #{memberNo},
+            (SELECT MEMBER_NO FROM TB_FEED WHERE FEED_NO = #{feedNo}),
+            #{reportReason},
+            #{reasonDetail},
+            'PENDING',
+            SYSDATE
+        )
+    </insert>
+    
+    <insert id="insertCommentReport" parameterType="report">
+        <selectKey keyProperty="reportNo" resultType="int" order="BEFORE">
+            SELECT SEQ_REPORT_NO.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO TB_REPORT (
+            REPORT_NO,
+            REPORT_TYPE,
+            TARGET_NO,
+            REPORTER_NO,
+            REPORTED_MEMBER_NO,
+            REASON_CODE,
+            REASON_DETAIL,
+            PROCESS_STATUS,
+            CREATED_AT
+        ) VALUES (
+            #{reportNo},
+            'COMMENT',
+            #{commentNo},
+            #{memberNo},
+            (SELECT MEMBER_NO FROM TB_COMMENT WHERE COMMENT_NO = #{commentNo}),
+            #{reportReason},
+            #{reasonDetail},
+            'PENDING',
+            SYSDATE
+        )
+    </insert>
+    
+    <!-- 신고 중복 확인 -->
+    <select id="checkFeedReport" parameterType="hashmap" resultType="_int">
+        SELECT COUNT(*)
+        FROM TB_REPORT
+        WHERE REPORT_TYPE = 'FEED'
+        AND TARGET_NO = #{feedNo}
+        AND REPORTER_NO = #{memberNo}
+    </select>
+    
+    <select id="checkCommentReport" parameterType="hashmap" resultType="_int">
+        SELECT COUNT(*)
+        FROM TB_REPORT
+        WHERE REPORT_TYPE = 'COMMENT'
+        AND TARGET_NO = #{commentNo}
+        AND REPORTER_NO = #{memberNo}
+    </select>
+    
+    <!-- 신고 목록 조회 (관리자용) -->
+    <select id="selectFeedReportList" resultMap="reportResultMap">
+        SELECT 
+            R.REPORT_NO,
+            R.REPORT_TYPE,
+            R.TARGET_NO,
+            R.REPORTER_NO,
+            R.REPORTED_MEMBER_NO,
+            R.REASON_CODE,
+            R.REASON_DETAIL,
+            R.PROCESS_STATUS,
+            R.CREATED_AT,
+            R.PROCESSED_AT,
+            M.MEMBER_NICK AS REPORTER_NICK,
+            F.CONTENT AS FEED_CONTENT,
+            FM.MEMBER_NICK AS FEED_WRITER_NICK
+        FROM TB_REPORT R
+        LEFT JOIN TB_MEMBER M ON R.REPORTER_NO = M.MEMBER_NO
+        LEFT JOIN TB_FEED F ON R.TARGET_NO = F.FEED_NO AND R.REPORT_TYPE = 'FEED'
+        LEFT JOIN TB_MEMBER FM ON F.MEMBER_NO = FM.MEMBER_NO
+        WHERE R.REPORT_TYPE = 'FEED'
+        ORDER BY R.CREATED_AT DESC
+    </select>
+    
+    <select id="selectCommentReportList" resultMap="reportResultMap">
+        SELECT 
+            R.REPORT_NO,
+            R.REPORT_TYPE,
+            R.TARGET_NO,
+            R.REPORTER_NO,
+            R.REPORTED_MEMBER_NO,
+            R.REASON_CODE,
+            R.REASON_DETAIL,
+            R.PROCESS_STATUS,
+            R.CREATED_AT,
+            R.PROCESSED_AT,
+            M.MEMBER_NICK AS REPORTER_NICK,
+            C.CONTENT AS COMMENT_CONTENT,
+            CM.MEMBER_NICK AS COMMENT_WRITER_NICK
+        FROM TB_REPORT R
+        LEFT JOIN TB_MEMBER M ON R.REPORTER_NO = M.MEMBER_NO
+        LEFT JOIN TB_COMMENT C ON R.TARGET_NO = C.COMMENT_NO AND R.REPORT_TYPE = 'COMMENT'
+        LEFT JOIN TB_MEMBER CM ON C.MEMBER_NO = CM.MEMBER_NO
+        WHERE R.REPORT_TYPE = 'COMMENT'
+        ORDER BY R.CREATED_AT DESC
+    </select>
+    
+    <!-- 신고 상세 조회 -->
+    <select id="selectFeedReport" parameterType="_int" resultMap="reportResultMap">
+        SELECT 
+            R.REPORT_NO,
+            R.REPORT_TYPE,
+            R.TARGET_NO,
+            R.REPORTER_NO,
+            R.REPORTED_MEMBER_NO,
+            R.REASON_CODE,
+            R.REASON_DETAIL,
+            R.PROCESS_STATUS,
+            R.CREATED_AT,
+            R.PROCESSED_AT,
+            M.MEMBER_NICK AS REPORTER_NICK,
+            F.CONTENT AS FEED_CONTENT,
+            FM.MEMBER_NICK AS FEED_WRITER_NICK
+        FROM TB_REPORT R
+        LEFT JOIN TB_MEMBER M ON R.REPORTER_NO = M.MEMBER_NO
+        LEFT JOIN TB_FEED F ON R.TARGET_NO = F.FEED_NO AND R.REPORT_TYPE = 'FEED'
+        LEFT JOIN TB_MEMBER FM ON F.MEMBER_NO = FM.MEMBER_NO
+        WHERE R.REPORT_NO = #{reportNo}
+    </select>
+    
+    <select id="selectCommentReport" parameterType="_int" resultMap="reportResultMap">
+        SELECT 
+            R.REPORT_NO,
+            R.REPORT_TYPE,
+            R.TARGET_NO,
+            R.REPORTER_NO,
+            R.REPORTED_MEMBER_NO,
+            R.REASON_CODE,
+            R.REASON_DETAIL,
+            R.PROCESS_STATUS,
+            R.CREATED_AT,
+            R.PROCESSED_AT,
+            M.MEMBER_NICK AS REPORTER_NICK,
+            C.CONTENT AS COMMENT_CONTENT,
+            CM.MEMBER_NICK AS COMMENT_WRITER_NICK
+        FROM TB_REPORT R
+        LEFT JOIN TB_MEMBER M ON R.REPORTER_NO = M.MEMBER_NO
+        LEFT JOIN TB_COMMENT C ON R.TARGET_NO = C.COMMENT_NO AND R.REPORT_TYPE = 'COMMENT'
+        LEFT JOIN TB_MEMBER CM ON C.MEMBER_NO = CM.MEMBER_NO
+        WHERE R.REPORT_NO = #{reportNo}
+    </select>
+    
+    <!-- 신고 처리 -->
+    <update id="updateFeedReportStatus" parameterType="report">
+        UPDATE TB_REPORT
+        SET PROCESS_STATUS = #{processStatus},
+            PROCESSED_AT = SYSDATE,
+            ADMIN_NO = #{adminNo},
+            ADMIN_MEMO = #{adminMemo}
+        WHERE REPORT_NO = #{reportNo}
+    </update>
+    
+    <update id="updateCommentReportStatus" parameterType="report">
+        UPDATE TB_REPORT
+        SET PROCESS_STATUS = #{processStatus},
+            PROCESSED_AT = SYSDATE,
+            ADMIN_NO = #{adminNo},
+            ADMIN_MEMO = #{adminMemo}
+        WHERE REPORT_NO = #{reportNo}
+    </update>
+
+    <!-- ==================== 통계 ==================== -->
+    
+    <select id="selectReportStats" resultType="hashmap">
+        SELECT 
+            (SELECT COUNT(*) FROM TB_REPORT WHERE REPORT_TYPE = 'FEED' AND PROCESS_STATUS = 'PENDING') AS PENDING_FEED_REPORTS,
+            (SELECT COUNT(*) FROM TB_REPORT WHERE REPORT_TYPE = 'COMMENT' AND PROCESS_STATUS = 'PENDING') AS PENDING_COMMENT_REPORTS,
+            (SELECT COUNT(*) FROM TB_REPORT WHERE REPORT_TYPE = 'FEED') AS TOTAL_FEED_REPORTS,
+            (SELECT COUNT(*) FROM TB_REPORT WHERE REPORT_TYPE = 'COMMENT') AS TOTAL_COMMENT_REPORTS
+        FROM DUAL
+    </select>
+
+    <!-- ==================== ResultMap ==================== -->
+    
+    <resultMap type="report" id="reportResultMap">
+        <id property="reportNo" column="REPORT_NO"/>
+        <result property="reportType" column="REPORT_TYPE"/>
+        <result property="targetNo" column="TARGET_NO"/>
+        <result property="reporterNo" column="REPORTER_NO"/>
+        <result property="reportedMemberNo" column="REPORTED_MEMBER_NO"/>
+        <result property="reasonCode" column="REASON_CODE"/>
+        <result property="reasonDetail" column="REASON_DETAIL"/>
+        <result property="processStatus" column="PROCESS_STATUS"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="processedAt" column="PROCESSED_AT"/>
+        <result property="adminNo" column="ADMIN_NO"/>
+        <result property="adminMemo" column="ADMIN_MEMO"/>
+        <!-- 조회용 -->
+        <result property="reporterNick" column="REPORTER_NICK"/>
+        <result property="feedContent" column="FEED_CONTENT"/>
+        <result property="feedWriterNick" column="FEED_WRITER_NICK"/>
+        <result property="commentContent" column="COMMENT_CONTENT"/>
+        <result property="commentWriterNick" column="COMMENT_WRITER_NICK"/>
+        <!-- 레거시 호환 -->
+        <result property="reportId" column="REPORT_NO"/>
+        <result property="reportReason" column="REASON_CODE"/>
+        <result property="reportDate" column="CREATED_AT"/>
+        <result property="processDate" column="PROCESSED_AT"/>
+        <result property="memberNo" column="REPORTER_NO"/>
+        <result property="feedNo" column="TARGET_NO"/>
+        <result property="commentNo" column="TARGET_NO"/>
+        <result property="status" column="PROCESS_STATUS"/>
+    </resultMap>
+
+</mapper>

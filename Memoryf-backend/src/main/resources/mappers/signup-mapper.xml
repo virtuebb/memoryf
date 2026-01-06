@@ -16,7 +16,7 @@
             PHONE,
             GENDER,
             BIRTHDAY,
-            STATUS
+            ACCOUNT_STATUS
         ) VALUES (
         		SEQ_MEMBER_NO.NEXTVAL,
             #{memberId},
@@ -27,9 +27,16 @@
             #{phone},
             #{gender},
             #{birthday},
-            'N'
+            'ACTIVE'
         )	
 	</insert>
+	
+	<!-- 홈 존재 여부 확인 -->
+	<select id="checkHomeExists" parameterType="int" resultType="int">
+		SELECT COUNT(*)
+		  FROM TB_MEMBER_HOME
+		 WHERE MEMBER_NO = #{memberNo}
+	</select>
 	
 	<insert id="insertHome" parameterType="signup">
 		INSERT INTO TB_MEMBER_HOME (
@@ -52,6 +59,12 @@
 	<select id="checkMemberNick" parameterType="string" resultType="int">
 		SELECT COUNT(*)
 		  FROM TB_MEMBER
-		 WHERE MEMBER_NICK = #{memberNicj}
+		 WHERE MEMBER_NICK = #{memberNick}
+	</select>
+
+	<select id="checkEmail" parameterType="string" resultType="int">
+		SELECT COUNT(*)
+		  FROM TB_MEMBER
+		 WHERE EMAIL = #{email}
 	</select>
 </mapper>

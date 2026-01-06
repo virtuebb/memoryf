@@ -6,10 +6,11 @@
         <id property="notificationNo" column="NOTIFICATION_NO"/>
         <result property="receiverNo" column="RECEIVER_NO"/>
         <result property="senderNo" column="SENDER_NO"/>
-        <result property="type" column="TYPE"/>
-        <result property="targetId" column="TARGET_ID"/>
+        <result property="type" column="NOTIFICATION_TYPE"/>
+        <result property="targetId" column="TARGET_NO"/>
+        <result property="targetSubId" column="TARGET_SUB_NO"/>
         <result property="isRead" column="IS_READ"/>
-        <result property="createDate" column="CREATE_DATE"/>
+        <result property="createDate" column="CREATED_AT"/>
         <result property="senderNick" column="SENDER_NICK"/>
         <result property="senderProfile" column="SENDER_PROFILE"/>
         <result property="senderStatus" column="SENDER_STATUS"/>
@@ -21,15 +22,17 @@
             NOTIFICATION_NO,
             RECEIVER_NO,
             SENDER_NO,
-            TYPE,
-            TARGET_ID,
+            NOTIFICATION_TYPE,
+            TARGET_TYPE,
+            TARGET_NO,
             IS_READ,
-            CREATE_DATE
+            CREATED_AT
         ) VALUES (
             SEQ_NOTIFICATION_NO.NEXTVAL,
             #{receiverNo},
             #{senderNo},
             #{type},
+            #{targetType},
             #{targetId},
             'N',
             SYSDATE
@@ -41,19 +44,20 @@
             N.NOTIFICATION_NO,
             N.RECEIVER_NO,
             N.SENDER_NO,
-            N.TYPE,
-            N.TARGET_ID,
+            N.NOTIFICATION_TYPE,
+            N.TARGET_TYPE,
+            N.TARGET_NO,
             N.IS_READ,
-            N.CREATE_DATE,
+            N.CREATED_AT,
             M.MEMBER_NICK AS SENDER_NICK,
-            M.STATUS AS SENDER_STATUS,
-            H.PROFILE_CHANGE_NAME AS SENDER_PROFILE,
-            (SELECT CHANGE_NAME FROM TB_FEED_FILE WHERE FEED_NO = N.TARGET_ID AND ROWNUM = 1) AS FEED_IMAGE
+            M.ACCOUNT_STATUS AS SENDER_STATUS,
+            H.PROFILE_SAVED_NAME AS SENDER_PROFILE,
+            (SELECT SAVED_NAME FROM TB_FEED_FILE WHERE FEED_NO = N.TARGET_NO AND ROWNUM = 1) AS FEED_IMAGE
         FROM TB_NOTIFICATION N
         JOIN TB_MEMBER M ON N.SENDER_NO = M.MEMBER_NO
         JOIN TB_MEMBER_HOME H ON M.MEMBER_NO = H.MEMBER_NO
         WHERE N.RECEIVER_NO = #{memberNo}
-        ORDER BY N.CREATE_DATE DESC
+        ORDER BY N.CREATED_AT DESC
     </select>
 
     <update id="updateReadStatus" parameterType="_int">

@@ -46,4 +46,14 @@ public class VisitorController {
         Map<String, Integer> stats = visitorService.getVisitorStats(homeNo);
         return ApiResponse.success(stats);
     }
+
+    /**
+     * 방문자 수 조회 (GET /visitors?homeNo=xxx)
+     * /stats와 동일한 기능 제공 (호환성)
+     */
+    @GetMapping
+    public ApiResponse<Map<String, Integer>> getVisitors(@RequestParam int homeNo) {
+        Map<String, Integer> stats = visitorService.getVisitorStats(homeNo);
+        return ApiResponse.success(stats);
+    }
 }

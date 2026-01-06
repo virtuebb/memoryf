@@ -1,0 +1,734 @@
+--------------------------------------------------------
+-- RETROGRAM V3 - 개선된 ERD 스크립트 (네이밍 컨벤션 통일)
+--------------------------------------------------------
+-- 
+-- 📌 네이밍 컨벤션:
+--   • PK: 테이블명_NO (예: MEMBER_NO, FEED_NO)
+--   • FK: 부모테이블_NO (예: MEMBER_NO, HOME_NO)
+--   • Boolean: IS_ 접두사 (예: IS_DELETED, IS_READ, IS_PRIVATE)
+--   • 상태값: 구체적명칭_STATUS (예: ACCOUNT_STATUS, FOLLOW_STATUS)
+--   • 날짜: _AT 접미사 (예: CREATED_AT, UPDATED_AT)
+--   • 카운트: _COUNT 접미사 (예: VIEW_COUNT)
+--
+-- 📌 상태값 정의:
+--   • ACCOUNT_STATUS: ACTIVE(활성), INACTIVE(비활성), SUSPENDED(정지), WITHDRAWN(탈퇴)
+--   • FOLLOW_STATUS: ACCEPTED(수락), PENDING(대기), REJECTED(거절)
+--   • PROCESS_STATUS: PENDING(대기), REVIEWING(검토중), COMPLETED(완료), REJECTED(반려)
+--   • PAYMENT_STATUS: PENDING(대기), COMPLETED(완료), CANCELLED(취소), REFUNDED(환불)
+--
+--------------------------------------------------------
+
+--------------------------------------------------------
+-- 1. 모든 테이블 삭제 (자식 -> 부모 순서)
+--------------------------------------------------------
+DROP TABLE TB_POINT_HISTORY CASCADE CONSTRAINTS;
+DROP TABLE TB_POINT_WALLET CASCADE CONSTRAINTS;
+DROP TABLE TB_REPORT CASCADE CONSTRAINTS;
+DROP TABLE TB_STORY_ITEM CASCADE CONSTRAINTS;
+DROP TABLE TB_NOTIFICATION CASCADE CONSTRAINTS;
+DROP TABLE TB_ACCOUNT_HISTORY CASCADE CONSTRAINTS;
+DROP TABLE TB_STORY_VISITOR CASCADE CONSTRAINTS;
+DROP TABLE TB_COMMENT_LIKE CASCADE CONSTRAINTS;
+DROP TABLE TB_COMMENT CASCADE CONSTRAINTS;
+DROP TABLE TB_GUESTBOOK_LIKE CASCADE CONSTRAINTS;
+DROP TABLE TB_GUESTBOOK CASCADE CONSTRAINTS;
+DROP TABLE TB_DM_MESSAGE CASCADE CONSTRAINTS;
+DROP TABLE TB_DM_PARTICIPANT CASCADE CONSTRAINTS;
+DROP TABLE TB_DM_ROOM CASCADE CONSTRAINTS;
+DROP TABLE TB_POINT_CHARGE CASCADE CONSTRAINTS;
+DROP TABLE TB_PAYMENT CASCADE CONSTRAINTS;
+DROP TABLE TB_FEED_BOOKMARK CASCADE CONSTRAINTS;
+DROP TABLE TB_FEED_LIKE CASCADE CONSTRAINTS;
+DROP TABLE TB_FEED_FILE CASCADE CONSTRAINTS;
+DROP TABLE TB_FOLLOWS CASCADE CONSTRAINTS;
+DROP TABLE TB_HOME_VISITOR CASCADE CONSTRAINTS;
+DROP TABLE TB_DIARY CASCADE CONSTRAINTS;
+DROP TABLE TB_STORY CASCADE CONSTRAINTS;
+DROP TABLE TB_FEED CASCADE CONSTRAINTS;
+DROP TABLE TB_MEMBER_HOME CASCADE CONSTRAINTS;
+DROP TABLE TB_BGM CASCADE CONSTRAINTS;
+DROP TABLE TB_MEMBER CASCADE CONSTRAINTS;
+
+--------------------------------------------------------
+-- 2. 모든 시퀀스 삭제
+--------------------------------------------------------
+DROP SEQUENCE SEQ_MEMBER_NO;
+DROP SEQUENCE SEQ_HISTORY_NO;
+DROP SEQUENCE SEQ_HOME_NO;
+DROP SEQUENCE SEQ_FEED_NO;
+DROP SEQUENCE SEQ_FILE_NO;
+DROP SEQUENCE SEQ_BGM_NO;
+DROP SEQUENCE SEQ_PAYMENT_NO;
+DROP SEQUENCE SEQ_CHARGE_NO;
+DROP SEQUENCE SEQ_DM_ROOM_NO;
+DROP SEQUENCE SEQ_DM_MESSAGE_NO;
+DROP SEQUENCE SEQ_GUESTBOOK_NO;
+DROP SEQUENCE SEQ_COMMENT_NO;
+DROP SEQUENCE SEQ_STORY_NO;
+DROP SEQUENCE SEQ_STORY_ITEM_NO;
+DROP SEQUENCE SEQ_DIARY_NO;
+DROP SEQUENCE SEQ_BOOKMARK_NO;
+DROP SEQUENCE SEQ_NOTIFICATION_NO;
+DROP SEQUENCE SEQ_VISITOR_NO;
+DROP SEQUENCE SEQ_REPORT_NO;
+DROP SEQUENCE SEQ_WALLET_NO;
+DROP SEQUENCE SEQ_POINT_HISTORY_NO;
+DROP SEQUENCE SEQ_COMMENT_LIKE_NO;
+
+--------------------------------------------------------
+-- 3. 시퀀스 생성
+--------------------------------------------------------
+CREATE SEQUENCE SEQ_MEMBER_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_HISTORY_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_HOME_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_FEED_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_FILE_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_BGM_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_PAYMENT_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_CHARGE_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_DM_ROOM_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_DM_MESSAGE_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_GUESTBOOK_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_COMMENT_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_COMMENT_LIKE_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_STORY_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_STORY_ITEM_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_DIARY_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_BOOKMARK_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_NOTIFICATION_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_VISITOR_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_REPORT_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_WALLET_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE SEQ_POINT_HISTORY_NO START WITH 1 INCREMENT BY 1 CACHE 20;
+
+--------------------------------------------------------
+-- 4. 테이블 생성
+--------------------------------------------------------
+
+-- =====================================================
+-- 1. 회원 테이블
+-- =====================================================
+CREATE TABLE TB_MEMBER (
+    MEMBER_NO           NUMBER          PRIMARY KEY,
+    MEMBER_ID           VARCHAR2(20)    UNIQUE NOT NULL,
+    MEMBER_PWD          VARCHAR2(100)   NOT NULL,
+    MEMBER_NAME         VARCHAR2(50)    NOT NULL,
+    MEMBER_NICK         VARCHAR2(50)    UNIQUE,
+    EMAIL               VARCHAR2(250)   UNIQUE,
+    PHONE               VARCHAR2(13),
+    GENDER              CHAR(1),
+    BIRTHDAY            DATE,
+    ACCOUNT_STATUS      VARCHAR2(20)    DEFAULT 'ACTIVE',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    UPDATED_AT          DATE,
+    LAST_LOGIN_AT       DATE,
+    CONSTRAINT CHK_MEMBER_GENDER CHECK (GENDER IN ('M', 'F', 'N')),
+    CONSTRAINT CHK_MEMBER_ACCOUNT_STATUS CHECK (ACCOUNT_STATUS IN ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'WITHDRAWN'))
+);
+
+COMMENT ON TABLE TB_MEMBER IS '회원 정보';
+COMMENT ON COLUMN TB_MEMBER.ACCOUNT_STATUS IS 'ACTIVE:활성, INACTIVE:비활성, SUSPENDED:정지, WITHDRAWN:탈퇴';
+
+-- =====================================================
+-- 2. 포인트 지갑
+-- =====================================================
+CREATE TABLE TB_POINT_WALLET (
+    WALLET_NO           NUMBER          PRIMARY KEY,
+    MEMBER_NO           NUMBER          UNIQUE NOT NULL,
+    BALANCE             NUMBER          DEFAULT 0 NOT NULL,
+    UPDATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT FK_WALLET_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO) ON DELETE CASCADE,
+    CONSTRAINT CHK_WALLET_BALANCE CHECK (BALANCE >= 0)
+);
+
+COMMENT ON TABLE TB_POINT_WALLET IS '회원 포인트 잔액';
+
+-- =====================================================
+-- 3. 포인트 이력
+-- =====================================================
+CREATE TABLE TB_POINT_HISTORY (
+    HISTORY_NO          NUMBER          PRIMARY KEY,
+    MEMBER_NO           NUMBER          NOT NULL,
+    AMOUNT              NUMBER          NOT NULL,
+    TRANSACTION_TYPE    VARCHAR2(20)    NOT NULL,
+    REFERENCE_TYPE      VARCHAR2(20),
+    REFERENCE_NO        NUMBER,
+    BALANCE_AFTER       NUMBER          NOT NULL,
+    DESCRIPTION         VARCHAR2(200),
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT FK_POINT_HISTORY_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO) ON DELETE CASCADE,
+    CONSTRAINT CHK_POINT_TRANSACTION_TYPE CHECK (TRANSACTION_TYPE IN ('CHARGE', 'USE', 'REFUND', 'BONUS', 'PENALTY'))
+);
+
+COMMENT ON TABLE TB_POINT_HISTORY IS '포인트 거래 이력';
+COMMENT ON COLUMN TB_POINT_HISTORY.AMOUNT IS '양수:적립, 음수:차감';
+COMMENT ON COLUMN TB_POINT_HISTORY.TRANSACTION_TYPE IS 'CHARGE:충전, USE:사용, REFUND:환불, BONUS:보너스, PENALTY:차감';
+
+-- =====================================================
+-- 4. 계정 활동 이력
+-- =====================================================
+CREATE TABLE TB_ACCOUNT_HISTORY (
+    HISTORY_NO          NUMBER          PRIMARY KEY,
+    MEMBER_NO           NUMBER          NOT NULL,
+    EVENT_TYPE          VARCHAR2(50)    NOT NULL,
+    EVENT_DESCRIPTION   VARCHAR2(300),
+    IP_ADDRESS          VARCHAR2(50),
+    USER_AGENT          VARCHAR2(500),
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT FK_ACCOUNT_HISTORY_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO) ON DELETE CASCADE
+);
+
+COMMENT ON TABLE TB_ACCOUNT_HISTORY IS '계정 활동 로그';
+
+-- =====================================================
+-- 5. 회원 홈
+-- =====================================================
+CREATE TABLE TB_MEMBER_HOME (
+    HOME_NO             NUMBER          PRIMARY KEY,
+    MEMBER_NO           NUMBER          UNIQUE NOT NULL,
+    HOME_TITLE          VARCHAR2(50),
+    STATUS_MESSAGE      VARCHAR2(500),
+    PROFILE_ORIGIN_NAME VARCHAR2(200),
+    PROFILE_SAVED_NAME  VARCHAR2(200),
+    IS_PROFILE_PRIVATE  CHAR(1)         DEFAULT 'N',
+    IS_VISITOR_PRIVATE  CHAR(1)         DEFAULT 'N',
+    IS_FOLLOW_PRIVATE   CHAR(1)         DEFAULT 'N',
+    THEME_CODE          VARCHAR2(20)    DEFAULT 'DEFAULT',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    UPDATED_AT          DATE,
+    CONSTRAINT FK_HOME_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO) ON DELETE CASCADE,
+    CONSTRAINT CHK_HOME_PROFILE_PRIVATE CHECK (IS_PROFILE_PRIVATE IN ('Y', 'N')),
+    CONSTRAINT CHK_HOME_VISITOR_PRIVATE CHECK (IS_VISITOR_PRIVATE IN ('Y', 'N')),
+    CONSTRAINT CHK_HOME_FOLLOW_PRIVATE CHECK (IS_FOLLOW_PRIVATE IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_MEMBER_HOME IS '회원 홈 설정';
+
+-- =====================================================
+-- 6. 피드
+-- =====================================================
+CREATE TABLE TB_FEED (
+    FEED_NO             NUMBER          PRIMARY KEY,
+    MEMBER_NO           NUMBER          NOT NULL,
+    CONTENT             VARCHAR2(2000),
+    TAG                 VARCHAR2(200),
+    LATITUDE            NUMBER(10,6),
+    LONGITUDE           NUMBER(10,6),
+    PLACE_NAME          VARCHAR2(100),
+    KAKAO_PLACE_ID      VARCHAR2(50),
+    ADDRESS_NAME        VARCHAR2(200),
+    ROAD_ADDRESS        VARCHAR2(200),
+    LOCATION_NAME       VARCHAR2(200),
+    VIEW_COUNT          NUMBER          DEFAULT 0,
+    IS_DELETED          CHAR(1)         DEFAULT 'N',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    UPDATED_AT          DATE,
+    DELETED_AT          DATE,
+    CONSTRAINT FK_FEED_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT CHK_FEED_IS_DELETED CHECK (IS_DELETED IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_FEED IS '피드 게시글';
+
+-- =====================================================
+-- 7. 피드 첨부파일
+-- =====================================================
+CREATE TABLE TB_FEED_FILE (
+    FILE_NO             NUMBER          PRIMARY KEY,
+    FEED_NO             NUMBER          NOT NULL,
+    FILE_ORDER          NUMBER          DEFAULT 1,
+    ORIGIN_NAME         VARCHAR2(200),
+    SAVED_NAME          VARCHAR2(200),
+    FILE_PATH           VARCHAR2(500),
+    FILE_TYPE           VARCHAR2(20),
+    FILE_SIZE           NUMBER,
+    IS_DELETED          CHAR(1)         DEFAULT 'N',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT FK_FEED_FILE_FEED FOREIGN KEY (FEED_NO) REFERENCES TB_FEED(FEED_NO) ON DELETE CASCADE,
+    CONSTRAINT CHK_FEED_FILE_TYPE CHECK (FILE_TYPE IN ('IMAGE', 'VIDEO')),
+    CONSTRAINT CHK_FEED_FILE_IS_DELETED CHECK (IS_DELETED IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_FEED_FILE IS '피드 첨부파일';
+
+-- =====================================================
+-- 8. 피드 좋아요
+-- =====================================================
+CREATE TABLE TB_FEED_LIKE (
+    FEED_NO             NUMBER          NOT NULL,
+    MEMBER_NO           NUMBER          NOT NULL,
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT PK_FEED_LIKE PRIMARY KEY (FEED_NO, MEMBER_NO),
+    CONSTRAINT FK_FEED_LIKE_FEED FOREIGN KEY (FEED_NO) REFERENCES TB_FEED(FEED_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_FEED_LIKE_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO)
+);
+
+COMMENT ON TABLE TB_FEED_LIKE IS '피드 좋아요';
+
+-- =====================================================
+-- 9. 피드 북마크
+-- =====================================================
+CREATE TABLE TB_FEED_BOOKMARK (
+    BOOKMARK_NO         NUMBER          PRIMARY KEY,
+    FEED_NO             NUMBER          NOT NULL,
+    MEMBER_NO           NUMBER          NOT NULL,
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT UK_FEED_BOOKMARK UNIQUE (FEED_NO, MEMBER_NO),
+    CONSTRAINT FK_BOOKMARK_FEED FOREIGN KEY (FEED_NO) REFERENCES TB_FEED(FEED_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_BOOKMARK_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO)
+);
+
+COMMENT ON TABLE TB_FEED_BOOKMARK IS '피드 북마크';
+
+-- =====================================================
+-- 10. 댓글 (대댓글 지원)
+-- =====================================================
+CREATE TABLE TB_COMMENT (
+    COMMENT_NO          NUMBER          PRIMARY KEY,
+    FEED_NO             NUMBER          NOT NULL,
+    MEMBER_NO           NUMBER          NOT NULL,
+    PARENT_COMMENT_NO   NUMBER,
+    DEPTH               NUMBER          DEFAULT 0,
+    CONTENT             VARCHAR2(500),
+    IS_DELETED          CHAR(1)         DEFAULT 'N',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    UPDATED_AT          DATE,
+    CONSTRAINT FK_COMMENT_FEED FOREIGN KEY (FEED_NO) REFERENCES TB_FEED(FEED_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_COMMENT_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT FK_COMMENT_PARENT FOREIGN KEY (PARENT_COMMENT_NO) REFERENCES TB_COMMENT(COMMENT_NO),
+    CONSTRAINT CHK_COMMENT_DEPTH CHECK (DEPTH IN (0, 1)),
+    CONSTRAINT CHK_COMMENT_IS_DELETED CHECK (IS_DELETED IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_COMMENT IS '피드 댓글';
+COMMENT ON COLUMN TB_COMMENT.PARENT_COMMENT_NO IS 'NULL이면 최상위 댓글';
+COMMENT ON COLUMN TB_COMMENT.DEPTH IS '0:댓글, 1:대댓글';
+
+-- =====================================================
+-- 11. 댓글 좋아요
+-- =====================================================
+CREATE TABLE TB_COMMENT_LIKE (
+    COMMENT_LIKE_NO     NUMBER          PRIMARY KEY,
+    COMMENT_NO          NUMBER          NOT NULL,
+    MEMBER_NO           NUMBER          NOT NULL,
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT UK_COMMENT_LIKE UNIQUE (COMMENT_NO, MEMBER_NO),
+    CONSTRAINT FK_COMMENT_LIKE_COMMENT FOREIGN KEY (COMMENT_NO) REFERENCES TB_COMMENT(COMMENT_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_COMMENT_LIKE_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO)
+);
+
+COMMENT ON TABLE TB_COMMENT_LIKE IS '댓글 좋아요';
+
+-- =====================================================
+-- 12. 팔로우
+-- =====================================================
+CREATE TABLE TB_FOLLOWS (
+    MEMBER_NO           NUMBER          NOT NULL,
+    HOME_NO             NUMBER          NOT NULL,
+    STATUS              VARCHAR2(20)    DEFAULT 'Y',
+    REQUEST_DATE         DATE            DEFAULT SYSDATE,
+    ACCEPTED_AT          DATE,
+    CONSTRAINT PK_FOLLOWS PRIMARY KEY (MEMBER_NO, HOME_NO),
+    CONSTRAINT FK_FOLLOWS_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_FOLLOWS_HOME FOREIGN KEY (HOME_NO) REFERENCES TB_MEMBER_HOME(HOME_NO) ON DELETE CASCADE,
+    CONSTRAINT CHK_FOLLOWS_STATUS CHECK (STATUS IN ('Y', 'N', 'P'))
+);
+
+COMMENT ON TABLE TB_FOLLOWS IS '팔로우 관계';
+COMMENT ON COLUMN TB_FOLLOWS.MEMBER_NO IS '팔로우 하는 회원';
+COMMENT ON COLUMN TB_FOLLOWS.HOME_NO IS '팔로우 대상 홈';
+COMMENT ON COLUMN TB_FOLLOWS.STATUS IS 'Y:수락, N:거절, P:대기';
+
+-- =====================================================
+-- 13. 홈 방문자
+-- =====================================================
+CREATE TABLE TB_HOME_VISITOR (
+    VISITOR_NO          NUMBER          PRIMARY KEY,
+    HOME_NO             NUMBER          NOT NULL,
+    MEMBER_NO           NUMBER          NOT NULL,
+    VISIT_DATE          DATE            DEFAULT TRUNC(SYSDATE),
+    VISIT_COUNT         NUMBER          DEFAULT 1,
+    FIRST_VISITED_AT    DATE            DEFAULT SYSDATE,
+    LAST_VISITED_AT     DATE            DEFAULT SYSDATE,
+    CONSTRAINT UK_HOME_VISITOR UNIQUE (HOME_NO, MEMBER_NO, VISIT_DATE),
+    CONSTRAINT FK_VISITOR_HOME FOREIGN KEY (HOME_NO) REFERENCES TB_MEMBER_HOME(HOME_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_VISITOR_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO)
+);
+
+COMMENT ON TABLE TB_HOME_VISITOR IS '홈 방문 기록';
+
+-- =====================================================
+-- 14. 방명록
+-- =====================================================
+CREATE TABLE TB_GUESTBOOK (
+    GUESTBOOK_NO        NUMBER          PRIMARY KEY,
+    HOME_NO             NUMBER          NOT NULL,
+    MEMBER_NO           NUMBER          NOT NULL,
+    CONTENT             VARCHAR2(4000)  NOT NULL,
+    IS_SECRET           CHAR(1)         DEFAULT 'N',
+    IS_DELETED          CHAR(1)         DEFAULT 'N',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT FK_GUESTBOOK_HOME FOREIGN KEY (HOME_NO) REFERENCES TB_MEMBER_HOME(HOME_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_GUESTBOOK_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT CHK_GUESTBOOK_IS_SECRET CHECK (IS_SECRET IN ('Y', 'N')),
+    CONSTRAINT CHK_GUESTBOOK_IS_DELETED CHECK (IS_DELETED IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_GUESTBOOK IS '방명록';
+
+-- =====================================================
+-- 15. 방명록 좋아요
+-- =====================================================
+CREATE TABLE TB_GUESTBOOK_LIKE (
+    GUESTBOOK_NO        NUMBER          NOT NULL,
+    MEMBER_NO           NUMBER          NOT NULL,
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT PK_GUESTBOOK_LIKE PRIMARY KEY (GUESTBOOK_NO, MEMBER_NO),
+    CONSTRAINT FK_GUESTBOOK_LIKE_GB FOREIGN KEY (GUESTBOOK_NO) REFERENCES TB_GUESTBOOK(GUESTBOOK_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_GUESTBOOK_LIKE_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO)
+);
+
+COMMENT ON TABLE TB_GUESTBOOK_LIKE IS '방명록 좋아요';
+
+-- =====================================================
+-- 16. 다이어리
+-- =====================================================
+CREATE TABLE TB_DIARY (
+    DIARY_NO            NUMBER          PRIMARY KEY,
+    MEMBER_NO           NUMBER          NOT NULL,
+    TITLE               VARCHAR2(100),
+    CONTENT             VARCHAR2(4000),
+    DIARY_DATE          DATE            DEFAULT TRUNC(SYSDATE),
+    MOOD                VARCHAR2(20),
+    WEATHER             VARCHAR2(20),
+    ORIGIN_NAME         VARCHAR2(200),
+    SAVED_NAME          VARCHAR2(200),
+    FILE_PATH           VARCHAR2(200),
+    IS_DELETED          CHAR(1)         DEFAULT 'N',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    UPDATED_AT          DATE,
+    CONSTRAINT FK_DIARY_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT CHK_DIARY_IS_DELETED CHECK (IS_DELETED IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_DIARY IS '다이어리';
+
+-- =====================================================
+-- 17. 스토리
+-- =====================================================
+CREATE TABLE TB_STORY (
+    STORY_NO            NUMBER          PRIMARY KEY,
+    MEMBER_NO           NUMBER          NOT NULL,
+    VIEW_COUNT          NUMBER          DEFAULT 0,
+    IS_DELETED          CHAR(1)         DEFAULT 'N',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    EXPIRED_AT          DATE            DEFAULT SYSDATE + 1,
+    CONSTRAINT FK_STORY_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT CHK_STORY_IS_DELETED CHECK (IS_DELETED IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_STORY IS '스토리 (24시간 후 만료)';
+
+-- =====================================================
+-- 18. 스토리 아이템
+-- =====================================================
+CREATE TABLE TB_STORY_ITEM (
+    ITEM_NO             NUMBER          PRIMARY KEY,
+    STORY_NO            NUMBER          NOT NULL,
+    ITEM_ORDER          NUMBER          NOT NULL,
+    ORIGIN_NAME         VARCHAR2(200),
+    SAVED_NAME          VARCHAR2(200),
+    FILE_PATH           VARCHAR2(500),
+    FILE_TYPE           VARCHAR2(20)    DEFAULT 'IMAGE',
+    STORY_TEXT          VARCHAR2(300),
+    DURATION_SEC        NUMBER          DEFAULT 5,
+    IS_DELETED          CHAR(1)         DEFAULT 'N',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT FK_STORY_ITEM_STORY FOREIGN KEY (STORY_NO) REFERENCES TB_STORY(STORY_NO) ON DELETE CASCADE,
+    CONSTRAINT CHK_STORY_ITEM_FILE_TYPE CHECK (FILE_TYPE IN ('IMAGE', 'VIDEO')),
+    CONSTRAINT CHK_STORY_ITEM_IS_DELETED CHECK (IS_DELETED IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_STORY_ITEM IS '스토리 개별 아이템';
+
+-- =====================================================
+-- 19. 스토리 조회자
+-- =====================================================
+CREATE TABLE TB_STORY_VISITOR (
+    STORY_NO            NUMBER          NOT NULL,
+    MEMBER_NO           NUMBER          NOT NULL,
+    VIEWED_AT           DATE            DEFAULT SYSDATE,
+    CONSTRAINT PK_STORY_VISITOR PRIMARY KEY (STORY_NO, MEMBER_NO),
+    CONSTRAINT FK_STORY_VISITOR_STORY FOREIGN KEY (STORY_NO) REFERENCES TB_STORY(STORY_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_STORY_VISITOR_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO)
+);
+
+COMMENT ON TABLE TB_STORY_VISITOR IS '스토리 조회 기록';
+
+-- =====================================================
+-- 20. DM 대화방
+-- =====================================================
+CREATE TABLE TB_DM_ROOM (
+    ROOM_NO             NUMBER          PRIMARY KEY,
+    ROOM_TYPE           CHAR(1)         DEFAULT 'P',
+    ROOM_NAME           VARCHAR2(100),
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT CHK_DM_ROOM_TYPE CHECK (ROOM_TYPE IN ('P', 'G'))
+);
+
+COMMENT ON TABLE TB_DM_ROOM IS 'DM 대화방';
+COMMENT ON COLUMN TB_DM_ROOM.ROOM_TYPE IS 'P:1:1채팅, G:그룹채팅';
+
+-- =====================================================
+-- 21. DM 참여자
+-- =====================================================
+CREATE TABLE TB_DM_PARTICIPANT (
+    ROOM_NO             NUMBER          NOT NULL,
+    MEMBER_NO           NUMBER          NOT NULL,
+    LAST_READ_MSG_NO    NUMBER          DEFAULT 0,
+    IS_MUTED            CHAR(1)         DEFAULT 'N',
+    JOINED_AT           DATE            DEFAULT SYSDATE,
+    LEFT_AT             DATE,
+    CONSTRAINT PK_DM_PARTICIPANT PRIMARY KEY (ROOM_NO, MEMBER_NO),
+    CONSTRAINT FK_DM_PART_ROOM FOREIGN KEY (ROOM_NO) REFERENCES TB_DM_ROOM(ROOM_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_DM_PART_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT CHK_DM_PART_IS_MUTED CHECK (IS_MUTED IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_DM_PARTICIPANT IS 'DM 참여자';
+
+-- =====================================================
+-- 22. DM 메시지
+-- =====================================================
+CREATE TABLE TB_DM_MESSAGE (
+    MESSAGE_NO          NUMBER          PRIMARY KEY,
+    ROOM_NO             NUMBER          NOT NULL,
+    SENDER_NO           NUMBER          NOT NULL,
+    CONTENT             VARCHAR2(4000),
+    MESSAGE_TYPE        VARCHAR2(20)    DEFAULT 'TEXT',
+    FILE_PATH           VARCHAR2(500),
+    IS_DELETED          CHAR(1)         DEFAULT 'N',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT FK_DM_MSG_ROOM FOREIGN KEY (ROOM_NO) REFERENCES TB_DM_ROOM(ROOM_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_DM_MSG_SENDER FOREIGN KEY (SENDER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT CHK_DM_MSG_TYPE CHECK (MESSAGE_TYPE IN ('TEXT', 'IMAGE', 'FILE', 'SYSTEM')),
+    CONSTRAINT CHK_DM_MSG_IS_DELETED CHECK (IS_DELETED IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_DM_MESSAGE IS 'DM 메시지';
+
+-- =====================================================
+-- 23. BGM
+-- =====================================================
+CREATE TABLE TB_BGM (
+    BGM_NO              NUMBER          PRIMARY KEY,
+    BGM_TITLE           VARCHAR2(200)   NOT NULL,
+    ARTIST              VARCHAR2(100),
+    FILE_PATH           VARCHAR2(250),
+    THUMBNAIL_URL       VARCHAR2(500),
+    YOUTUBE_ID          VARCHAR2(20),
+    PRICE               NUMBER          DEFAULT 0,
+    DURATION_SEC        NUMBER,
+    IS_ACTIVE           CHAR(1)         DEFAULT 'Y',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT CHK_BGM_IS_ACTIVE CHECK (IS_ACTIVE IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_BGM IS 'BGM 상품';
+
+-- =====================================================
+-- 24. 결제
+-- =====================================================
+CREATE TABLE TB_PAYMENT (
+    PAYMENT_NO          NUMBER          PRIMARY KEY,
+    MEMBER_NO           NUMBER          NOT NULL,
+    PAYMENT_TYPE        VARCHAR2(20)    NOT NULL,
+    PAYMENT_AMOUNT      NUMBER          NOT NULL,
+    PAYMENT_METHOD      VARCHAR2(20),
+    IMP_UID             VARCHAR2(100),
+    MERCHANT_UID        VARCHAR2(100),
+    PAYMENT_STATUS      VARCHAR2(20)    DEFAULT 'COMPLETED',
+    BGM_NO              NUMBER,
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CANCELLED_AT        DATE,
+    CANCEL_REASON       VARCHAR2(200),
+    CONSTRAINT FK_PAYMENT_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT FK_PAYMENT_BGM FOREIGN KEY (BGM_NO) REFERENCES TB_BGM(BGM_NO),
+    CONSTRAINT CHK_PAYMENT_TYPE CHECK (PAYMENT_TYPE IN ('BGM', 'POINT_CHARGE', 'STICKER', 'PREMIUM')),
+    CONSTRAINT CHK_PAYMENT_STATUS CHECK (PAYMENT_STATUS IN ('PENDING', 'COMPLETED', 'CANCELLED', 'REFUNDED'))
+);
+
+COMMENT ON TABLE TB_PAYMENT IS '결제 내역';
+
+-- =====================================================
+-- 25. 포인트 충전
+-- =====================================================
+CREATE TABLE TB_POINT_CHARGE (
+    CHARGE_NO           NUMBER          PRIMARY KEY,
+    MEMBER_NO           NUMBER          NOT NULL,
+    CHARGE_AMOUNT       NUMBER          NOT NULL,
+    IMP_UID             VARCHAR2(100)   NOT NULL,
+    MERCHANT_UID        VARCHAR2(100)   NOT NULL,
+    PAYMENT_METHOD      VARCHAR2(20),
+    CHARGE_STATUS       VARCHAR2(20)    DEFAULT 'COMPLETED',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT FK_CHARGE_MEMBER FOREIGN KEY (MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO) ON DELETE CASCADE,
+    CONSTRAINT CHK_CHARGE_STATUS CHECK (CHARGE_STATUS IN ('PENDING', 'COMPLETED', 'CANCELLED', 'REFUNDED'))
+);
+
+COMMENT ON TABLE TB_POINT_CHARGE IS '포인트 충전 내역';
+
+-- =====================================================
+-- 26. 통합 신고
+-- =====================================================
+CREATE TABLE TB_REPORT (
+    REPORT_NO           NUMBER          PRIMARY KEY,
+    REPORT_TYPE         VARCHAR2(20)    NOT NULL,
+    TARGET_NO           NUMBER          NOT NULL,
+    REPORTER_NO         NUMBER          NOT NULL,
+    REPORTED_MEMBER_NO  NUMBER,
+    REASON_CODE         VARCHAR2(50)    NOT NULL,
+    REASON_DETAIL       VARCHAR2(500),
+    PROCESS_STATUS      VARCHAR2(20)    DEFAULT 'PENDING',
+    ADMIN_NO            NUMBER,
+    ADMIN_MEMO          VARCHAR2(500),
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    PROCESSED_AT        DATE,
+    CONSTRAINT FK_REPORT_REPORTER FOREIGN KEY (REPORTER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT FK_REPORT_REPORTED FOREIGN KEY (REPORTED_MEMBER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT CHK_REPORT_TYPE CHECK (REPORT_TYPE IN ('FEED', 'COMMENT', 'STORY', 'GUESTBOOK', 'DM', 'MEMBER')),
+    CONSTRAINT CHK_REPORT_PROCESS_STATUS CHECK (PROCESS_STATUS IN ('PENDING', 'REVIEWING', 'ACCEPTED', 'REJECTED', 'COMPLETED'))
+);
+
+COMMENT ON TABLE TB_REPORT IS '통합 신고';
+COMMENT ON COLUMN TB_REPORT.REPORT_TYPE IS 'FEED, COMMENT, STORY, GUESTBOOK, DM, MEMBER';
+COMMENT ON COLUMN TB_REPORT.PROCESS_STATUS IS 'PENDING:대기, REVIEWING:검토중, ACCEPTED:수락, REJECTED:반려, COMPLETED:완료';
+
+-- =====================================================
+-- 27. 알림
+-- =====================================================
+CREATE TABLE TB_NOTIFICATION (
+    NOTIFICATION_NO     NUMBER          PRIMARY KEY,
+    RECEIVER_NO         NUMBER          NOT NULL,
+    SENDER_NO           NUMBER          NOT NULL,
+    NOTIFICATION_TYPE   VARCHAR2(20)    NOT NULL,
+    TARGET_TYPE         VARCHAR2(20),
+    TARGET_NO           NUMBER,
+    MESSAGE             VARCHAR2(200),
+    IS_READ             CHAR(1)         DEFAULT 'N',
+    CREATED_AT          DATE            DEFAULT SYSDATE,
+    CONSTRAINT FK_NOTI_RECEIVER FOREIGN KEY (RECEIVER_NO) REFERENCES TB_MEMBER(MEMBER_NO) ON DELETE CASCADE,
+    CONSTRAINT FK_NOTI_SENDER FOREIGN KEY (SENDER_NO) REFERENCES TB_MEMBER(MEMBER_NO),
+    CONSTRAINT CHK_NOTI_TYPE CHECK (NOTIFICATION_TYPE IN ('LIKE', 'COMMENT', 'FOLLOW', 'FOLLOW_REQUEST', 'FOLLOW_ACCEPT', 'DM', 'MENTION', 'SYSTEM')),
+    CONSTRAINT CHK_NOTI_IS_READ CHECK (IS_READ IN ('Y', 'N'))
+);
+
+COMMENT ON TABLE TB_NOTIFICATION IS '알림';
+
+--------------------------------------------------------
+-- 5. 트리거 생성
+--------------------------------------------------------
+
+-- 회원 가입 시 홈 + 포인트 지갑 자동 생성
+CREATE OR REPLACE TRIGGER TRG_MEMBER_AFTER_INSERT
+AFTER INSERT ON TB_MEMBER
+FOR EACH ROW
+BEGIN
+    INSERT INTO TB_MEMBER_HOME (HOME_NO, MEMBER_NO, HOME_TITLE)
+    VALUES (SEQ_HOME_NO.NEXTVAL, :NEW.MEMBER_NO, :NEW.MEMBER_NICK || '의 홈');
+    
+    INSERT INTO TB_POINT_WALLET (WALLET_NO, MEMBER_NO, BALANCE)
+    VALUES (SEQ_WALLET_NO.NEXTVAL, :NEW.MEMBER_NO, 0);
+END;
+/
+
+-- 포인트 이력 추가 시 지갑 잔액 자동 업데이트
+CREATE OR REPLACE TRIGGER TRG_POINT_HISTORY_AFTER_INSERT
+AFTER INSERT ON TB_POINT_HISTORY
+FOR EACH ROW
+BEGIN
+    UPDATE TB_POINT_WALLET 
+    SET BALANCE = :NEW.BALANCE_AFTER,
+        UPDATED_AT = SYSDATE
+    WHERE MEMBER_NO = :NEW.MEMBER_NO;
+END;
+/
+
+-- 스토리 생성 시 만료일 자동 설정
+CREATE OR REPLACE TRIGGER TRG_STORY_BEFORE_INSERT
+BEFORE INSERT ON TB_STORY
+FOR EACH ROW
+BEGIN
+    IF :NEW.EXPIRED_AT IS NULL THEN
+        :NEW.EXPIRED_AT := SYSDATE + 1;
+    END IF;
+END;
+/
+
+--------------------------------------------------------
+-- 6. 뷰 생성
+--------------------------------------------------------
+
+-- 피드 통계 뷰
+CREATE OR REPLACE VIEW VW_FEED_STATS AS
+SELECT 
+    F.FEED_NO,
+    F.MEMBER_NO,
+    F.CONTENT,
+    F.CREATED_AT,
+    NVL(L.LIKE_COUNT, 0) AS LIKE_COUNT,
+    NVL(C.COMMENT_COUNT, 0) AS COMMENT_COUNT,
+    NVL(B.BOOKMARK_COUNT, 0) AS BOOKMARK_COUNT
+FROM TB_FEED F
+LEFT JOIN (
+    SELECT FEED_NO, COUNT(*) AS LIKE_COUNT 
+    FROM TB_FEED_LIKE GROUP BY FEED_NO
+) L ON F.FEED_NO = L.FEED_NO
+LEFT JOIN (
+    SELECT FEED_NO, COUNT(*) AS COMMENT_COUNT 
+    FROM TB_COMMENT WHERE IS_DELETED = 'N' GROUP BY FEED_NO
+) C ON F.FEED_NO = C.FEED_NO
+LEFT JOIN (
+    SELECT FEED_NO, COUNT(*) AS BOOKMARK_COUNT 
+    FROM TB_FEED_BOOKMARK GROUP BY FEED_NO
+) B ON F.FEED_NO = B.FEED_NO
+WHERE F.IS_DELETED = 'N';
+
+-- 회원 + 포인트 뷰
+CREATE OR REPLACE VIEW VW_MEMBER_WITH_POINT AS
+SELECT 
+    M.MEMBER_NO,
+    M.MEMBER_ID,
+    M.MEMBER_NAME,
+    M.MEMBER_NICK,
+    M.EMAIL,
+    M.ACCOUNT_STATUS,
+    M.CREATED_AT,
+    NVL(W.BALANCE, 0) AS POINT_BALANCE
+FROM TB_MEMBER M
+LEFT JOIN TB_POINT_WALLET W ON M.MEMBER_NO = W.MEMBER_NO;
+
+--------------------------------------------------------
+-- 7. 테스트 데이터
+--------------------------------------------------------
+
+-- 비밀번호: 1234
+INSERT INTO TB_MEMBER (MEMBER_NO, MEMBER_ID, MEMBER_PWD, MEMBER_NAME, MEMBER_NICK, EMAIL, PHONE, GENDER, BIRTHDAY, ACCOUNT_STATUS)
+VALUES (SEQ_MEMBER_NO.NEXTVAL, 'testuser', '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 
+        '테스트유저', '테스터', 'test@test.com', '010-1234-5678', 'M', TO_DATE('1990-01-01', 'YYYY-MM-DD'), 'ACTIVE');
+
+-- 신규 가입 보너스 포인트
+INSERT INTO TB_POINT_HISTORY (HISTORY_NO, MEMBER_NO, AMOUNT, TRANSACTION_TYPE, BALANCE_AFTER, DESCRIPTION)
+VALUES (SEQ_POINT_HISTORY_NO.NEXTVAL, 1, 10000, 'BONUS', 10000, '신규 가입 보너스');
+
+-- 관리자 계정 (비밀번호: 1234)
+INSERT INTO TB_MEMBER (MEMBER_NO, MEMBER_ID, MEMBER_PWD, MEMBER_NAME, MEMBER_NICK, EMAIL, PHONE, GENDER, ACCOUNT_STATUS)
+VALUES (SEQ_MEMBER_NO.NEXTVAL, 'admin', '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 
+        '관리자', 'ADMIN', 'admin@retrogram.com', '010-0000-0000', 'N', 'ACTIVE');
+
+COMMIT;
+
+--------------------------------------------------------
+-- END OF SCRIPT
+--------------------------------------------------------
+

@@ -29,6 +29,11 @@ public class WebConfig implements WebMvcConfigurer {
     
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
+        // 정적 리소스 (로고, 기본 이미지 등) - classpath:static/images
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("classpath:/static/images/")
+                .setCachePeriod(3600);
+        
         // 업로드된 피드 이미지 제공 (file system)
         String feedUploadPath = System.getProperty("user.home") + "/memoryf/feed_upfiles/";
         registry.addResourceHandler("/feed_upfiles/**")

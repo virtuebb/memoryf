@@ -15,6 +15,12 @@ const normalizeHome = (home) => {
 	return {
 		...home,
 		isFollowing: Boolean(normalizedIsFollowing),
+		// statusMessage를 statusMsg로도 매핑 (호환성)
+		statusMsg: home.statusMessage || home.statusMsg,
+		statusMessage: home.statusMessage || home.statusMsg,
+		// profileSavedName을 profileChangeName으로도 매핑 (호환성)
+		profileChangeName: home.profileSavedName || home.profileChangeName,
+		profileSavedName: home.profileSavedName || home.profileChangeName,
 	};
 };
 

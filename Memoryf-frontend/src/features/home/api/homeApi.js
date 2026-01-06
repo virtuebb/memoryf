@@ -22,6 +22,26 @@ export {
 // getHomeByMemberNo/getHomeByMemberNick/uploadProfileImage/updateProfile는 entities/home에서 re-export
 
 /**
+ * 방명록 데이터 정규화 (백엔드 필드명 → 프론트엔드 필드명)
+ */
+const normalizeGuestbook = (guestbook) => {
+	if (!guestbook || typeof guestbook !== "object") return guestbook;
+	
+	return {
+		...guestbook,
+		// 날짜 필드: createdAt → createDate
+		createDate: guestbook.createdAt || guestbook.createDate,
+		createdAt: guestbook.createdAt || guestbook.createDate,
+		// 삭제 여부: isDeleted → isDel
+		isDel: guestbook.isDeleted || guestbook.isDel,
+		isDeleted: guestbook.isDeleted || guestbook.isDel,
+		// 프로필 이미지: profileSavedName → profileChangeName
+		profileChangeName: guestbook.profileSavedName || guestbook.profileChangeName,
+		profileSavedName: guestbook.profileSavedName || guestbook.profileChangeName,
+	};
+};
+
+/**
  * 홈 번호로 방명록 목록 조회 (RESTful: GET /home/{homeNo}/guestbook)
  * @param {number} homeNo - 홈 번호
  * @param {number} currentMemberNo - 현재 로그인한 회원 번호 (옵션)
@@ -37,7 +57,9 @@ export const getGuestbookList = async (homeNo, currentMemberNo = null, offset = 
     }
     const response = await baseApi.get(`/home/${homeNo}/guestbook`, { params });
 
-    return getApiResponseData(response.data, []);
+    const data = getApiResponseData(response.data, []);
+    const guestbooks = Array.isArray(data) ? data : [];
+    return guestbooks.map(normalizeGuestbook);
   } catch (error) {
     console.error('방명록 조회 실패:', error);
     throw error;

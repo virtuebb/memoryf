@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import YouTube from "react-youtube";
+import { fetchPurchasedBgmList } from "../../../features/payment/api/paymentApi";
+import { getMemberNoFromToken } from "../../../shared/lib";
 import "../../../shared/css/BgmPlayer.css";
 
 function BgmPlayer() {
@@ -21,44 +23,55 @@ function BgmPlayer() {
 		setShowModal(true);
 	};
 
-	const loadBgmList = () => {
-		const memberNo = localStorage.getItem('memberNo') || 1;
-		let stored = localStorage.getItem(`purchasedMelonBgm_${memberNo}`);
-
-		if (!stored) {
-			stored = localStorage.getItem('purchasedMelonBgm');
+	const loadBgmList = async () => {
+		const tokenMemberNo = getMemberNoFromToken();
+		const memberNo = tokenMemberNo || localStorage.getItem('memberNo');
+		
+		if (!memberNo) {
+			setBgmList([]);
+			return;
 		}
 
-		const applyCache = (list) => {
-			let cache = {};
-			try {
-				cache = JSON.parse(localStorage.getItem('melonThumbCache') || '{}');
-			} catch (e) {
-				console.error('썸네일 캐시 파싱 실패', e);
-			}
+		try {
+			// 백엔드 API에서 구매한 BGM 목록 조회
+			const response = await fetchPurchasedBgmList(memberNo);
+			
+			if (response.success && Array.isArray(response.data)) {
+				const applyCache = (list) => {
+					let cache = {};
+					try {
+						cache = JSON.parse(localStorage.getItem('melonThumbCache') || '{}');
+					} catch (e) {
+						console.error('썸네일 캐시 파싱 실패', e);
+					}
 
-			return list.map((item) => {
-				const key = `${item.artist}-${item.bgmTitle}`;
-				if (!item.videoId && cache[key]?.videoId) {
-					return {
-						...item,
-						videoId: cache[key].videoId,
-						thumbnail: item.thumbnail || cache[key].thumbnail,
-					};
-				}
-				return item;
-			});
-		};
+					return list.map((item) => {
+						const key = `${item.artist}-${item.bgmTitle}`;
+						if (!item.videoId && cache[key]?.videoId) {
+							return {
+								...item,
+								videoId: cache[key].videoId,
+								thumbnail: item.thumbnail || cache[key].thumbnail,
+							};
+						}
+						return item;
+					});
+				};
 
-		if (stored) {
-			try {
-				const parsed = JSON.parse(stored);
-				setBgmList(applyCache(parsed));
-			} catch (e) {
-				console.error("Failed to parse purchased BGM", e);
+				const serverList = response.data.map((item) => ({
+					...item,
+					key: `${item.artist}-${item.bgmTitle}`,
+					videoId: item.videoId || item.filePath || null,
+					thumbnail: item.thumbnail || null,
+				}));
+
+				setBgmList(applyCache(serverList));
+			} else {
 				setBgmList([]);
 			}
-		} else {
+		} catch (error) {
+			console.error("구매한 BGM 목록 조회 실패:", error);
+			// 에러 발생 시 빈 배열 설정
 			setBgmList([]);
 		}
 	};
@@ -153,16 +166,8 @@ function BgmPlayer() {
 	};
 
 	const getPlaylistFromStorage = () => {
-		const memberNo = localStorage.getItem('memberNo') || 1;
-		const stored = localStorage.getItem(`purchasedMelonBgm_${memberNo}`);
-		if (stored) {
-			try {
-				return JSON.parse(stored);
-			} catch (e) {
-				console.error('Failed to parse purchased BGM', e);
-			}
-		}
-		return [];
+		// bgmList state에서 직접 가져오기 (백엔드 API에서 로드된 데이터)
+		return bgmList;
 	};
 
 	const hydrateWithCache = (bgm) => {

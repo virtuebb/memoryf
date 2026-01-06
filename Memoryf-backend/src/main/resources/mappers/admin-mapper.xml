@@ -15,8 +15,8 @@
 		<result column="PHONE" property="phone" />
 		<result column="GENDER" property="gender" />
 		<result column="BIRTHDAY" property="birthday" />
-		<result column="CREATE_DATE" property="createDate" />
-		<result column="STATUS" property="status" />
+		<result column="CREATED_AT" property="createdAt" />
+		<result column="ACCOUNT_STATUS" property="accountStatus" />
 	</resultMap>
 	
 	<!-- 회원 전체 조회 -->
@@ -26,8 +26,8 @@
 			 , MEMBER_NICK
 			 , EMAIL
 		 	 , PHONE
-			 , CREATE_DATE
-			 , STATUS
+		 	 , CREATED_AT
+			 , ACCOUNT_STATUS
 		  FROM TB_MEMBER
 		 WHERE MEMBER_ID != 'admin'
 		 ORDER BY MEMBER_NO DESC
@@ -36,7 +36,7 @@
 	<!-- 회원 탈퇴 -->
 	<update id="deleteUser" parameterType="string">
 		UPDATE TB_MEMBER
-		   SET STATUS = 'Y'
+		   SET ACCOUNT_STATUS = 'WITHDRAWN', UPDATED_AT = SYSDATE
 		 WHERE MEMBER_ID = #{userId}
 	</update>
 

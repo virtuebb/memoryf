@@ -66,7 +66,7 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.GET,  "/visitor/**", "/memoryf/visitor/**").permitAll()
 
 					.requestMatchers("/images/**", "/resources/**", "/css/**", "/js/**", "/feed_upfiles/**", "/profile_images/**").permitAll() // 정적 리소스 및 업로드 이미지 모두 허용
-					.requestMatchers("/login/**", "/signup/**").permitAll() // 로그인, 회원가입 요청 허용 - @RequestMapping
+					.requestMatchers("/auth/**").permitAll() // 인증 관련 모든 요청 허용 (로그인, 회원가입, 중복체크 등)
 					.requestMatchers("/ws/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers("/messages/**").permitAll() // 🔌 WebSocket 엔드포인트 허용 (SockJS 포함)
 					.requestMatchers(HttpMethod.GET, "/bgm/**", "/memoryf/bgm/**").permitAll() // 멜론 차트 공개 조회 허용

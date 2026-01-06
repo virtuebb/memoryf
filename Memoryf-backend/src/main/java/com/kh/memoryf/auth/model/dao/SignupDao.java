@@ -14,6 +14,11 @@ public class SignupDao {
 		return sqlSession.insert("signupMapper.insertMember", signup);
 	}
 	
+	// 홈 존재 여부 확인
+	public int checkHomeExists(SqlSessionTemplate sqlSession, int memberNo) {
+		return sqlSession.selectOne("signupMapper.checkHomeExists", memberNo);
+	}
+	
 	// 홈 생성 DB 연결
 	public int insertHome(SqlSessionTemplate sqlSession, Signup signup) {
 		return sqlSession.insert("signupMapper.insertHome", signup);
@@ -28,6 +33,11 @@ public class SignupDao {
 	public int checkMemberNick(SqlSessionTemplate sqlSession, String memberNick) {
 		
 		return sqlSession.selectOne("signupMapper.checkMemberNick", memberNick);
+	}
+
+	// 이메일 중복확인 DB 연결
+	public int checkEmail(SqlSessionTemplate sqlSession, String email) {
+		return sqlSession.selectOne("signupMapper.checkEmail", email);
 	}
 
 }

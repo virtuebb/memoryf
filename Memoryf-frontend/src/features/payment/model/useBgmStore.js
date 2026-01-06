@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useBgmCache } from "./useBgmCache";
 import { useBgmList } from "./useBgmList";
@@ -13,6 +13,9 @@ import { useBgmPurchase } from "./useBgmPurchase";
  */
 export const useBgmStore = ({ navigate } = {}) => {
 	const [activeTab, setActiveTab] = useState("store");
+	
+	// 초기 로드 완료 여부 (무한 루프 방지)
+	const isInitializedRef = useRef(false);
 
 	// 캐시 관련 Hook
 	const { loadThumbCache, resolveVideoInfo, enrichThumbnails } = useBgmCache();
@@ -43,8 +46,12 @@ export const useBgmStore = ({ navigate } = {}) => {
 		navigate,
 	});
 
-	// 초기 데이터 로드
+	// 초기 데이터 로드 (한 번만 실행)
 	useEffect(() => {
+		// 이미 초기화되었으면 재실행하지 않음
+		if (isInitializedRef.current) return;
+		isInitializedRef.current = true;
+
 		loadMelonChart();
 		loadThumbCache();
 
@@ -55,7 +62,17 @@ export const useBgmStore = ({ navigate } = {}) => {
 
 		loadPoints();
 		loadPurchasedList();
-	}, [loadMelonChart, loadPoints, loadPurchasedList, loadThumbCache, memberNo]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []); // 빈 배열로 초기 로드 한 번만 실행
+
+	// memberNo가 나중에 로드되면 추가 데이터 로드
+	useEffect(() => {
+		if (memberNo && isInitializedRef.current) {
+			loadPoints();
+			loadPurchasedList();
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [memberNo]);
 
 	return {
 		memberNo,

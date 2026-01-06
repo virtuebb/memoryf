@@ -4,7 +4,7 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 
 import { getBaseURL } from '../../../shared/api';
-import { getAccessToken, getUserIdFromToken } from '../../../shared/lib';
+import { getAccessToken, getUserIdFromToken, getMemberNoFromToken } from '../../../shared/lib';
 import {
 	createDmRoom,
 	deleteDmRoom,
@@ -75,10 +75,12 @@ export function useDmController() {
 			}
 
 			const mapped = roomList.map((room) => {
-				const time = room.lastSendDate
+				// V3: lastMessageAt, 레거시: lastSendDate
+				const rawTime = room.lastMessageAt || room.lastSendDate;
+				const time = rawTime
 					? (() => {
 						try {
-							let dateStr = room.lastSendDate;
+							let dateStr = rawTime;
 							if (!dateStr.includes(':')) {
 								dateStr = dateStr + ' 00:00:00';
 							}
@@ -92,29 +94,40 @@ export function useDmController() {
 								hour12: true,
 							});
 						} catch {
-							return String(room.lastSendDate || '');
+							return String(rawTime || '');
 						}
 					})()
 					: room.time || '대기';
 
+				// V3: targetMemberId/targetMemberNo, 레거시: targetUserId
 				const opponentId =
+					room.targetMemberId ||
 					room.targetUserId ||
 					room.target_user_id ||
 					room.targetUser ||
 					room.roomName ||
 					room.room_name ||
-					room.roomNm ||
-					room.room_nm ||
-					room.room;
+					String(room.roomNo);
+
+				// V3: targetMemberName/targetMemberNick, 레거시: targetUserName
+				const opponentName =
+					room.targetMemberNick ||
+					room.targetMemberName ||
+					room.targetUserName ||
+					opponentId;
+
+				// V3: profileImage, 레거시: avatar
+				const profileImg = room.profileImage || room.avatar || '👤';
 
 				return {
 					id: room.roomNo,
-					userId: opponentId || String(room.roomNo),
-					userName: room.targetUserName || opponentId || room.roomName || String(room.roomNo),
+					memberNo: room.targetMemberNo,  // V3: 상대방 회원번호
+					userId: opponentId,
+					userName: opponentName,
 					lastMessage: room.lastMessage || '대화 없음',
 					time,
 					unread: room.unreadCount || 0,
-					avatar: room.avatar || '👤',
+					avatar: profileImg,
 					messages: room.messages || [],
 					isPending: false,
 				};
@@ -359,12 +372,19 @@ export function useDmController() {
 			const chat = chatRoomsRef.current.find((c) => String(c.id) === String(chatId));
 			if (!chat) return null;
 
+			const myMemberNo = getMemberNoFromToken?.();
+
 			if (stompClientRef.current && isConnected) {
 				stompClientRef.current.publish({
 					destination: '/pub/chat/private',
 					body: JSON.stringify({
 						type: 'message',
 						roomNo: chat.id,
+						// V3 필드
+						senderNo: myMemberNo,
+						recipientNo: chat.memberNo,
+						messageType: 'TEXT',
+						// 레거시 호환 필드
 						roomId: chat.userId,
 						recipientId: chat.userId,
 						sender: myUserId,
@@ -413,14 +433,18 @@ export function useDmController() {
 			const msgs = resp?.data ?? resp;
 			if (!Array.isArray(msgs)) return msgs;
 
+			const myMemberNo = getMemberNoFromToken?.();
+
 			const mapped = msgs.map((m) => {
+				// V3: createdAtStr/createdAt, 레거시: createDate/sendDate
 				const rawTime =
+					m.createdAtStr ||
+					m.createdAt ||
 					m.sendDate ||
 					m.SEND_DATE ||
 					m.createDate ||
 					m.CREATE_DATE ||
 					m.create_date ||
-					m.createAt ||
 					'';
 
 				let timeStr = '';
@@ -452,15 +476,23 @@ export function useDmController() {
 					timeStr = String(rawTime || '');
 				}
 
-				const sender =
-					m.senderId || m.senderNo || m.SENDER_NO || m.sender || m.SENDER_ID || m.senderIdString;
+				// V3: senderNo, 레거시: senderId
+				const senderNo = m.senderNo || m.SENDER_NO;
+				const senderId = m.senderId || m.sender || m.SENDER_ID;
+				
+				// V3에서는 senderNo로 비교, 레거시에서는 senderId로 비교
+				const isMine = myMemberNo 
+					? String(senderNo) === String(myMemberNo)
+					: String(senderId) === String(myUserId);
 
 				return {
 					id: m.messageNo || m.MESSAGE_NO || m.id || Date.now(),
 					text: m.content || m.CONTENT || m.text || '',
 					time: timeStr,
-					isMine: String(sender) === String(myUserId),
+					isMine,
 					isRead: m.readCheck === 0 || m.readCount === 0 || m.isRead === true,
+					messageType: m.messageType || 'TEXT',
+					senderName: m.senderName || m.senderNick || senderId,
 				};
 			});
 

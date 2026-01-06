@@ -13,20 +13,20 @@
         FROM (
             SELECT
                 G.GUESTBOOK_NO        AS guestbookNo,
-                G.GUESTBOOK_CONTENT   AS guestbookContent,
-                G.CREATE_DATE         AS createDate,
-                G.IS_DEL              AS isDel,
+                G.CONTENT             AS content,
+                G.CREATED_AT          AS createdAt,
+                G.IS_DELETED          AS isDeleted,
                 G.MEMBER_NO           AS memberNo,
                 G.HOME_NO             AS homeNo,
                 CASE WHEN (SELECT COUNT(*) 
                            FROM TB_STORY S 
                            WHERE S.MEMBER_NO = G.MEMBER_NO 
-                             AND S.EXPIRE_DATE > SYSDATE) > 0 
+                             AND S.EXPIRED_AT > SYSDATE) > 0 
                      THEN 1 ELSE 0 END AS "hasStory",
                 CASE WHEN (SELECT COUNT(*) 
                            FROM TB_STORY S 
                            WHERE S.MEMBER_NO = G.MEMBER_NO 
-                             AND S.EXPIRE_DATE > SYSDATE
+                             AND S.EXPIRED_AT > SYSDATE
                              AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{currentMemberNo})) > 0 
                      THEN 1 ELSE 0 END AS "hasUnreadStory",
                 ROWNUM AS rnum
@@ -34,8 +34,8 @@
                 SELECT *
                 FROM TB_GUESTBOOK G
                 WHERE G.HOME_NO = #{homeNo}
-                  AND G.IS_DEL = 'N'
-                ORDER BY G.CREATE_DATE DESC
+                  AND G.IS_DELETED = 'N'
+                ORDER BY G.CREATED_AT DESC
             ) G
             WHERE ROWNUM <![CDATA[<=]]> #{offset} + #{limit}
         )
@@ -47,15 +47,15 @@
             parameterType="guestbook">
         INSERT INTO TB_GUESTBOOK (
             GUESTBOOK_NO,
-            GUESTBOOK_CONTENT,
+            CONTENT,
             MEMBER_NO,
             HOME_NO,
-            CREATE_DATE,
-            IS_DEL
+            CREATED_AT,
+            IS_DELETED
         )
         VALUES (
             SEQ_GUESTBOOK_NO.NEXTVAL,
-            #{guestbookContent},
+            #{content},
             #{memberNo},
             #{homeNo},
             SYSDATE,

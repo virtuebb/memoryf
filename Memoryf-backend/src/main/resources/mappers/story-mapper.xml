@@ -9,51 +9,51 @@
   <resultMap id="storyResultSet" type="story">
     <id property="storyNo" column="STORY_NO"/>
     <result property="memberNo" column="MEMBER_NO"/>
-    <result property="createDate" column="CREATE_DATE"/>
-    <result property="expireDate" column="EXPIRE_DATE"/>
-    <result property="isDel" column="IS_DEL"/>
+    <result property="createdAt" column="CREATED_AT"/>
+    <result property="expiredAt" column="EXPIRED_AT"/>
+    <result property="isDeleted" column="IS_DELETED"/>
     <result property="memberNick" column="MEMBER_NICK"/>
-    <result property="profileImg" column="PROFILE_CHANGE_NAME"/> 
+    <result property="profileImg" column="PROFILE_SAVED_NAME"/> 
     <result property="isRead" column="IS_READ"/>
   </resultMap>
 
   <resultMap id="storyDetailResultMap" type="storyDetail">
     <id property="story.storyNo" column="STORY_NO"/>
     <result property="story.memberNo" column="MEMBER_NO"/>
-    <result property="story.createDate" column="CREATE_DATE"/>
-    <result property="story.expireDate" column="EXPIRE_DATE"/>
-    <result property="story.isDel" column="IS_DEL"/>
+    <result property="story.createdAt" column="CREATED_AT"/>
+    <result property="story.expiredAt" column="EXPIRED_AT"/>
+    <result property="story.isDeleted" column="IS_DELETED"/>
     <result property="story.memberNick" column="MEMBER_NICK"/>
-    <result property="story.profileImg" column="PROFILE_CHANGE_NAME"/>
+    <result property="story.profileImg" column="PROFILE_SAVED_NAME"/>
 	
     <collection property="items" ofType="storyItem">
       <id property="itemNo" column="ITEM_NO"/>
       <result property="storyNo" column="STORY_NO"/>
       <result property="itemOrder" column="ITEM_ORDER"/>
       <result property="originName" column="ORIGIN_NAME"/>
-      <result property="changeName" column="CHANGE_NAME"/>
+      <result property="savedName" column="SAVED_NAME"/>
       <result property="filePath" column="FILE_PATH"/>
       <result property="storyText" column="STORY_TEXT"/>
-      <result property="isDel" column="ITEM_IS_DEL"/>
-      <result property="createDate" column="ITEM_CREATE_DATE"/>
+      <result property="isDeleted" column="ITEM_IS_DELETED"/>
+      <result property="createdAt" column="ITEM_CREATED_AT"/>
     </collection>
   </resultMap>
 
   <!-- ✅ StoryDetail 조회 -->
   <select id="selectStoryDetail" parameterType="int" resultMap="storyDetailResultMap">
     SELECT
-      S.STORY_NO, S.MEMBER_NO, S.CREATE_DATE, S.EXPIRE_DATE, S.IS_DEL,
+      S.STORY_NO, S.MEMBER_NO,       S.CREATED_AT, S.EXPIRED_AT, S.IS_DELETED,
       M.MEMBER_NICK,
-      H.PROFILE_CHANGE_NAME,
-      I.ITEM_NO, I.ITEM_ORDER, I.ORIGIN_NAME, I.CHANGE_NAME, I.FILE_PATH,
-      I.STORY_TEXT, I.IS_DEL AS ITEM_IS_DEL, I.CREATE_DATE AS ITEM_CREATE_DATE
+      H.PROFILE_SAVED_NAME,
+      I.ITEM_NO, I.ITEM_ORDER, I.ORIGIN_NAME, I.SAVED_NAME, I.FILE_PATH,
+      I.STORY_TEXT, I.IS_DELETED AS ITEM_IS_DELETED, I.CREATED_AT AS ITEM_CREATED_AT
     FROM TB_STORY S
     JOIN TB_MEMBER M ON (S.MEMBER_NO = M.MEMBER_NO)
     LEFT JOIN TB_MEMBER_HOME H ON (S.MEMBER_NO = H.MEMBER_NO)
-    LEFT JOIN TB_STORY_ITEM I ON (I.STORY_NO = S.STORY_NO AND I.IS_DEL = 'N')
+    LEFT JOIN TB_STORY_ITEM I ON (I.STORY_NO = S.STORY_NO AND I.IS_DELETED = 'N')
     WHERE S.STORY_NO = #{value} 
-      AND S.IS_DEL = 'N'
-      AND S.EXPIRE_DATE > SYSDATE
+      AND S.IS_DELETED = 'N'
+      AND S.EXPIRED_AT > SYSDATE
     ORDER BY I.ITEM_ORDER
   </select>
   
@@ -65,7 +65,7 @@
 	<!-- ✅ TB_STORY INSERT -->
 	<insert id="insertStory" parameterType="story">
 	  INSERT INTO TB_STORY
-	    (STORY_NO, MEMBER_NO, CREATE_DATE, EXPIRE_DATE, IS_DEL)
+	    (STORY_NO, MEMBER_NO, CREATED_AT, EXPIRED_AT, IS_DELETED)
 	  VALUES
 	    (#{storyNo}, #{memberNo}, SYSDATE, SYSDATE + 1, 'N')
 	</insert>
@@ -77,11 +77,11 @@
 	        STORY_NO, 
 	        ITEM_ORDER, 
 	        ORIGIN_NAME, 
-	        CHANGE_NAME, 
+	        SAVED_NAME, 
 	        FILE_PATH, 
 	        STORY_TEXT, 
-	        IS_DEL, 
-	        CREATE_DATE
+	        IS_DELETED, 
+	        CREATED_AT
 	    )
 	    SELECT SEQ_STORY_ITEM_NO.NEXTVAL, A.* FROM (
 	        <foreach collection="list" item="it" separator=" UNION ALL ">
@@ -89,11 +89,11 @@
 	                #{it.storyNo} as story_no, 
 	                #{it.itemOrder} as item_order, 
 	                #{it.originName} as origin_name, 
-	                #{it.changeName} as change_name, 
+	                #{it.savedName} as saved_name, 
 	                #{it.filePath} as file_path, 
 	                #{it.storyText, jdbcType=VARCHAR} as story_text, 
-	                'N' as is_del, 
-	                SYSDATE as create_date
+	                'N' as is_deleted, 
+	                SYSDATE as created_at
 	            FROM DUAL
 	        </foreach>
 	    ) A
@@ -102,14 +102,14 @@
 	<!-- 스토리 소프트 삭제 -->
 	<update id="deleteStory" parameterType="int">
 	  UPDATE TB_STORY
-	     SET IS_DEL = 'Y'
+	     SET IS_DELETED = 'Y'
 	   WHERE STORY_NO = #{value}
 	</update>
 	
 	<!-- 스토리 아이템 소프트 삭제 -->
 	<update id="deleteStoryItems" parameterType="int">
 	  UPDATE TB_STORY_ITEM
-	     SET IS_DEL = 'Y'
+	     SET IS_DELETED = 'Y'
 	   WHERE STORY_NO = #{value}
 	</update>
 	
@@ -117,24 +117,26 @@
 	    SELECT
 	      S.STORY_NO,
 	      S.MEMBER_NO,
-	      S.CREATE_DATE,
-	      S.EXPIRE_DATE,
-	      S.IS_DEL,
+	      S.CREATED_AT,
+	      S.EXPIRED_AT,
+	      S.IS_DELETED,
 	      M.MEMBER_NICK,
-	      H.PROFILE_CHANGE_NAME,
+	      NVL(H.PROFILE_SAVED_NAME, '') AS PROFILE_SAVED_NAME,
 	      CASE WHEN EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{value}) THEN 1 ELSE 0 END AS IS_READ
 	    FROM TB_STORY S
 	    JOIN TB_MEMBER M ON (S.MEMBER_NO = M.MEMBER_NO)
 	    LEFT JOIN TB_MEMBER_HOME H ON (S.MEMBER_NO = H.MEMBER_NO)
-	    WHERE S.IS_DEL = 'N'
-	      AND S.EXPIRE_DATE > SYSDATE
+	    WHERE S.IS_DELETED = 'N'
+	      AND S.EXPIRED_AT > SYSDATE
 	      AND (
 	        S.MEMBER_NO = #{value}
 	        OR 
 	        S.MEMBER_NO IN (
-	          SELECT MEMBER_NO 
-	          FROM TB_FOLLOWS 
-	          WHERE HOME_NO = (SELECT HOME_NO FROM TB_MEMBER_HOME WHERE MEMBER_NO = #{value})
+	          SELECT MH.MEMBER_NO 
+	          FROM TB_FOLLOWS F
+	          JOIN TB_MEMBER_HOME MH ON F.HOME_NO = MH.HOME_NO
+	          WHERE F.MEMBER_NO = #{value}
+	          AND F.STATUS = 'Y'
 	        )
 	      )
 	    ORDER BY S.STORY_NO DESC
@@ -160,16 +162,17 @@
 	    SELECT
 	      S.STORY_NO,
 	      S.MEMBER_NO,
-	      S.CREATE_DATE,
-	      S.EXPIRE_DATE,
-	      S.IS_DEL,
+	      S.CREATED_AT,
+	      S.EXPIRED_AT,
+	      S.IS_DELETED,
 	      M.MEMBER_NICK,
-	      H.PROFILE_CHANGE_NAME
+	      NVL(H.PROFILE_SAVED_NAME, '') AS PROFILE_SAVED_NAME,
+	      0 AS IS_READ
 	    FROM TB_STORY S
 	    JOIN TB_MEMBER M ON (S.MEMBER_NO = M.MEMBER_NO)
 	    LEFT JOIN TB_MEMBER_HOME H ON (S.MEMBER_NO = H.MEMBER_NO)
-	    WHERE S.IS_DEL = 'N'
-	      AND S.EXPIRE_DATE > SYSDATE
+	    WHERE S.IS_DELETED = 'N'
+	      AND S.EXPIRED_AT > SYSDATE
 	      AND S.MEMBER_NO = #{value}
 	    ORDER BY S.STORY_NO DESC
 	</select>

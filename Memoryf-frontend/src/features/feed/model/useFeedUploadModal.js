@@ -23,7 +23,7 @@ export function useFeedUploadModal({ isOpen, mode = 'create', initialFeed = null
 	const [step, setStep] = useState(isEditMode ? 2 : 1);
 	
 	// 사용자 프로필 정보
-	const [userProfile, setUserProfile] = useState({ memberNick: '사용자', profileChangeName: null });
+	const [userProfile, setUserProfile] = useState({ memberNick: '사용자', profileSavedName: null, profileChangeName: null });
 
 	// 현재 회원 번호
 	const currentMemberNo = useMemo(() => getMemberNoFromToken(), []);
@@ -47,6 +47,7 @@ export function useFeedUploadModal({ isOpen, mode = 'create', initialFeed = null
 				if (!homeData) return;
 				setUserProfile({
 					memberNick: homeData.memberNick || '사용자',
+					profileSavedName: homeData.profileSavedName,
 					profileChangeName: homeData.profileChangeName,
 				});
 			} catch (error) {

@@ -41,7 +41,7 @@ export const useSettingsEdit = () => {
 				setProfileData(homeData);
 				setFormData({
 					memberNick: homeData?.memberNick || "",
-					statusMsg: homeData?.statusMsg || "",
+					statusMsg: homeData?.statusMessage || homeData?.statusMsg || "",
 				});
 			} catch (error) {
 				console.error("프로필 데이터 조회 실패:", error);

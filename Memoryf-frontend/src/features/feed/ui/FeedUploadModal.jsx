@@ -155,8 +155,8 @@ function FeedUploadModal({ isOpen, onClose, onSuccess, mode = 'create', initialF
 										<img
 											className="profile-avatar"
 											src={
-												userProfile.profileChangeName
-													? getProfileImageUrl(userProfile.profileChangeName)
+												(userProfile.profileSavedName || userProfile.profileChangeName)
+													? getProfileImageUrl(userProfile.profileSavedName || userProfile.profileChangeName)
 													: defaultProfileImg
 											}
 											alt="프로필"

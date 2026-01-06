@@ -12,8 +12,8 @@
 		<result column="PHONE" property="phone" />
 		<result column="GENDER" property="gender" />
 		<result column="BIRTHDAY" property="birthday" />
-		<result column="CREATE_DATE" property="createDate" />
-		<result column="STATUS" property="status" />
+		<result column="CREATED_AT" property="createdAt" />
+		<result column="ACCOUNT_STATUS" property="accountStatus" />
 	</resultMap>
 
 	<!-- 닉네임으로 회원번호 조회 -->
@@ -61,7 +61,7 @@
 	<!-- 회원 탈퇴 -->
 	<update id="deleteMember" parameterType="_int">
 		UPDATE TB_MEMBER
-		SET STATUS = 'Y'
+		SET ACCOUNT_STATUS = 'WITHDRAWN', UPDATED_AT = SYSDATE
 		WHERE MEMBER_NO = #{memberNo}
 	</update>
 

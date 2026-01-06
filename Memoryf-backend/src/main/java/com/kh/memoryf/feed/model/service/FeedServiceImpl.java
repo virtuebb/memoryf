@@ -1,6 +1,7 @@
 package com.kh.memoryf.feed.model.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,14 +77,15 @@ public class FeedServiceImpl implements FeedService {
 	
 	@Override
 	@Transactional
-	public boolean toggleFeedLike(int feedNo, int memberNo) {
+	public HashMap<String, Object> toggleFeedLike(int feedNo, int memberNo) {
 		// 이미 좋아요 했는지 확인
 		int likeCount = feedDao.checkFeedLike(sqlSession, feedNo, memberNo);
+		boolean isLiked;
 		
 		if (likeCount > 0) {
 			// 좋아요 삭제
 			feedDao.deleteFeedLike(sqlSession, feedNo, memberNo);
-			return false;
+			isLiked = false;
 		} else {
 			// 좋아요 추가
 			feedDao.insertFeedLike(sqlSession, feedNo, memberNo);
@@ -99,8 +101,16 @@ public class FeedServiceImpl implements FeedService {
 				notificationService.createNotification(noti);
 			}
 			
-			return true;
+			isLiked = true;
 		}
+		
+		// 좋아요 개수 조회
+		int currentLikeCount = feedDao.selectFeedLikeCount(sqlSession, feedNo);
+		
+		HashMap<String, Object> result = new HashMap<>();
+		result.put("isLiked", isLiked);
+		result.put("likeCount", currentLikeCount);
+		return result;
 	}
 	
 	@Override
@@ -139,7 +149,12 @@ public class FeedServiceImpl implements FeedService {
 	public ArrayList<Feed> selectProfileFeedList(int targetMemberNo, Integer viewerMemberNo, int page, int size) {
 		// 비공개 계정 체크
 		Home targetHome = homeDao.selectHomeByMemberNo(sqlSession, targetMemberNo, null);
-		if (targetHome != null && "Y".equals(targetHome.getIsPrivateProfile())) {
+		if (targetHome == null) {
+			// 홈이 없으면 빈 목록 반환
+			return new ArrayList<>();
+		}
+		
+		if ("Y".equals(targetHome.getIsProfilePrivate())) {
 			// 본인이면 조회 가능
 			if (viewerMemberNo != null && viewerMemberNo == targetMemberNo) {
 				// pass

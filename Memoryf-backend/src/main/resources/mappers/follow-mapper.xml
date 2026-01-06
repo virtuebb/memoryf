@@ -18,8 +18,8 @@
 	</select>
 
 	<insert id="insertFollow" parameterType="hashmap">
-		INSERT INTO TB_FOLLOWS (MEMBER_NO, HOME_NO, STATUS)
-		VALUES (#{memberNo}, #{homeNo}, #{status})
+		INSERT INTO TB_FOLLOWS (MEMBER_NO, HOME_NO, STATUS, REQUEST_DATE)
+		VALUES (#{memberNo}, #{homeNo}, #{status}, SYSDATE)
 	</insert>
 
 	<delete id="deleteFollow" parameterType="hashmap">
@@ -42,7 +42,7 @@
 			SELECT
 				FM.MEMBER_NO AS "memberNo",
 				FM.MEMBER_NICK AS "memberNick",
-				FH.PROFILE_CHANGE_NAME AS "profileChangeName"
+				FH.PROFILE_SAVED_NAME AS "profileSavedName"
 				<if test="currentMemberNo != null">
 					, CASE WHEN CF.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS "isFollowing"
 				</if>
@@ -72,7 +72,7 @@
 				TM.MEMBER_ID AS "memberId",
 				TM.MEMBER_NICK AS "memberNick",
 				TM.MEMBER_NAME as "memberName",
-				TH.PROFILE_CHANGE_NAME AS "profileChangeName"
+				TH.PROFILE_SAVED_NAME AS "profileSavedName"
 				<if test="currentMemberNo != null">
 					, CASE WHEN CF.MEMBER_NO IS NOT NULL THEN 1 ELSE 0 END AS "isFollowing"
 				</if>

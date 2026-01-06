@@ -69,46 +69,68 @@ function ActivitySection() {
                 items.map(feed => {
                   // 이미지 URL 추출 (FeedItem 로직과 동일)
                   const getImageUrl = () => {
+                    // feedFiles가 없거나 비어있으면 null 반환
                     if (!feed.feedFiles || feed.feedFiles.length === 0) {
-                      return 'https://via.placeholder.com/300?text=No+Image';
+                      return null;
                     }
                     
-                    const filePath = feed.feedFiles[0].filePath;
+                    const firstFile = feed.feedFiles[0];
+                    let filePath = firstFile.filePath;
+                    const savedName = firstFile.savedName || firstFile.changeName || firstFile.originName;
                     
-                    return getAssetUrl(filePath) || filePath;
+                    // filePath가 이미 전체 경로인 경우 (파일명 포함)
+                    if (filePath && savedName && filePath.includes(savedName)) {
+                      return getAssetUrl(filePath) || null;
+                    }
+                    
+                    // filePath와 savedName을 조합해야 하는 경우
+                    if (!filePath || !savedName) {
+                      return null;
+                    }
+                    
+                    // filePath에 이미 '/'가 포함되어 있을 수 있음
+                    const fullPath = filePath.endsWith('/') 
+                      ? `${filePath}${savedName}` 
+                      : `${filePath}/${savedName}`;
+                    
+                    return getAssetUrl(fullPath) || null;
                   };
                   
                   const imageUrl = getImageUrl();
-                  const isVideo = ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(
+                  const isVideo = imageUrl ? ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(
                     imageUrl.split('.').pop()?.toLowerCase()
-                  );
+                  ) : false;
                   const isSelected = selectedItems.has(feed.feedNo);
 
                   return (
                     <div 
-                      key={feed.feedNo} 
+                      key={feed.feedNo || `feed-${feed.feedNo || Math.random()}`} 
                       className={`activity-item ${isSelected ? 'selected' : ''}`}
                       onClick={() => handleItemClick(feed)}
                     >
-                      {isVideo ? (
-                        <>
-                          <video 
-                            src={`${imageUrl}#t=1.0`} 
-                            className="activity-video-blur" 
-                            muted 
-                            loop 
-                            preload="metadata"
-                          />
-                          <video 
-                            src={`${imageUrl}#t=1.0`} 
-                            className="activity-video" 
-                            muted 
-                            loop 
-                            preload="metadata"
-                          />
-                        </>
+                      {imageUrl ? (
+                        isVideo ? (
+                          <>
+                            <video 
+                              src={`${imageUrl}#t=1.0`} 
+                              className="activity-video-blur" 
+                              muted 
+                              loop 
+                              preload="metadata"
+                            />
+                            <video 
+                              src={`${imageUrl}#t=1.0`} 
+                              className="activity-video" 
+                              muted 
+                              loop 
+                              preload="metadata"
+                            />
+                          </>
+                        ) : (
+                          <img src={imageUrl} alt="feed" />
+                        )
                       ) : (
-                        <img src={imageUrl} alt="feed" />
+                        <div className="activity-item-placeholder">이미지 없음</div>
                       )}
                       {isSelectionMode && (
                         <div className={`selection-overlay ${isSelected ? 'active' : ''}`}>
@@ -131,14 +153,23 @@ function ActivitySection() {
               {loading ? (
                 <div className="loading-state">로딩 중...</div>
               ) : items.length > 0 ? (
-                items.map(comment => {
-                  const feedImageUrl = comment.feedImage
-                    ? getFeedUpfileUrl(comment.feedImage)
-                    : 'https://via.placeholder.com/100?text=No+Image';
+                items.map((comment, index) => {
+                  // feedImage는 이미 전체 경로일 수 있음 (백엔드에서 FILE_PATH || '/' || SAVED_NAME)
+                  let feedImageUrl = null;
+                  if (comment.feedImage) {
+                    // 백엔드에서 FILE_PATH || '/' || SAVED_NAME 형태로 반환
+                    if (comment.feedImage.includes('/')) {
+                      // 전체 경로인 경우
+                      feedImageUrl = getAssetUrl(comment.feedImage);
+                    } else {
+                      // 파일명만 있는 경우 (이전 버전 호환)
+                      feedImageUrl = getFeedUpfileUrl(comment.feedImage);
+                    }
+                  }
                   
-                  const profileUrl = comment.writerProfileImage
-                    ? getProfileImageUrl(comment.writerProfileImage)
-                    : '/assets/images/profiles/default-profile.png';
+                  const profileUrl = comment.writerProfileImage || comment.memberProfileImage
+                    ? getProfileImageUrl(comment.writerProfileImage || comment.memberProfileImage)
+                    : null;
 
                   const isSelected = selectedItems.has(comment.commentNo);
 
@@ -151,22 +182,30 @@ function ActivitySection() {
 
                   return (
                     <div 
-                      key={comment.commentNo} 
+                      key={comment.commentNo || `comment-${index}`} 
                       className={`comment-activity-item ${isSelected ? 'selected' : ''}`}
                       onClick={() => handleItemClick(comment)}
                     >
                       <div className="comment-activity-left">
-                        <img src={profileUrl} alt="profile" className="comment-profile-img" />
+                        {profileUrl ? (
+                          <img src={profileUrl} alt="profile" className="comment-profile-img" onError={(e) => { e.target.style.display = 'none'; }} />
+                        ) : (
+                          <div className="comment-profile-img comment-profile-placeholder">👤</div>
+                        )}
                         <div className="comment-activity-info">
                           <div className="comment-header">
-                            <span className="comment-nickname">{comment.writerNick}</span>
-                            <span className="comment-date">{formatDate(comment.createDate)}</span>
+                            <span className="comment-nickname">{comment.writerNick || comment.memberNick || '알 수 없음'}</span>
+                            <span className="comment-date">{formatDate(comment.createDate || comment.createdAt)}</span>
                           </div>
                           <div className="comment-content">{comment.content}</div>
                         </div>
                       </div>
                       <div className="comment-activity-right">
-                        <img src={feedImageUrl} alt="feed" className="comment-feed-img" />
+                        {feedImageUrl ? (
+                          <img src={feedImageUrl} alt="feed" className="comment-feed-img" onError={(e) => { e.target.style.display = 'none'; }} />
+                        ) : (
+                          <div className="comment-feed-img comment-feed-placeholder">📷</div>
+                        )}
                       </div>
                       
                       {isSelectionMode && (

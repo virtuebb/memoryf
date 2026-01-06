@@ -5,17 +5,24 @@
 	<!-- 포인트 충전 내역 삽입 -->
 	<insert id="insertPointCharge">
 		INSERT INTO TB_POINT_CHARGE (
-			CHARGE_NO, MEMBER_NO, CHARGE_AMOUNT, IMP_UID, MERCHANT_UID, PAYMENT_METHOD, STATUS
+			CHARGE_NO, MEMBER_NO, CHARGE_AMOUNT, IMP_UID, MERCHANT_UID, PAYMENT_METHOD, CHARGE_STATUS
 		) VALUES (
 			SEQ_CHARGE_NO.NEXTVAL, #{memberNo}, #{chargeAmount}, #{impUid}, #{merchantUid}, #{paymentMethod}, #{status}
 		)
 	</insert>
 	
-	<!-- 회원 포인트 업데이트 -->
+	<!-- 회원 포인트 충전 (V3: TB_POINT_WALLET 사용) -->
 	<update id="updateMemberPoint">
-		UPDATE TB_MEMBER
-		SET POINT = POINT + #{amount}
-		WHERE MEMBER_NO = #{memberNo}
+		MERGE INTO TB_POINT_WALLET W
+		USING (SELECT #{memberNo} AS MEMBER_NO, #{amount} AS AMOUNT FROM DUAL) D
+		ON (W.MEMBER_NO = D.MEMBER_NO)
+		WHEN MATCHED THEN
+			UPDATE SET 
+				BALANCE = NVL(W.BALANCE, 0) + D.AMOUNT,
+				UPDATED_AT = SYSDATE
+		WHEN NOT MATCHED THEN
+			INSERT (WALLET_NO, MEMBER_NO, BALANCE, UPDATED_AT)
+			VALUES (SEQ_WALLET_NO.NEXTVAL, D.MEMBER_NO, D.AMOUNT, SYSDATE)
 	</update>
 	
 	<!-- BGM 전체 목록 조회 -->
@@ -26,10 +33,10 @@
 			FILE_PATH,
 			ARTIST,
 			PRICE,
-			REG_DATE,
+			CREATED_AT,
 			FILE_PATH as videoId
 		FROM TB_BGM
-		ORDER BY REG_DATE DESC
+		ORDER BY CREATED_AT DESC
 	</select>
 	
 	<!-- 회원이 구매한 BGM 목록 조회 -->
@@ -40,13 +47,13 @@
 			B.FILE_PATH,
 			B.ARTIST,
 			B.PRICE,
-			B.REG_DATE,
+			B.CREATED_AT,
 			B.FILE_PATH as videoId
 		FROM TB_BGM B
 		JOIN TB_PAYMENT P ON B.BGM_NO = P.BGM_NO
 		WHERE P.MEMBER_NO = #{memberNo}
 		  AND P.PAYMENT_TYPE = 'BGM'
-		ORDER BY P.PAYMENT_DATE DESC
+		ORDER BY P.CREATED_AT DESC
 	</select>
 	
 	<!-- BGM 상세 조회 -->
@@ -57,7 +64,7 @@
 			FILE_PATH,
 			ARTIST,
 			PRICE,
-			REG_DATE,
+			CREATED_AT,
 			FILE_PATH as videoId
 		FROM TB_BGM
 		WHERE BGM_NO = #{bgmNo}
@@ -71,7 +78,7 @@
 			FILE_PATH,
 			ARTIST,
 			PRICE,
-			REG_DATE,
+			CREATED_AT,
 			FILE_PATH as videoId
 		FROM TB_BGM
 		WHERE BGM_TITLE = #{title}
@@ -84,7 +91,7 @@
 			SELECT SEQ_BGM_NO.NEXTVAL FROM DUAL
 		</selectKey>
 		INSERT INTO TB_BGM (
-			BGM_NO, BGM_TITLE, ARTIST, PRICE, REG_DATE, FILE_PATH
+			BGM_NO, BGM_TITLE, ARTIST, PRICE, CREATED_AT, FILE_PATH
 		) VALUES (
 			#{bgmNo}, #{bgmTitle}, #{artist}, #{price}, SYSDATE, #{videoId}
 		)
@@ -102,50 +109,58 @@
 	<!-- BGM 구매 내역 삽입 -->
 	<insert id="insertBgmPayment">
 		INSERT INTO TB_PAYMENT (
-			PAYMENT_NO, PAYMENT_AMOUNT, BGM_NO, MEMBER_NO, PAYMENT_TYPE
+			PAYMENT_NO, PAYMENT_AMOUNT, BGM_NO, MEMBER_NO, PAYMENT_TYPE, PAYMENT_STATUS, CREATED_AT
 		) VALUES (
-			SEQ_PAYMENT_NO.NEXTVAL, #{paymentAmount}, #{bgmNo}, #{memberNo}, 'BGM'
+			SEQ_PAYMENT_NO.NEXTVAL, #{paymentAmount}, #{bgmNo}, #{memberNo}, 'BGM', 'COMPLETED', SYSDATE
 		)
 	</insert>
 	
-	<!-- 회원 포인트 차감 -->
+	<!-- 회원 포인트 차감 (V3: TB_POINT_WALLET 사용) -->
 	<update id="deductMemberPoint">
-		UPDATE TB_MEMBER
-		SET POINT = POINT - #{amount}
+		UPDATE TB_POINT_WALLET
+		SET BALANCE = NVL(BALANCE, 0) - #{amount},
+		    UPDATED_AT = SYSDATE
 		WHERE MEMBER_NO = #{memberNo}
 	</update>
 	
-	<!-- 회원 포인트 조회 -->
+	<!-- 회원 포인트 조회 (V3: TB_POINT_WALLET 사용) -->
 	<select id="selectMemberPoint" resultType="int">
-		SELECT POINT
-		FROM TB_MEMBER
+		SELECT NVL(MAX(BALANCE), 0)
+		FROM TB_POINT_WALLET
 		WHERE MEMBER_NO = #{memberNo}
 	</select>
 	
 	<!-- 결제 내역 조회 (충전 + 사용) -->
 	<select id="selectPaymentHistory" resultType="com.kh.memoryf.payment.model.dto.PaymentHistoryDto">
 		SELECT 
-			'CHARGE' AS type,
-			CHARGE_AMOUNT AS amount,
-			CHARGE_DATE AS date,
-			'포인트 충전' AS description,
-			STATUS AS status
-		FROM TB_POINT_CHARGE
-		WHERE MEMBER_NO = #{memberNo}
-		
-		UNION ALL
-		
-		SELECT 
-			'USE' AS type,
-			P.PAYMENT_AMOUNT AS amount,
-			P.PAYMENT_DATE AS date,
-			'BGM 구매: ' || B.BGM_TITLE AS description,
-			'COMPLETED' AS status
-		FROM TB_PAYMENT P
-		JOIN TB_BGM B ON P.BGM_NO = B.BGM_NO
-		WHERE P.MEMBER_NO = #{memberNo}
-		  AND P.PAYMENT_TYPE = 'BGM'
-		
+			type,
+			amount,
+			date,
+			description,
+			status
+		FROM (
+			SELECT 
+				'CHARGE' AS type,
+				CHARGE_AMOUNT AS amount,
+				CREATED_AT AS date,
+				'포인트 충전' AS description,
+				NVL(CHARGE_STATUS, 'COMPLETED') AS status
+			FROM TB_POINT_CHARGE
+			WHERE MEMBER_NO = #{memberNo}
+			
+			UNION ALL
+			
+			SELECT 
+				'USE' AS type,
+				P.PAYMENT_AMOUNT AS amount,
+				P.CREATED_AT AS date,
+				'BGM 구매: ' || NVL(B.BGM_TITLE, '알 수 없음') AS description,
+				NVL(P.PAYMENT_STATUS, 'COMPLETED') AS status
+			FROM TB_PAYMENT P
+			LEFT JOIN TB_BGM B ON P.BGM_NO = B.BGM_NO
+			WHERE P.MEMBER_NO = #{memberNo}
+			  AND P.PAYMENT_TYPE = 'BGM'
+		)
 		ORDER BY date DESC
 	</select>
 

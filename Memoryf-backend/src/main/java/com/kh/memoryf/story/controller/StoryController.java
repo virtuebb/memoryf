@@ -88,8 +88,13 @@ public class StoryController {
 	 */
     @GetMapping("/members/{memberNo}")
     public ApiResponse<List<Story>> selectStoryList(@PathVariable int memberNo) {
-        ArrayList<Story> list = storyService.selectStoryList(memberNo);
-        return ApiResponse.success(list);
+        try {
+            ArrayList<Story> list = storyService.selectStoryList(memberNo);
+            return ApiResponse.success(list != null ? list : new ArrayList<>());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponse.error("스토리 목록 조회 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
 	/**

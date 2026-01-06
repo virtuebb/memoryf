@@ -46,14 +46,19 @@ public class AuthController {
 	 */
 	@PostMapping("/login")
 	public ApiResponse<HashMap<String, Object>> login(@RequestBody Login login) {
-		String jwt = loginService.loginMember(login);
-		
-		if (jwt != null && !jwt.isEmpty()) {
-			HashMap<String, Object> data = new HashMap<>();
-			data.put("token", jwt);
-			return ApiResponse.success("로그인 성공", data);
-		} else {
-			return ApiResponse.error("아이디 또는 비밀번호가 일치하지 않습니다.");
+		try {
+			String jwt = loginService.loginMember(login);
+			
+			if (jwt != null && !jwt.isEmpty()) {
+				HashMap<String, Object> data = new HashMap<>();
+				data.put("token", jwt);
+				return ApiResponse.success("로그인 성공", data);
+			} else {
+				return ApiResponse.error("아이디 또는 비밀번호가 일치하지 않습니다.");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ApiResponse.error("로그인 처리 중 오류가 발생했습니다: " + e.getMessage());
 		}
 	}
 	
@@ -65,11 +70,21 @@ public class AuthController {
 	 */
 	@PostMapping("/signup")
 	public ApiResponse<Void> signup(@RequestBody Signup signup) {
-		int result = signupService.insertMember(signup);
-		if (result > 0) {
-			return ApiResponse.success("회원가입이 완료되었습니다.", null);
-		} else {
-			return ApiResponse.error("회원가입에 실패했습니다.");
+		try {
+			int result = signupService.insertMember(signup);
+			if (result > 0) {
+				return ApiResponse.success("회원가입이 완료되었습니다.", null);
+			} else {
+				return ApiResponse.error("회원가입에 실패했습니다. 입력 정보를 확인해주세요.");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			// DB 제약 위반 등으로 500이 나지 않도록 표준 응답으로 변환
+			String errorMsg = e.getMessage();
+			if (errorMsg != null && errorMsg.contains("UNIQUE")) {
+				return ApiResponse.error("이미 사용 중인 정보입니다. (아이디, 닉네임, 이메일 중복)");
+			}
+			return ApiResponse.error("회원가입 처리 중 오류가 발생했습니다: " + errorMsg);
 		}
 	}
 	
@@ -145,6 +160,30 @@ public class AuthController {
 			return ApiResponse.success("비밀번호가 재설정되었습니다.", null);
 		} else {
 			return ApiResponse.error("비밀번호 재설정에 실패했습니다.");
+		}
+	}
+	
+	/**
+	 * 테스트용: 비밀번호 직접 재설정 (개발 환경 전용)
+	 * POST /auth/test-reset-password
+	 * Body: { "memberId": "testuser", "memberPwd": "1234" }
+	 */
+	@PostMapping("/test-reset-password")
+	public ApiResponse<HashMap<String, Object>> testResetPassword(@RequestBody Member member) {
+		try {
+			int result = findService.resetPwd(member.getMemberId(), member.getMemberPwd());
+			
+			if (result > 0) {
+				HashMap<String, Object> data = new HashMap<>();
+				data.put("memberId", member.getMemberId());
+				data.put("message", "비밀번호가 재설정되었습니다.");
+				return ApiResponse.success("비밀번호가 재설정되었습니다.", data);
+			} else {
+				return ApiResponse.error("비밀번호 재설정에 실패했습니다.");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ApiResponse.error("비밀번호 재설정 중 오류가 발생했습니다: " + e.getMessage());
 		}
 	}
 }

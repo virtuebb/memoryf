@@ -48,15 +48,17 @@ public class LoginServiceImpl implements LoginService {
 
 		// 아이디 없는 경우
 		if(loginUser == null) {
-			
-			// 로그인 실패
+			System.out.println("[로그인 실패] 아이디를 찾을 수 없습니다: " + login.getMemberId());
 			return null;
 		}
 		
 		// 비밀번호 비교 (입력한 값 vs DB에 암호화된 값)
-		if(!bCryptPasswordEncoder.matches(login.getMemberPwd(), loginUser.getMemberPwd())) {
-			
-			// 로그인 실패
+		boolean passwordMatches = bCryptPasswordEncoder.matches(login.getMemberPwd(), loginUser.getMemberPwd());
+		if(!passwordMatches) {
+			System.out.println("[로그인 실패] 비밀번호가 일치하지 않습니다.");
+			System.out.println("[디버그] 입력한 비밀번호: " + login.getMemberPwd());
+			System.out.println("[디버그] DB 해시: " + loginUser.getMemberPwd());
+			System.out.println("[디버그] 해시 매칭 결과: " + passwordMatches);
 			return null;
 		}
 		// JWT 서명(Signature)에 사용할 비밀 키 생성

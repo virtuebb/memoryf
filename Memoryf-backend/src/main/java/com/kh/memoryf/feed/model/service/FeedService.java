@@ -49,9 +49,9 @@ public interface FeedService {
 	 * 피드 좋아요 토글 (좋아요 추가/삭제)
 	 * @param feedNo 피드 번호
 	 * @param memberNo 회원 번호
-	 * @return 좋아요 여부 (true: 좋아요 추가, false: 좋아요 삭제)
+	 * @return 좋아요 정보 (isLiked, likeCount)
 	 */
-	boolean toggleFeedLike(int feedNo, int memberNo);
+	java.util.HashMap<String, Object> toggleFeedLike(int feedNo, int memberNo);
 	
 	/**
 	 * 피드 북마크 토글 (북마크 추가/삭제)

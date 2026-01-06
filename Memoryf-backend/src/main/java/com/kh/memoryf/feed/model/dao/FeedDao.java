@@ -143,6 +143,17 @@ public class FeedDao {
 	}
 	
 	/**
+	 * 피드 좋아요 개수 조회
+	 * @param sqlSession
+	 * @param feedNo 피드 번호
+	 * @return 좋아요 개수
+	 */
+	public int selectFeedLikeCount(SqlSession sqlSession, int feedNo) {
+		Integer count = sqlSession.selectOne("feedMapper.selectFeedLikeCount", feedNo);
+		return count != null ? count : 0;
+	}
+	
+	/**
 	 * 피드 삭제 (IS_DEL = 'Y')
 	 * @param sqlSession
 	 * @param feedNo 피드 번호

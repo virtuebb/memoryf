@@ -2,27 +2,144 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="commentMapper">
 
-	<!-- 댓글 목록 조회 -->
+	<!-- ===========================
+	     ResultMap 정의 (V3 스키마)
+	=========================== -->
+	
+	<resultMap type="comment" id="commentResultMap">
+		<id property="commentNo" column="COMMENT_NO"/>
+		<result property="feedNo" column="FEED_NO"/>
+		<result property="memberNo" column="MEMBER_NO"/>
+		<result property="parentCommentNo" column="PARENT_COMMENT_NO"/>
+		<result property="depth" column="DEPTH"/>
+		<result property="content" column="CONTENT"/>
+		<result property="isDeleted" column="IS_DELETED"/>
+		<result property="createdAt" column="CREATED_AT"/>
+		<result property="updatedAt" column="UPDATED_AT"/>
+		<result property="memberNick" column="MEMBER_NICK"/>
+		<result property="memberStatus" column="MEMBER_STATUS"/>
+		<result property="memberProfileImage" column="MEMBER_PROFILE_IMAGE"/>
+		<result property="likeCount" column="LIKE_COUNT"/>
+		<result property="isLiked" column="IS_LIKED"/>
+		<result property="hasStory" column="HAS_STORY"/>
+		<result property="hasUnreadStory" column="HAS_UNREAD_STORY"/>
+		<result property="replyCount" column="REPLY_COUNT"/>
+		<result property="parentWriterNick" column="PARENT_WRITER_NICK"/>
+	</resultMap>
+
+	<!-- ===========================
+	     댓글 조회 쿼리 (V3 스키마)
+	=========================== -->
+
+	<!-- 댓글 목록 조회 (원댓글만 - depth=0) -->
 	<select id="selectCommentList" parameterType="hashmap" resultMap="commentResultMap">
 		SELECT 
 			C.COMMENT_NO,
-			C.CONTENT,
-			C.CREATE_DATE,
-			C.IS_DEL,
-			C.WRITER,
 			C.FEED_NO,
-			M.MEMBER_NICK AS WRITER_NICK,
-			M.STATUS AS WRITER_STATUS,
-			H.PROFILE_CHANGE_NAME AS WRITER_PROFILE_IMAGE,
+			C.MEMBER_NO,
+			NVL(C.PARENT_COMMENT_NO, NULL) AS PARENT_COMMENT_NO,
+			NVL(C.DEPTH, 0) AS DEPTH,
+			C.CONTENT,
+			C.IS_DELETED,
+			C.CREATED_AT,
+			C.UPDATED_AT,
+			M.MEMBER_NICK,
+			M.ACCOUNT_STATUS AS MEMBER_STATUS,
+			H.PROFILE_SAVED_NAME AS MEMBER_PROFILE_IMAGE,
 			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
-			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = C.WRITER AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
+			NVL(REPLY_CNT.REPLY_COUNT, 0) AS REPLY_COUNT,
+			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = C.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
 			<if test="memberNo != null">
-				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = C.WRITER AND S.IS_DEL = 'N' AND S.EXPIRE_DATE > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{memberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
+				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = C.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{memberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
 				, CASE WHEN CL.COMMENT_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
 			</if>
 		FROM TB_COMMENT C
-		LEFT JOIN TB_MEMBER M ON C.WRITER = M.MEMBER_NO
-		LEFT JOIN TB_MEMBER_HOME H ON C.WRITER = H.MEMBER_NO
+		LEFT JOIN TB_MEMBER M ON C.MEMBER_NO = M.MEMBER_NO
+		LEFT JOIN TB_MEMBER_HOME H ON C.MEMBER_NO = H.MEMBER_NO
+		LEFT JOIN (
+			SELECT COMMENT_NO, COUNT(*) AS LIKE_COUNT
+			FROM TB_COMMENT_LIKE
+			GROUP BY COMMENT_NO
+		) LIKE_CNT ON C.COMMENT_NO = LIKE_CNT.COMMENT_NO
+		LEFT JOIN (
+			SELECT PARENT_COMMENT_NO, COUNT(*) AS REPLY_COUNT
+			FROM TB_COMMENT
+			WHERE IS_DELETED = 'N' AND PARENT_COMMENT_NO IS NOT NULL
+			GROUP BY PARENT_COMMENT_NO
+		) REPLY_CNT ON C.COMMENT_NO = REPLY_CNT.PARENT_COMMENT_NO
+		<if test="memberNo != null">
+			LEFT JOIN TB_COMMENT_LIKE CL ON C.COMMENT_NO = CL.COMMENT_NO AND CL.MEMBER_NO = #{memberNo}
+		</if>
+		WHERE C.FEED_NO = #{feedNo}
+		AND C.IS_DELETED = 'N'
+		AND (C.PARENT_COMMENT_NO IS NULL OR C.DEPTH = 0)
+		ORDER BY C.CREATED_AT ASC
+	</select>
+
+	<!-- 대댓글 목록 조회 (특정 원댓글의 대댓글들) -->
+	<select id="selectReplyList" parameterType="hashmap" resultMap="commentResultMap">
+		SELECT 
+			C.COMMENT_NO,
+			C.FEED_NO,
+			C.MEMBER_NO,
+			C.PARENT_COMMENT_NO,
+			NVL(C.DEPTH, 1) AS DEPTH,
+			C.CONTENT,
+			C.IS_DELETED,
+			C.CREATED_AT,
+			C.UPDATED_AT,
+			M.MEMBER_NICK,
+			M.ACCOUNT_STATUS AS MEMBER_STATUS,
+			H.PROFILE_SAVED_NAME AS MEMBER_PROFILE_IMAGE,
+			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
+			PM.MEMBER_NICK AS PARENT_WRITER_NICK,
+			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = C.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
+			<if test="memberNo != null">
+				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = C.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{memberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
+				, CASE WHEN CL.COMMENT_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
+			</if>
+		FROM TB_COMMENT C
+		LEFT JOIN TB_MEMBER M ON C.MEMBER_NO = M.MEMBER_NO
+		LEFT JOIN TB_MEMBER_HOME H ON C.MEMBER_NO = H.MEMBER_NO
+		LEFT JOIN TB_COMMENT PC ON C.PARENT_COMMENT_NO = PC.COMMENT_NO
+		LEFT JOIN TB_MEMBER PM ON PC.MEMBER_NO = PM.MEMBER_NO
+		LEFT JOIN (
+			SELECT COMMENT_NO, COUNT(*) AS LIKE_COUNT
+			FROM TB_COMMENT_LIKE
+			GROUP BY COMMENT_NO
+		) LIKE_CNT ON C.COMMENT_NO = LIKE_CNT.COMMENT_NO
+		<if test="memberNo != null">
+			LEFT JOIN TB_COMMENT_LIKE CL ON C.COMMENT_NO = CL.COMMENT_NO AND CL.MEMBER_NO = #{memberNo}
+		</if>
+		WHERE C.PARENT_COMMENT_NO = #{parentCommentNo}
+		AND C.IS_DELETED = 'N'
+		ORDER BY C.CREATED_AT ASC
+	</select>
+
+	<!-- 모든 댓글 조회 (계층 구조로 정렬) -->
+	<select id="selectAllCommentsByFeed" parameterType="hashmap" resultMap="commentResultMap">
+		SELECT 
+			C.COMMENT_NO,
+			C.FEED_NO,
+			C.MEMBER_NO,
+			C.PARENT_COMMENT_NO,
+			NVL(C.DEPTH, 0) AS DEPTH,
+			C.CONTENT,
+			C.IS_DELETED,
+			C.CREATED_AT,
+			C.UPDATED_AT,
+			M.MEMBER_NICK,
+			M.ACCOUNT_STATUS AS MEMBER_STATUS,
+			H.PROFILE_SAVED_NAME AS MEMBER_PROFILE_IMAGE,
+			NVL(LIKE_CNT.LIKE_COUNT, 0) AS LIKE_COUNT,
+			CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = C.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE) > 0 THEN 1 ELSE 0 END AS HAS_STORY
+			<if test="memberNo != null">
+				, CASE WHEN (SELECT COUNT(*) FROM TB_STORY S WHERE S.MEMBER_NO = C.MEMBER_NO AND S.IS_DELETED = 'N' AND S.EXPIRED_AT > SYSDATE AND NOT EXISTS (SELECT 1 FROM TB_STORY_VISITOR V WHERE V.STORY_NO = S.STORY_NO AND V.MEMBER_NO = #{memberNo})) > 0 THEN 1 ELSE 0 END AS HAS_UNREAD_STORY
+				, CASE WHEN CL.COMMENT_NO IS NOT NULL THEN 1 ELSE 0 END AS IS_LIKED
+			</if>
+		FROM TB_COMMENT C
+		LEFT JOIN TB_MEMBER M ON C.MEMBER_NO = M.MEMBER_NO
+		LEFT JOIN TB_MEMBER_HOME H ON C.MEMBER_NO = H.MEMBER_NO
 		LEFT JOIN (
 			SELECT COMMENT_NO, COUNT(*) AS LIKE_COUNT
 			FROM TB_COMMENT_LIKE
@@ -32,46 +149,100 @@
 			LEFT JOIN TB_COMMENT_LIKE CL ON C.COMMENT_NO = CL.COMMENT_NO AND CL.MEMBER_NO = #{memberNo}
 		</if>
 		WHERE C.FEED_NO = #{feedNo}
-		AND C.IS_DEL = 'N'
-		ORDER BY C.CREATE_DATE ASC
+		AND C.IS_DELETED = 'N'
+		ORDER BY 
+			NVL(C.PARENT_COMMENT_NO, C.COMMENT_NO),
+			C.DEPTH,
+			C.CREATED_AT ASC
 	</select>
 
-	<!-- 댓글 생성 -->
+	<!-- ===========================
+	     댓글 생성/수정/삭제 (V3 스키마)
+	=========================== -->
+
+	<!-- 댓글 생성 (원댓글 또는 대댓글) -->
 	<insert id="insertComment" parameterType="comment">
+		<selectKey keyProperty="commentNo" resultType="int" order="BEFORE">
+			SELECT SEQ_COMMENT_NO.NEXTVAL FROM DUAL
+		</selectKey>
 		INSERT INTO TB_COMMENT (
 			COMMENT_NO,
+			FEED_NO,
+			MEMBER_NO,
+			PARENT_COMMENT_NO,
+			DEPTH,
 			CONTENT,
-			CREATE_DATE,
-			IS_DEL,
-			WRITER,
-			FEED_NO
+			IS_DELETED,
+			CREATED_AT
 		) VALUES (
-			SEQ_COMMENT_NO.NEXTVAL,
+			#{commentNo},
+			#{feedNo},
+			#{memberNo},
+			#{parentCommentNo},
+			#{depth},
 			#{content},
-			SYSDATE,
 			'N',
-			#{writer},
-			#{feedNo}
+			SYSDATE
 		)
 	</insert>
 
-	<!-- 댓글 삭제 (IS_DEL = 'Y') -->
+	<!-- 대댓글 생성 -->
+	<insert id="insertReply" parameterType="comment">
+		<selectKey keyProperty="commentNo" resultType="int" order="BEFORE">
+			SELECT SEQ_COMMENT_NO.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO TB_COMMENT (
+			COMMENT_NO,
+			FEED_NO,
+			MEMBER_NO,
+			PARENT_COMMENT_NO,
+			DEPTH,
+			CONTENT,
+			IS_DELETED,
+			CREATED_AT
+		) VALUES (
+			#{commentNo},
+			#{feedNo},
+			#{memberNo},
+			#{parentCommentNo},
+			1,
+			#{content},
+			'N',
+			SYSDATE
+		)
+	</insert>
+
+	<!-- 댓글 삭제 (IS_DELETED = 'Y') -->
 	<update id="deleteComment" parameterType="_int">
 		UPDATE TB_COMMENT
-		SET IS_DEL = 'Y'
+		SET IS_DELETED = 'Y'
 		WHERE COMMENT_NO = #{commentNo}
 	</update>
+
+	<!-- 댓글 및 대댓글 모두 삭제 -->
+	<update id="deleteCommentWithReplies" parameterType="_int">
+		UPDATE TB_COMMENT
+		SET IS_DELETED = 'Y'
+		WHERE COMMENT_NO = #{commentNo}
+		   OR PARENT_COMMENT_NO = #{commentNo}
+	</update>
+
+	<!-- ===========================
+	     댓글 좋아요
+	=========================== -->
 
 	<!-- 댓글 좋아요 추가 -->
 	<insert id="insertCommentLike" parameterType="hashmap">
 		INSERT INTO TB_COMMENT_LIKE (
 			COMMENT_LIKE_NO,
 			COMMENT_NO,
-			MEMBER_NO
+			MEMBER_NO,
+			CREATED_AT
 		) VALUES (
 			SEQ_COMMENT_LIKE_NO.NEXTVAL,
 			#{commentNo},
-			#{memberNo}
+			#{memberNo},
+			SYSDATE
 		)
 	</insert>
 
@@ -90,19 +261,33 @@
 		AND MEMBER_NO = #{memberNo}
 	</select>
 
-	<!-- ResultMap: Comment -->
-	<resultMap type="comment" id="commentResultMap">
-		<id property="commentNo" column="COMMENT_NO"/>
-		<result property="content" column="CONTENT"/>
-		<result property="createDate" column="CREATE_DATE"/>
-		<result property="isDel" column="IS_DEL"/>
-		<result property="writer" column="WRITER"/>
-		<result property="feedNo" column="FEED_NO"/>
-		<result property="writerNick" column="WRITER_NICK"/>
-		<result property="writerStatus" column="WRITER_STATUS"/>
-		<result property="writerProfileImage" column="WRITER_PROFILE_IMAGE"/>
-		<result property="likeCount" column="LIKE_COUNT"/>
-		<result property="isLiked" column="IS_LIKED"/>
-	</resultMap>
+	<!-- ===========================
+	     통계/기타
+	=========================== -->
+
+	<!-- 피드의 총 댓글 수 (대댓글 포함) -->
+	<select id="countCommentsByFeed" parameterType="_int" resultType="_int">
+		SELECT COUNT(*)
+		FROM TB_COMMENT
+		WHERE FEED_NO = #{feedNo}
+		AND IS_DELETED = 'N'
+	</select>
+
+	<!-- 댓글 상세 조회 -->
+	<select id="selectCommentByNo" parameterType="_int" resultMap="commentResultMap">
+		SELECT 
+			C.COMMENT_NO,
+			C.FEED_NO,
+			C.MEMBER_NO,
+			C.PARENT_COMMENT_NO,
+			NVL(C.DEPTH, 0) AS DEPTH,
+			C.CONTENT,
+			C.IS_DELETED,
+			C.CREATED_AT,
+			M.MEMBER_NICK
+		FROM TB_COMMENT C
+		LEFT JOIN TB_MEMBER M ON C.MEMBER_NO = M.MEMBER_NO
+		WHERE C.COMMENT_NO = #{commentNo}
+	</select>
 
 </mapper>

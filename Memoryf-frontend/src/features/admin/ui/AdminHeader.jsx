@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../auth/model/useAuth';
 
 /**
  * AdminHeader - 관리자 페이지 상단 헤더 컴포넌트
@@ -13,11 +14,12 @@ import { useNavigate } from 'react-router-dom';
  */
 const AdminHeader = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
-    // 실제 로그아웃 처리
+  // 실제 로그아웃 처리
   const confirmLogout = () => {
-    localStorage.removeItem("accessToken");
-    navigate("/login", {replace : true});
+    logout(); // AuthContext의 logout 함수 호출 (토큰 제거 + 상태 업데이트)
+    navigate("/login", { replace: true });
   };
 
   return (

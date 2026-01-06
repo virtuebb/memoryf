@@ -85,7 +85,9 @@ export function useActivitySection() {
 			};
 
 			const data = activeTab === 'likes' ? await getLikedFeeds(params) : await getCommentedFeeds(params);
-			setItems(data.list || []);
+			// 백엔드는 ApiResponse.success(list)로 직접 리스트를 반환하므로 data가 배열이거나 data.list일 수 있음
+			const itemsList = Array.isArray(data) ? data : (data?.list || []);
+			setItems(itemsList);
 		} catch (error) {
 			console.error('데이터 로딩 실패:', error);
 		} finally {

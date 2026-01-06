@@ -10,6 +10,7 @@ import {
   unfollowMember,
 } from "../../follow";
 import { StoryViewer, storyApi } from "../../story";
+import { createDmRoom } from "../../dm/api/dmApi";
 import defaultProfileImg from "../../../assets/images/profiles/default-profile.svg";
 import { getProfileImageUrl } from "../../../shared/api";
 import "../css/ProfileCard.css";
@@ -125,8 +126,36 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
     navigate("/settings/edit");
   };
 
-  const handleMessage = () => {
-    navigate("/messages");
+  const handleMessage = async () => {
+    // 본인 프로필에서는 메시지 목록으로만 이동
+    if (isOwner) {
+      navigate("/messages");
+      return;
+    }
+
+    // 상대방 프로필에서는 대화방 생성 후 해당 방으로 이동
+    const targetUserId = home?.memberId;
+    if (!targetUserId) {
+      alert("상대방 정보를 불러올 수 없습니다.");
+      navigate("/messages");
+      return;
+    }
+
+    try {
+      const result = await createDmRoom(targetUserId);
+      const roomNo = result?.data?.roomNo || result?.roomNo;
+      
+      if (roomNo) {
+        navigate(`/messages/${roomNo}`);
+      } else {
+        // 방 번호를 가져오지 못한 경우 메시지 목록으로 이동
+        navigate("/messages");
+      }
+    } catch (error) {
+      console.error("대화방 생성 실패:", error);
+      // 이미 존재하는 방이거나 오류 시 메시지 목록으로 이동
+      navigate("/messages");
+    }
   };
 
   const handleToggleFollow = async () => {
@@ -499,10 +528,15 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
   };
 
   const handleProfileImageClick = () => {
-    if (isOwner) {
-      fileInputRef.current?.click();
-    } else if (home?.hasStory) {
+    // 스토리가 있으면 스토리 뷰어 열기
+    if (home?.hasStory) {
       openStoryViewer(resolvedMemberNo);
+    } else {
+      // 스토리가 없으면 본인일 때만 프로필 사진 수정
+      if (isOwner) {
+        fileInputRef.current?.click();
+      }
+      // 타인이고 스토리도 없으면 아무 동작 없음
     }
   };
 
@@ -554,10 +588,11 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
   ========================= */
   const isDeletedUser = home.status === 'Y';
   const displayNick = isDeletedUser ? 'deletedUser' : home.memberNick;
+  const profileImageFileName = home.profileSavedName || home.profileChangeName;
   const profileImageUrl = isDeletedUser 
     ? defaultProfileImg
-    : (home.profileChangeName
-      ? `${getProfileImageUrl(home.profileChangeName)}?t=${imageTimestamp}`
+    : (profileImageFileName
+      ? `${getProfileImageUrl(profileImageFileName)}?t=${imageTimestamp}`
       : defaultProfileImg);
 
   const followModal = isFollowModalOpen ? (
@@ -597,8 +632,9 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
               {followList.map((u) => {
                 const isMe = u.memberNo === currentMemberNo;
                 const nick = u.memberNick || "익명";
-                const avatarUrl = u.profileChangeName
-                  ? getProfileImageUrl(u.profileChangeName)
+                const profileFileName = u.profileSavedName || u.profileChangeName;
+                const avatarUrl = profileFileName
+                  ? getProfileImageUrl(profileFileName)
                   : defaultProfileImg;
 
                 return (
@@ -656,7 +692,7 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
       <div className="profile-row">
         {/* 아바타 */}
         <div 
-          className={`profile-avatar ${home.hasStory ? (home.hasUnreadStory ? 'has-story' : 'has-story read') : ''}`} 
+          className={`profile-avatar ${home?.hasStory ? (home?.hasUnreadStory ? 'has-story' : 'has-story read') : ''}`} 
           onClick={handleProfileImageClick}
         >
           <div className="profile-avatar-inner">
@@ -682,7 +718,9 @@ function ProfileCard({ memberNo, isOwner: isOwnerProp }) {
             <p className="deleted-user-notice">탈퇴한 회원입니다</p>
           )}
 
-          {!isDeletedUser && home.statusMsg && <p className="bio">{home.statusMsg}</p>}
+          {!isDeletedUser && (home.statusMessage || home.statusMsg) && (
+            <p className="bio">{home.statusMessage || home.statusMsg}</p>
+          )}
 
           <div className="stats inline">
             <div>

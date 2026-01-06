@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { purchaseBgm } from "../../api";
+import { purchaseBgm } from "../api";
 
 /**
  * BGM 구매 및 재생 관련 Hook

@@ -27,7 +27,8 @@ export const getFeedList = async (sortBy = 'recent', page = 0, size = 18) => {
   });
 
 	const data = getApiResponseData(response.data, []);
-	return Array.isArray(data) ? data : (Array.isArray(response.data) ? response.data : []);
+	const feeds = Array.isArray(data) ? data : (Array.isArray(response.data) ? response.data : []);
+	return feeds.map(normalizeFeed);
 };
 
 /**
@@ -50,7 +51,8 @@ export const getFeedListByMember = async (
   const response = await feedApi.get(`/feeds/by-member/${targetMemberNo}`, { params });
 
 	const data = getApiResponseData(response.data, []);
-	return Array.isArray(data) ? data : [];
+	const feeds = Array.isArray(data) ? data : [];
+	return feeds.map(normalizeFeed);
 };
 
 /**
@@ -65,7 +67,69 @@ export const getFeedDetail = async (feedNo) => {
 
   const response = await feedApi.get(`/feeds/${feedNo}`, { params });
 
-	return getApiResponseData(response.data, response.data);
+	const data = getApiResponseData(response.data, response.data);
+	return normalizeFeed(data);
+};
+
+/**
+ * 피드 데이터 정규화 (백엔드 필드명 → 프론트엔드 필드명)
+ */
+const normalizeFeed = (feed) => {
+	if (!feed || typeof feed !== "object") return feed;
+	
+	const normalized = {
+		...feed,
+		// 날짜 필드: createdAt → createDate
+		createDate: feed.createdAt || feed.createDate,
+		createdAt: feed.createdAt || feed.createDate,
+		// 삭제 여부: isDeleted → isDel
+		isDel: feed.isDeleted || feed.isDel,
+		isDeleted: feed.isDeleted || feed.isDel,
+		// 프로필 이미지: profileSavedName → profileChangeName
+		profileChangeName: feed.profileImage || feed.profileSavedName || feed.profileChangeName,
+		profileSavedName: feed.profileImage || feed.profileSavedName || feed.profileChangeName,
+		profileImage: feed.profileImage || feed.profileSavedName || feed.profileChangeName,
+	};
+	
+	// 피드 파일 배열도 정규화
+	if (Array.isArray(normalized.feedFiles)) {
+		normalized.feedFiles = normalized.feedFiles.map((file) => ({
+			...file,
+			createDate: file.createdAt || file.createDate,
+			createdAt: file.createdAt || file.createDate,
+			isDel: file.isDeleted || file.isDel,
+			isDeleted: file.isDeleted || file.isDel,
+			changeName: file.savedName || file.changeName,
+			savedName: file.savedName || file.changeName,
+		}));
+	}
+	
+	return normalized;
+};
+
+/**
+ * 댓글 데이터 정규화 (백엔드 필드명 → 프론트엔드 필드명)
+ */
+const normalizeComment = (comment) => {
+	if (!comment || typeof comment !== "object") return comment;
+	
+	return {
+		...comment,
+		// 백엔드 필드명을 프론트엔드 필드명으로 매핑
+		writerNick: comment.memberNick || comment.writerNick,
+		writerProfileImage: comment.memberProfileImage || comment.writerProfileImage,
+		writerStatus: comment.memberStatus || comment.writerStatus,
+		writer: comment.memberNo || comment.writer,
+		createDate: comment.createdAt || comment.createDate,
+		isDel: comment.isDeleted || comment.isDel,
+		// 호환성을 위해 원본 필드도 유지
+		memberNick: comment.memberNick || comment.writerNick,
+		memberProfileImage: comment.memberProfileImage || comment.writerProfileImage,
+		memberStatus: comment.memberStatus || comment.writerStatus,
+		memberNo: comment.memberNo || comment.writer,
+		createdAt: comment.createdAt || comment.createDate,
+		isDeleted: comment.isDeleted || comment.isDel,
+	};
 };
 
 /**
@@ -81,7 +145,10 @@ export const getComments = async (feedNo) => {
   const response = await feedApi.get(`/feeds/${feedNo}/comments`, { params });
 
 	const data = getApiResponseData(response.data, []);
-	return Array.isArray(data) ? data : [];
+	const comments = Array.isArray(data) ? data : [];
+	
+	// 댓글 데이터 정규화
+	return comments.map(normalizeComment);
 };
 
 /**
@@ -95,7 +162,8 @@ export const getBookmarkedFeedList = async (memberNo) => {
   });
 
 	const data = getApiResponseData(response.data, []);
-	return Array.isArray(data) ? data : [];
+	const feeds = Array.isArray(data) ? data : [];
+	return feeds.map(normalizeFeed);
 };
 
 export default {

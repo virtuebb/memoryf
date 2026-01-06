@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
-import { searchYouTubeMusic } from "../../../../shared/lib";
+import { searchYouTubeMusic } from "../../../shared/lib";
 
 /**
  * BGM 썸네일 캐시 관리 Hook
@@ -9,6 +9,10 @@ import { searchYouTubeMusic } from "../../../../shared/lib";
  */
 export const useBgmCache = () => {
 	const [thumbCache, setThumbCache] = useState({});
+	
+	// useRef로 캐시 참조 유지 (함수 재생성 방지)
+	const thumbCacheRef = useRef(thumbCache);
+	thumbCacheRef.current = thumbCache;
 
 	const getThumbCache = useCallback(() => {
 		try {
@@ -63,10 +67,12 @@ export const useBgmCache = () => {
 
 	/**
 	 * BGM 리스트에 썸네일 정보를 enrichment
+	 * - useRef를 사용하여 함수 재생성 방지
 	 */
 	const enrichThumbnails = useCallback(
 		async (list, setAllBgmList) => {
-			let cache = { ...getThumbCache(), ...thumbCache };
+			// useRef를 통해 최신 캐시 접근 (의존성 배열에 포함하지 않음)
+			let cache = { ...getThumbCache(), ...thumbCacheRef.current };
 
 			const applyCache = (items, cacheMap) =>
 				items.map((item) => {
@@ -108,7 +114,7 @@ export const useBgmCache = () => {
 				}
 			}
 		},
-		[getThumbCache, saveThumbCache, thumbCache]
+		[getThumbCache, saveThumbCache] // thumbCache 제거 - useRef 사용
 	);
 
 	return {

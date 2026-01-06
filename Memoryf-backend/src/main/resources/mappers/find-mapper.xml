@@ -11,7 +11,7 @@
 		  FROM TB_MEMBER
 		 WHERE MEMBER_NAME = #{memberName}
 		   AND EMAIL = #{email}
-		   AND STATUS = 'Y'
+		   AND ACCOUNT_STATUS = 'ACTIVE'
 	</select>
 	
 	<!-- 비밀번호 찾기 -->
@@ -20,7 +20,7 @@
 		  FROM TB_MEMBER
 		 WHERE MEMBER_ID = #{memberId}
 		   AND EMAIL = #{email}
-		   AND STATUS = 'Y'
+		   AND ACCOUNT_STATUS = 'ACTIVE'
 	</select>
 	
 	<!-- 비밀번호 재설정 -->
@@ -28,7 +28,7 @@
 		UPDATE TB_MEMBER
 		   SET MEMBER_PWD = #{memberPwd}
 		 WHERE MEMBER_ID = #{memberId}
-		   AND STATUS = 'Y'
+		   AND ACCOUNT_STATUS = 'ACTIVE'
 	</update>
 
 </mapper>

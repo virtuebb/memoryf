@@ -4,10 +4,12 @@ import { useLocation, useNavigate, Navigate, Route, Routes } from "react-router-
 
 import SettingsEditWidget from "./SettingsEditWidget.jsx";
 import { ActivitySection, PaymentSection, PreferenceSection, SecuritySection } from "../../../features/settings";
+import { useAuth } from "../../../features/auth/model/useAuth";
 
 function SettingsPageWidget() {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { logout } = useAuth();
 
 	// 현재 URL의 마지막 경로 세그먼트를 가져와서 활성 탭 결정
 	const currentPath = location.pathname.split("/").pop();
@@ -31,7 +33,7 @@ function SettingsPageWidget() {
 
 	// 실제 로그아웃 처리
 	const confirmLogout = () => {
-		localStorage.removeItem("accessToken");
+		logout(); // AuthContext의 logout 함수 호출 (토큰 제거 + 상태 업데이트)
 		navigate("/login", { replace: true });
 	};
 

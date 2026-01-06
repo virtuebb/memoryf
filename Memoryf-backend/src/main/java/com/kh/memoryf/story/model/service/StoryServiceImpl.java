@@ -67,7 +67,7 @@ public class StoryServiceImpl implements StoryService {
 	        String changeName = FileRenamePolicy.saveFile(upfile, session, "story"); // path 파라미터는 너 방식대로
 
 	        item.setOriginName(originName);
-	        item.setChangeName(changeName);
+	        item.setSavedName(changeName);
 
 	        // ⚠️ 여기 값은 "프론트에서 접근하는 경로"로 통일해야 함
 	        // 예) /resources/story

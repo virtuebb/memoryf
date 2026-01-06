@@ -291,7 +291,7 @@ public class HomeContoller {
 			Home home = new Home();
 			home.setMemberNo(memberNo);
 			home.setProfileOriginName(originName);
-			home.setProfileChangeName(changeName);
+			home.setProfileSavedName(changeName);
 			
 			int result = homeService.updateProfileImage(home);
 			
@@ -305,7 +305,8 @@ public class HomeContoller {
 				
 				response.put("success", true);
 				response.put("message", "프로필 이미지가 업데이트되었습니다.");
-				response.put("profileChangeName", changeName);
+				response.put("profileSavedName", changeName);
+				response.put("profileChangeName", changeName); // 프론트엔드 호환성
 			} else {
 				response.put("success", false);
 				response.put("message", "프로필 이미지 업데이트에 실패했습니다.");
@@ -345,7 +346,7 @@ public class HomeContoller {
 			// Home 상태메시지 업데이트
 			Home home = new Home();
 			home.setMemberNo(memberNo);
-			home.setStatusMsg(statusMsg);
+			home.setStatusMessage(statusMsg);
 			homeService.updateStatusMsg(home);
 			
 			response.put("success", true);
@@ -377,7 +378,7 @@ public class HomeContoller {
 			
 			Home home = new Home();
 			home.setMemberNo(memberNo);
-			home.setIsPrivateProfile(isPrivateStr);
+			home.setIsProfilePrivate(isPrivateStr);
 			
 			int result = homeService.updatePrivacy(home);
 			

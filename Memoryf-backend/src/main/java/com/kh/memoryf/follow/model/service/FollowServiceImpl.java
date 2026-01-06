@@ -58,7 +58,7 @@ public class FollowServiceImpl implements FollowService {
 			String newStatus = "Y";
 			String notiType = "FOLLOW";
 			
-			if ("Y".equals(targetHome.getIsPrivateProfile())) {
+			if ("Y".equals(targetHome.getIsProfilePrivate())) {
 				newStatus = "P"; // 비공개 계정이면 대기 상태
 				notiType = "FOLLOW_REQUEST";
 			}

@@ -10,7 +10,7 @@ import { baseApi } from '../../../shared/api';
 // =========================
 export const visitHome = (homeNo) => {
   return baseApi.post(
-    "/visitor",
+    "/visitors",
     null,
     {
       params: { homeNo },
@@ -23,7 +23,7 @@ export const visitHome = (homeNo) => {
 // =========================
 export const getVisitorStats = (homeNo) => {
   return baseApi.get(
-    "/visitor/count",
+    "/visitors/stats",
     {
       params: { homeNo },
     }

@@ -5,209 +5,318 @@
 
 <mapper namespace="dmMapper">
 	
-	<resultMap id="dmResultSet" type="dmRoom">
+	<!-- ===========================
+	     ResultMap 정의
+	=========================== -->
+	
+	<!-- DM 방 ResultMap -->
+	<resultMap id="dmRoomResultMap" type="dmRoom">
 		<id column="ROOM_NO" property="roomNo" />
-		<result column="CREATE_DATE" property="createDate" />
+		<result column="ROOM_TYPE" property="roomType" />
 		<result column="ROOM_NAME" property="roomName" />
-		<!-- selectDmRoomList용 필드들 -->
-		<result column="TARGET_USER_ID" property="targetUserId" />
-		<result column="TARGET_USER_NAME" property="targetUserName" />
+		<result column="CREATED_AT" property="createdAt" />
+		<!-- 채팅 목록 조회용 -->
+		<result column="TARGET_MEMBER_NO" property="targetMemberNo" />
+		<result column="TARGET_MEMBER_ID" property="targetMemberId" />
+		<result column="TARGET_MEMBER_NAME" property="targetMemberName" />
+		<result column="TARGET_MEMBER_NICK" property="targetMemberNick" />
 		<result column="LAST_MESSAGE" property="lastMessage" />
-		<result column="LAST_SEND_DATE" property="lastSendDate" />
+		<result column="LAST_MESSAGE_AT" property="lastMessageAt" />
 		<result column="UNREAD_COUNT" property="unreadCount" />
-		<result column="AVATAR" property="avatar" />
+		<result column="PROFILE_IMAGE" property="profileImage" />
 	</resultMap>
 
-	<!-- 메세지 ResultSet -->
-	<resultMap id="dmMessageResultSet" type="dmMessage">
+	<!-- DM 메시지 ResultMap -->
+	<resultMap id="dmMessageResultMap" type="dmMessage">
 		<id column="MESSAGE_NO" property="messageNo" />
 		<result column="ROOM_NO" property="roomNo" />
-		<result column="SENDER_ID" property="senderId" />
+		<result column="SENDER_NO" property="senderNo" />
 		<result column="CONTENT" property="content" />
-		<result column="CREATE_DATE" property="createDate" />
-		<!-- 읽음 여부 (0: 읽음, 1: 안읽음) -->
+		<result column="MESSAGE_TYPE" property="messageType" />
+		<result column="FILE_PATH" property="filePath" />
+		<result column="IS_DELETED" property="isDeleted" />
+		<result column="CREATED_AT" property="createdAt" />
+		<!-- 조회용 -->
+		<result column="SENDER_ID" property="senderId" />
+		<result column="SENDER_NAME" property="senderName" />
+		<result column="SENDER_NICK" property="senderNick" />
+		<result column="CREATED_AT_STR" property="createdAtStr" />
 		<result column="READ_CHECK" property="readCheck" />
 	</resultMap>
+
+	<!-- DM 참여자 ResultMap -->
+	<resultMap id="dmParticipantResultMap" type="dmParticipant">
+		<result column="ROOM_NO" property="roomNo" />
+		<result column="MEMBER_NO" property="memberNo" />
+		<result column="LAST_READ_MSG_NO" property="lastReadMsgNo" />
+		<result column="IS_MUTED" property="isMuted" />
+		<result column="JOINED_AT" property="joinedAt" />
+		<result column="LEFT_AT" property="leftAt" />
+		<!-- 조회용 -->
+		<result column="MEMBER_ID" property="memberId" />
+		<result column="MEMBER_NAME" property="memberName" />
+		<result column="MEMBER_NICK" property="memberNick" />
+	</resultMap>
+
+	<!-- ===========================
+	     채팅방 관련 쿼리
+	=========================== -->
 	
-	<!-- Dm 방 조회용 쿼리 (채팅 목록) -->
-	<select id="selectDmRoomList" parameterType="string" resultMap="dmResultSet">
+	<!-- 채팅방 목록 조회 (회원번호 기준) -->
+	<select id="selectDmRoomList" parameterType="int" resultMap="dmRoomResultMap">
 		SELECT 
 		    r.ROOM_NO,
-		    p2.MEMBER_ID AS TARGET_USER_ID,
-		    m.MEMBER_NAME AS TARGET_USER_NAME,
-		    h.PROFILE_CHANGE_NAME AS AVATAR,
-		    COALESCE(
-		        (SELECT CONTENT FROM TB_DM_MESSAGE 
-		         WHERE ROOM_NO = r.ROOM_NO AND IS_DEL = 'N' 
-		         ORDER BY MESSAGE_NO DESC 
-		         FETCH FIRST 1 ROW ONLY),
-		        '대화 없음'
-		    ) AS LAST_MESSAGE,
-		    COALESCE(
-		        (SELECT TO_CHAR(CREATE_DATE + (9/24), 'YYYY-MM-DD HH24:MI:SS') FROM TB_DM_MESSAGE 
-		         WHERE ROOM_NO = r.ROOM_NO AND IS_DEL = 'N' 
-		         ORDER BY MESSAGE_NO DESC 
-		         FETCH FIRST 1 ROW ONLY),
-		        TO_CHAR(r.CREATE_DATE + (9/24), 'YYYY-MM-DD HH24:MI:SS')
-		    ) AS LAST_SEND_DATE,
-		    COALESCE(
-		        (SELECT COUNT(*) FROM TB_DM_MESSAGE 
-		         WHERE ROOM_NO = r.ROOM_NO 
-		           AND SENDER_ID = p2.MEMBER_ID
-		           AND MESSAGE_NO > NVL(p1.LAST_READ_MESSAGE_NO, 0)
-		           AND IS_DEL = 'N'),
+		    r.ROOM_TYPE,
+		    r.CREATED_AT,
+		    p2.MEMBER_NO AS TARGET_MEMBER_NO,
+		    m.MEMBER_ID AS TARGET_MEMBER_ID,
+		    m.MEMBER_NAME AS TARGET_MEMBER_NAME,
+		    m.MEMBER_NICK AS TARGET_MEMBER_NICK,
+		    NVL(h.PROFILE_SAVED_NAME, 'default.png') AS PROFILE_IMAGE,
+		    NVL(lm.CONTENT, '대화 없음') AS LAST_MESSAGE,
+		    NVL(
+		        TO_CHAR(lm.CREATED_AT + (9/24), 'YYYY-MM-DD HH24:MI:SS'),
+		        TO_CHAR(r.CREATED_AT + (9/24), 'YYYY-MM-DD HH24:MI:SS')
+		    ) AS LAST_MESSAGE_AT,
+		    NVL(
+		        (SELECT COUNT(*) FROM TB_DM_MESSAGE dm
+		         WHERE dm.ROOM_NO = r.ROOM_NO 
+		           AND dm.SENDER_NO = p2.MEMBER_NO
+		           AND dm.MESSAGE_NO > NVL(p1.LAST_READ_MSG_NO, 0)
+		           AND dm.IS_DELETED = 'N'),
 		        0
 		    ) AS UNREAD_COUNT
 		FROM TB_DM_ROOM r
-		JOIN TB_DM_PARTICIPANT p1 ON r.ROOM_NO = p1.ROOM_NO
-		JOIN TB_DM_PARTICIPANT p2 ON r.ROOM_NO = p2.ROOM_NO 
-		JOIN TB_MEMBER m ON m.MEMBER_ID = p2.MEMBER_ID
-		JOIN TB_MEMBER_HOME h ON h.MEMBER_NO = m.MEMBER_NO
-		WHERE p1.MEMBER_ID = #{userId}
-		  AND p2.MEMBER_ID != p1.MEMBER_ID
-		  AND r.IS_DEL = 'N'
-		
-		ORDER BY LAST_SEND_DATE DESC
+		JOIN TB_DM_PARTICIPANT p1 ON r.ROOM_NO = p1.ROOM_NO AND p1.LEFT_AT IS NULL
+		JOIN TB_DM_PARTICIPANT p2 ON r.ROOM_NO = p2.ROOM_NO AND p2.LEFT_AT IS NULL
+		LEFT JOIN TB_MEMBER m ON m.MEMBER_NO = p2.MEMBER_NO
+		LEFT JOIN TB_MEMBER_HOME h ON h.MEMBER_NO = m.MEMBER_NO
+		LEFT JOIN (
+		    SELECT ROOM_NO, CONTENT, CREATED_AT
+		    FROM (
+		        SELECT ROOM_NO, CONTENT, CREATED_AT,
+		               ROW_NUMBER() OVER (PARTITION BY ROOM_NO ORDER BY MESSAGE_NO DESC) AS rn
+		        FROM TB_DM_MESSAGE 
+		        WHERE IS_DELETED = 'N'
+		    )
+		    WHERE rn = 1
+		) lm ON lm.ROOM_NO = r.ROOM_NO
+		WHERE p1.MEMBER_NO = #{memberNo}
+		  AND p2.MEMBER_NO != p1.MEMBER_NO
+		ORDER BY LAST_MESSAGE_AT DESC
 	</select>
 
-	<!-- 참여자 존재 여부 확인 쿼리 -->
+	<!-- 채팅방 목록 조회 (회원 아이디 기준 - 레거시 호환) -->
+	<select id="selectDmRoomListByMemberId" parameterType="string" resultMap="dmRoomResultMap">
+		SELECT 
+		    r.ROOM_NO,
+		    r.ROOM_TYPE,
+		    r.CREATED_AT,
+		    p2.MEMBER_NO AS TARGET_MEMBER_NO,
+		    m2.MEMBER_ID AS TARGET_MEMBER_ID,
+		    m2.MEMBER_NAME AS TARGET_MEMBER_NAME,
+		    m2.MEMBER_NICK AS TARGET_MEMBER_NICK,
+		    NVL(h.PROFILE_SAVED_NAME, 'default.png') AS PROFILE_IMAGE,
+		    NVL(lm.CONTENT, '대화 없음') AS LAST_MESSAGE,
+		    NVL(
+		        TO_CHAR(lm.CREATED_AT + (9/24), 'YYYY-MM-DD HH24:MI:SS'),
+		        TO_CHAR(r.CREATED_AT + (9/24), 'YYYY-MM-DD HH24:MI:SS')
+		    ) AS LAST_MESSAGE_AT,
+		    NVL(
+		        (SELECT COUNT(*) FROM TB_DM_MESSAGE dm
+		         WHERE dm.ROOM_NO = r.ROOM_NO 
+		           AND dm.SENDER_NO = p2.MEMBER_NO
+		           AND dm.MESSAGE_NO > NVL(p1.LAST_READ_MSG_NO, 0)
+		           AND dm.IS_DELETED = 'N'),
+		        0
+		    ) AS UNREAD_COUNT
+		FROM TB_DM_ROOM r
+		JOIN TB_DM_PARTICIPANT p1 ON r.ROOM_NO = p1.ROOM_NO AND p1.LEFT_AT IS NULL
+		JOIN TB_MEMBER m1 ON m1.MEMBER_NO = p1.MEMBER_NO
+		JOIN TB_DM_PARTICIPANT p2 ON r.ROOM_NO = p2.ROOM_NO AND p2.LEFT_AT IS NULL
+		LEFT JOIN TB_MEMBER m2 ON m2.MEMBER_NO = p2.MEMBER_NO
+		LEFT JOIN TB_MEMBER_HOME h ON h.MEMBER_NO = m2.MEMBER_NO
+		LEFT JOIN (
+		    SELECT ROOM_NO, CONTENT, CREATED_AT
+		    FROM (
+		        SELECT ROOM_NO, CONTENT, CREATED_AT,
+		               ROW_NUMBER() OVER (PARTITION BY ROOM_NO ORDER BY MESSAGE_NO DESC) AS rn
+		        FROM TB_DM_MESSAGE 
+		        WHERE IS_DELETED = 'N'
+		    )
+		    WHERE rn = 1
+		) lm ON lm.ROOM_NO = r.ROOM_NO
+		WHERE m1.MEMBER_ID = #{memberId}
+		  AND p2.MEMBER_NO != p1.MEMBER_NO
+		ORDER BY LAST_MESSAGE_AT DESC
+	</select>
+
+	<!-- 기존 채팅방 존재 여부 확인 -->
+	<select id="findExistingRoom" parameterType="map" resultType="int">
+		SELECT r.ROOM_NO
+		FROM TB_DM_ROOM r
+		JOIN TB_DM_PARTICIPANT p1 ON r.ROOM_NO = p1.ROOM_NO
+		JOIN TB_DM_PARTICIPANT p2 ON r.ROOM_NO = p2.ROOM_NO
+		WHERE r.ROOM_TYPE = 'P'
+		  AND p1.MEMBER_NO = #{memberNo}
+		  AND p2.MEMBER_NO = #{targetMemberNo}
+		  AND p1.LEFT_AT IS NULL
+		  AND p2.LEFT_AT IS NULL
+		  AND ROWNUM = 1
+	</select>
+
+	<!-- 참여자 존재 여부 확인 -->
     <select id="checkParticipantExists" parameterType="map" resultType="int">
         SELECT COUNT(*) FROM TB_DM_PARTICIPANT 
-        WHERE ROOM_NO = #{roomNo} AND MEMBER_ID = #{memberId}
+        WHERE ROOM_NO = #{roomNo} AND MEMBER_NO = #{memberNo}
     </select>
 
-	<!-- 새로운 DM 방 생성용 쿼리 -->
-	<!-- selectKey로 시퀀스 값을 먼저 가져와 parameter의 roomNo에 설정하고 그걸 반환할 수 있음-->
+	<!-- 새 채팅방 생성 -->
 	<insert id="insertRoom" parameterType="map" useGeneratedKeys="false">
 		<selectKey keyProperty="roomNo" order="BEFORE" resultType="int">
 			SELECT SEQ_DM_ROOM_NO.NEXTVAL FROM DUAL
 		</selectKey>
-		INSERT INTO TB_DM_ROOM(
-					  ROOM_NO)
-		       VALUES(
-					  #{roomNo})
+		INSERT INTO TB_DM_ROOM (ROOM_NO, ROOM_TYPE, CREATED_AT)
+		VALUES (#{roomNo}, NVL(#{roomType}, 'P'), SYSDATE)
 	</insert>
 
-	<!-- 새로운 방에 참여자(발신자) 정보 삽입용 쿼리 -->
-	<insert id="insertParticipantSender" parameterType="map">
-		INSERT INTO TB_DM_PARTICIPANT (
-					ROOM_NO,
-					MEMBER_ID,
-					LAST_READ_MESSAGE_NO,
-					JOINED_AT
-				)
-				VALUES (
-					#{roomNo},
-					#{userId},
-					NULL,
-					SYSDATE
-				)
-	</insert>
-	
-	<!-- 새로운 방에 참여자(발신자) 정보 삽입용 쿼리 -->
-	<insert id="insertParticipantReciever" parameterType="map">
-		INSERT INTO TB_DM_PARTICIPANT (
-					ROOM_NO,
-					MEMBER_ID,
-					LAST_READ_MESSAGE_NO,
-					JOINED_AT
-				)
-				VALUES (
-					#{roomNo},
-					#{targetUserId},
-					NULL,
-					SYSDATE
-				)
-	</insert>
-	
-	<!-- 메세지 저장용 쿼리 -->
-	<insert id="insertMessage" parameterType="map">
-		INSERT  INTO TB_DM_MESSAGE(MESSAGE_NO
-                        , ROOM_NO
-                        , SENDER_ID
-                        , CONTENT)
-				VALUES(SEQ_DM_MESSAGE_NO.NEXTVAL
-						, #{roomNo}
-						, #{senderId}
-						, #{content})
+	<!-- 참여자 추가 -->
+	<insert id="insertParticipant" parameterType="map">
+		INSERT INTO TB_DM_PARTICIPANT (ROOM_NO, MEMBER_NO, LAST_READ_MSG_NO, IS_MUTED, JOINED_AT)
+		VALUES (#{roomNo}, #{memberNo}, 0, 'N', SYSDATE)
 	</insert>
 
-	<!-- 메세지 조회용 쿼리 -->
-	<select id="selectMessage" parameterType="map" resultMap="dmMessageResultSet">
-		SELECT m.MESSAGE_NO
-		     , m.ROOM_NO
-		     , m.SENDER_ID
-		     , m.CONTENT
-		     , TO_CHAR(m.CREATE_DATE + (9/24), 'YYYY-MM-DD HH24:MI:SS') AS CREATE_DATE
-		     , (CASE 
-		          WHEN m.MESSAGE_NO &lt;= (
-		              SELECT NVL(MAX(p.LAST_READ_MESSAGE_NO), 0)
-		              FROM TB_DM_PARTICIPANT p
-		              WHERE p.ROOM_NO = m.ROOM_NO
-		                AND p.MEMBER_ID != #{senderId}
-		          ) THEN 0  <!-- 상대방이 읽은 번호보다 작거나 같으면 읽음(0) -->
-		          ELSE 1    <!-- 아니면 안 읽음(1) -->
-		       END) AS READ_CHECK
-		  FROM TB_DM_MESSAGE m
-		 WHERE m.ROOM_NO = #{roomNo}
-		   AND m.IS_DEL = 'N'
-		 ORDER BY m.CREATE_DATE ASC
-	</select>
-	
-	<!-- 읽음 처리 - 마지막으로 읽은 메시지 번호 업데이트 -->
-	<update id="updateReadStatus" parameterType="map">
+	<!-- 채팅방 나가기 (LEFT_AT 설정) -->
+	<update id="leaveRoom" parameterType="map">
 		UPDATE TB_DM_PARTICIPANT
-		SET LAST_READ_MESSAGE_NO = (
-		    SELECT MAX(MESSAGE_NO) FROM TB_DM_MESSAGE
-		    WHERE ROOM_NO = #{roomNo}
-		      AND IS_DEL = 'N'
-		)
-		WHERE ROOM_NO = #{roomNo}
-		  AND MEMBER_ID = #{readerId}
+		SET LEFT_AT = SYSDATE
+		WHERE ROOM_NO = #{roomNo} AND MEMBER_NO = #{memberNo}
 	</update>
-	
-	<!-- 미읽은 메시지 개수 조회 -->
-	<select id="getUnreadMessageCount" parameterType="map" resultType="int">
-		SELECT COUNT(*) 
-		  FROM TB_DM_MESSAGE
-		 WHERE ROOM_NO = #{roomNo}
-		   AND SENDER_ID != #{readerId}
-		   AND IS_DEL = 'N'
-		   AND MESSAGE_NO > (
-		   		SELECT NVL(MAX(LAST_READ_MESSAGE_NO), 0)
-		   		  FROM TB_DM_PARTICIPANT
-		   		 WHERE ROOM_NO = #{roomNo}
-		   		   AND MEMBER_ID = #{readerId}
-		   )
+
+	<!-- 채팅방 삭제 (참여자 모두 삭제) -->
+	<delete id="deleteDmRoom" parameterType="int">
+		DELETE FROM TB_DM_PARTICIPANT WHERE ROOM_NO = #{roomNo}
+	</delete>
+
+	<!-- 채팅방 참여자 목록 조회 (회원번호 반환) -->
+	<select id="getParticipantsByRoomNo" parameterType="int" resultType="int">
+		SELECT MEMBER_NO
+		FROM TB_DM_PARTICIPANT
+		WHERE ROOM_NO = #{roomNo}
+		  AND LEFT_AT IS NULL
 	</select>
 
-	<!-- 메세지 삭제 -->
-	<select id="deleteMessage" parameterType="int">
-		UPDATE TB_DM_MESSAGE
-		   SET IS_DEL = 'Y'
-		 WHERE MESSAGE_NO = #{messageNo}
+	<!-- 채팅방 참여자 목록 조회 (회원 아이디 반환 - 레거시) -->
+	<select id="getParticipantIdsByRoomNo" parameterType="int" resultType="string">
+		SELECT m.MEMBER_ID
+		FROM TB_DM_PARTICIPANT p
+		JOIN TB_MEMBER m ON m.MEMBER_NO = p.MEMBER_NO
+		WHERE p.ROOM_NO = #{roomNo}
+		  AND p.LEFT_AT IS NULL
 	</select>
+
+	<!-- ===========================
+	     메시지 관련 쿼리
+	=========================== -->
+
+	<!-- 메시지 저장 -->
+	<insert id="insertMessage" parameterType="map">
+		INSERT INTO TB_DM_MESSAGE (
+			MESSAGE_NO, ROOM_NO, SENDER_NO, CONTENT, MESSAGE_TYPE, IS_DELETED, CREATED_AT
+		) VALUES (
+			SEQ_DM_MESSAGE_NO.NEXTVAL,
+			#{roomNo},
+			#{senderNo},
+			#{content},
+			NVL(#{messageType}, 'TEXT'),
+			'N',
+			SYSDATE
+		)
+	</insert>
+
+	<!-- 메시지 목록 조회 -->
+	<select id="selectMessage" parameterType="map" resultMap="dmMessageResultMap">
+		SELECT 
+			msg.MESSAGE_NO,
+			msg.ROOM_NO,
+			msg.SENDER_NO,
+			msg.CONTENT,
+			msg.MESSAGE_TYPE,
+			msg.FILE_PATH,
+			msg.IS_DELETED,
+			msg.CREATED_AT,
+			m.MEMBER_ID AS SENDER_ID,
+			m.MEMBER_NAME AS SENDER_NAME,
+			m.MEMBER_NICK AS SENDER_NICK,
+			TO_CHAR(msg.CREATED_AT + (9/24), 'YYYY-MM-DD HH24:MI:SS') AS CREATED_AT_STR,
+			(CASE 
+				WHEN msg.MESSAGE_NO &lt;= (
+					SELECT NVL(MAX(p.LAST_READ_MSG_NO), 0)
+					FROM TB_DM_PARTICIPANT p
+					WHERE p.ROOM_NO = msg.ROOM_NO
+					  AND p.MEMBER_NO != #{senderNo}
+				) THEN 0
+				ELSE 1
+			END) AS READ_CHECK
+		FROM TB_DM_MESSAGE msg
+		LEFT JOIN TB_MEMBER m ON m.MEMBER_NO = msg.SENDER_NO
+		WHERE msg.ROOM_NO = #{roomNo}
+		  AND msg.IS_DELETED = 'N'
+		ORDER BY msg.CREATED_AT ASC
+	</select>
+
+	<!-- 메시지 삭제 (소프트 삭제) -->
+	<update id="deleteMessage" parameterType="int">
+		UPDATE TB_DM_MESSAGE
+		SET IS_DELETED = 'Y'
+		WHERE MESSAGE_NO = #{messageNo}
+	</update>
 
 	<!-- 메시지 ID로 ROOM_NO 조회 -->
 	<select id="getRoomNoByMessageId" parameterType="int" resultType="int">
 		SELECT ROOM_NO
-		  FROM TB_DM_MESSAGE
-		 WHERE MESSAGE_NO = #{messageId}
+		FROM TB_DM_MESSAGE
+		WHERE MESSAGE_NO = #{messageNo}
 	</select>
 
-	<!-- 채팅방 참가자 목록 조회 -->
-	<select id="getParticipantsByRoomNo" parameterType="int" resultType="string">
-		SELECT MEMBER_ID
-		  FROM TB_DM_PARTICIPANT
-		 WHERE ROOM_NO = #{roomNo}
-	</select>
+	<!-- ===========================
+	     읽음 처리 관련 쿼리
+	=========================== -->
 
-	<!-- 채팅방 삭제 쿼리문 -->
-	<update id="deleteDmRoom" parameterType="int">
-		UPDATE TB_DM_ROOM 
-		   SET IS_DEL = 'Y'
-		 WHERE ROOM_NO = #{roomNo}
+	<!-- 읽음 처리 (마지막 읽은 메시지 번호 업데이트) -->
+	<update id="updateReadStatus" parameterType="map">
+		UPDATE TB_DM_PARTICIPANT
+		SET LAST_READ_MSG_NO = (
+			SELECT NVL(MAX(MESSAGE_NO), 0) 
+			FROM TB_DM_MESSAGE
+			WHERE ROOM_NO = #{roomNo}
+			  AND IS_DELETED = 'N'
+		)
+		WHERE ROOM_NO = #{roomNo}
+		  AND MEMBER_NO = #{memberNo}
 	</update>
 
+	<!-- 미읽은 메시지 개수 조회 -->
+	<select id="getUnreadMessageCount" parameterType="map" resultType="int">
+		SELECT COUNT(*) 
+		FROM TB_DM_MESSAGE msg
+		WHERE msg.ROOM_NO = #{roomNo}
+		  AND msg.SENDER_NO != #{memberNo}
+		  AND msg.IS_DELETED = 'N'
+		  AND msg.MESSAGE_NO > (
+			SELECT NVL(LAST_READ_MSG_NO, 0)
+			FROM TB_DM_PARTICIPANT
+			WHERE ROOM_NO = #{roomNo}
+			  AND MEMBER_NO = #{memberNo}
+		)
+	</select>
+
+	<!-- 알림 음소거 설정 -->
+	<update id="updateMuteStatus" parameterType="map">
+		UPDATE TB_DM_PARTICIPANT
+		SET IS_MUTED = #{isMuted}
+		WHERE ROOM_NO = #{roomNo}
+		  AND MEMBER_NO = #{memberNo}
+	</update>
 
 </mapper>
